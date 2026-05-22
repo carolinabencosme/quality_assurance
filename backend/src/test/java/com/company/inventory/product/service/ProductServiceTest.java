@@ -5,6 +5,7 @@ import com.company.inventory.product.dto.ProductRequest;
 import com.company.inventory.product.entity.Category;
 import com.company.inventory.product.entity.Product;
 import com.company.inventory.product.entity.ProductStatus;
+import com.company.inventory.product.repository.CategoryRepository;
 import com.company.inventory.product.repository.ProductRepository;
 import com.company.inventory.stock.service.StockService;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,7 +31,7 @@ class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
     @Mock
-    private CategoryService categoryService;
+    private CategoryRepository categoryRepository;
     @Mock
     private StockService stockService;
     @InjectMocks
@@ -67,7 +70,7 @@ class ProductServiceTest {
         category.setName("Electronics");
 
         when(productRepository.existsBySkuIgnoreCase("SKU-3")).thenReturn(false);
-        when(categoryService.getByIdOrThrow(1L)).thenReturn(category);
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
         when(productRepository.save(any(Product.class))).thenAnswer(inv -> {
             Product p = inv.getArgument(0);
             p.setId(10L);
@@ -92,7 +95,6 @@ class ProductServiceTest {
 
         productService.create(request);
 
-        verify(stockService).registerInitialStock(any(Product.class), org.mockito.ArgumentMatchers.eq(5),
-                org.mockito.ArgumentMatchers.isNull());
+        verify(stockService).registerInitialStock(any(Product.class), eq(5), isNull());
     }
 }

@@ -77,12 +77,15 @@ docker compose -f docker-compose.dev.yml down
 
 ## Desarrollo local (sin Docker)
 
-**Backend**
+**Backend** (no requiere Maven instalado; usa el wrapper incluido)
 
 ```powershell
 cd backend
-mvn spring-boot:run
+.\mvnw.cmd test          # pruebas (Docker Desktop encendido para Testcontainers)
+.\mvnw.cmd spring-boot:run
 ```
+
+Requisitos: **Java 21+** (recomendado 21 LTS) y **Docker Desktop** en ejecución para el test de contexto con PostgreSQL.
 
 **Frontend**
 
