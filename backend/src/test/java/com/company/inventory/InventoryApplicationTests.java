@@ -7,7 +7,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 
-@SpringBootTest
+@SpringBootTest(properties = "inventory.security.enabled=false")
 @Testcontainers(disabledWithoutDocker = true)
 class InventoryApplicationTests {
 

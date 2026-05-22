@@ -5,7 +5,9 @@ import com.company.inventory.product.dto.ProductResponse;
 import com.company.inventory.product.dto.ProductUpdateRequest;
 import com.company.inventory.product.entity.ProductStatus;
 import com.company.inventory.product.service.ProductService;
+import com.company.inventory.security.Permission;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/products")
-@Tag(name = "Products", description = "CRUD de productos (permiso product:view / product:manage en Fase 2)")
+@Tag(name = "Products", description = "CRUD de productos — permisos granulares JWT")
+@SecurityRequirement(name = "bearerAuth")
 public class ProductController {
 
     private final ProductService productService;
@@ -37,6 +41,7 @@ public class ProductController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_VIEW + "')")
     @Operation(summary = "Listar productos", description = "Paginacion, busqueda por nombre/SKU, filtros y ordenamiento")
     public Page<ProductResponse> findAll(
             @RequestParam(required = false) String search,
@@ -48,12 +53,14 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_VIEW + "')")
     @Operation(summary = "Detalle de producto")
     public ProductResponse findById(@PathVariable Long id) {
         return productService.findById(id);
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "')")
     @Operation(summary = "Crear producto", description = "Valida SKU unico, precio y stock inicial no negativos")
     @ApiResponse(responseCode = "201", description = "Producto creado")
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
@@ -62,12 +69,14 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "')")
     @Operation(summary = "Actualizar producto", description = "No modifica cantidad; usar movimientos de stock")
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductUpdateRequest request) {
         return productService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "')")
     @Operation(summary = "Inactivar producto", description = "Soft delete: status INACTIVE")
     @ApiResponse(responseCode = "204", description = "Producto inactivado")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

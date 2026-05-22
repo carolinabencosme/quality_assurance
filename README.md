@@ -117,8 +117,8 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | Fase | Objetivo | Estado |
 |------|----------|--------|
 | 0 | Setup repo, Docker dev, README, `.env.example` | Completado (`QA-2`) |
-| 1 | Core: productos, stock, Flyway, Swagger | En curso (`QA-3`) |
-| 2 | Keycloak y permisos granulares | Pendiente |
+| 1 | Core: productos, stock, Flyway, Swagger | Completado (`QA-3`) |
+| 2 | Keycloak y permisos granulares | En curso (`QA-4`) |
 | 3 | Dashboard y auditoría (Envers) | Pendiente |
 | 4 | Testing full stack | Pendiente |
 | 5 | Observabilidad (Grafana stack) | Pendiente |
@@ -141,11 +141,27 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 
 Reglas MVP: SKU duplicado → 409; precio/stock negativo → 400; salida sin stock → 409; cada cambio de cantidad genera movimiento.
 
+## Seguridad Fase 2 (QA-4)
+
+Todos los endpoints `/api/v1/*` exigen JWT Bearer. Permisos granulares vía `@PreAuthorize` (ej. `product:view`).
+
+Usuarios de prueba (Keycloak): `admin`/`admin123`, `viewer`/`viewer123` — ver [docs/security-model.md](docs/security-model.md).
+
+```powershell
+# Token de ejemplo (viewer)
+curl -s -X POST "http://localhost:8081/realms/inventory-realm/protocol/openid-connect/token" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d "grant_type=password&client_id=inventory-frontend&username=viewer&password=viewer123"
+```
+
+Frontend: login en http://localhost:3000 con las mismas credenciales.
+
 ## Issues y Jira
 
 - **QA-2** — Fase 0: Setup repositorio y entorno local  
 - **QA-3** — Fase 1: Core funcional productos y stock  
-- Etiquetas: `inventory-qas_fase-0_setup`, `inventory-qas_fase-1_core`
+- **QA-4** — Fase 2: Seguridad Keycloak y permisos granulares  
+- Etiquetas: `inventory-qas_fase-0_setup`, `inventory-qas_fase-1_core`, `inventory-qas_fase-2_security`
 
 ## Documentación
 
