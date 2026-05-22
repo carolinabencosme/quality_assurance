@@ -23,6 +23,7 @@ public class InventoryRevisionEntity {
     private int rev;
 
     @RevisionTimestamp
+    @Column(name = "revtstmp")
     private long timestamp;
 
     @Column(name = "modified_by", length = 100)

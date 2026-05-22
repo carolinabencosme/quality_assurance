@@ -84,7 +84,7 @@ services:
       VITE_KEYCLOAK_CLIENT_ID: ${VITE_KEYCLOAK_CLIENT_ID:-inventory-frontend}
     volumes:
       - ./frontend:/app
-      # Sin volumen anónimo en node_modules: npm ci al iniciar sincroniza dependencias (p. ej. react-router-dom)
+      - frontend_node_modules:/app/node_modules
     depends_on:
       - backend
     networks:
@@ -92,6 +92,7 @@ services:
 
 volumes:
   postgres_dev_data:
+  frontend_node_modules:
 
 networks:
   inventory-net:
