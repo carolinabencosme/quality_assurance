@@ -63,7 +63,9 @@ docker compose -f docker-compose.dev.yml ps
 | Frontend | http://localhost:3000 |
 | Backend API | http://localhost:8080 |
 | Health | http://localhost:8080/actuator/health |
-| Setup info (Fase 0) | http://localhost:8080/api/v1/setup/info |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| API productos | http://localhost:8080/api/v1/products |
+| API stock | http://localhost:8080/api/v1/stock |
 | Keycloak Admin | http://localhost:8081 (admin / admin) |
 | PostgreSQL | localhost:5432 |
 
@@ -111,8 +113,8 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 
 | Fase | Objetivo | Estado |
 |------|----------|--------|
-| 0 | Setup repo, Docker dev, README, `.env.example` | En curso (`QA-2`) |
-| 1 | Core: productos, stock, Flyway, Swagger | Pendiente |
+| 0 | Setup repo, Docker dev, README, `.env.example` | Completado (`QA-2`) |
+| 1 | Core: productos, stock, Flyway, Swagger | En curso (`QA-3`) |
 | 2 | Keycloak y permisos granulares | Pendiente |
 | 3 | Dashboard y auditoría (Envers) | Pendiente |
 | 4 | Testing full stack | Pendiente |
@@ -120,10 +122,27 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | Pendiente |
 | 7 | Documentación y defensa | Pendiente |
 
+## API Fase 1 (QA-3)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/v1/products` | Lista con `search`, `categoryId`, `status`, `critical`, paginación |
+| GET | `/api/v1/products/{id}` | Detalle |
+| POST | `/api/v1/products` | Crear (SKU único, stock inicial opcional) |
+| PUT | `/api/v1/products/{id}` | Actualizar (sin cambiar cantidad directa) |
+| DELETE | `/api/v1/products/{id}` | Inactivar (soft delete) |
+| GET | `/api/v1/categories` | Categorías para filtros |
+| GET | `/api/v1/stock` | Existencias actuales |
+| GET | `/api/v1/stock/movements` | Historial (`productId`, `type`) |
+| POST | `/api/v1/stock/movements` | IN / OUT / ADJUSTMENT |
+
+Reglas MVP: SKU duplicado → 409; precio/stock negativo → 400; salida sin stock → 409; cada cambio de cantidad genera movimiento.
+
 ## Issues y Jira
 
 - **QA-2** — Fase 0: Setup repositorio y entorno local  
-- Etiqueta sugerida: `inventory-qas_fase-0_setup`
+- **QA-3** — Fase 1: Core funcional productos y stock  
+- Etiquetas: `inventory-qas_fase-0_setup`, `inventory-qas_fase-1_core`
 
 ## Documentación
 

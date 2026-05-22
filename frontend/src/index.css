@@ -31,8 +31,35 @@ header h1 {
   color: #b91c1c;
 }
 
+.product-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.product-list li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.product-list li.critical {
+  background: #fff7ed;
+  padding-left: 0.5rem;
+  border-left: 3px solid #ea580c;
+}
+
+.badge {
+  color: #c2410c;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
 footer {
   margin-top: 2rem;
   color: #64748b;
   font-size: 0.875rem;
+}
+
+footer a {
+  color: #2563eb;
 }
