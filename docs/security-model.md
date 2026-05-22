@@ -5,7 +5,8 @@
 | Elemento | Valor |
 |----------|--------|
 | Realm | `inventory-realm` |
-| Cliente frontend | `inventory-frontend` (público, PKCE / password grant en dev) |
+| Cliente frontend | `inventory-frontend` (público, password grant en dev; Next.js con refresh) |
+| Issuer JWT (dev) | `http://localhost:8081/realms/inventory-realm` — debe coincidir con `KEYCLOAK_ISSUER_URI` del backend |
 | Cliente API | `inventory-backend` (bearer-only, Resource Server) |
 | Issuer (host) | `http://localhost:8081/realms/inventory-realm` |
 | Issuer (Docker) | `http://keycloak:8080/realms/inventory-realm` |

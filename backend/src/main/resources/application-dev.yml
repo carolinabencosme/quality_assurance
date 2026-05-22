@@ -1,4 +1,10 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:${KEYCLOAK_ISSUER_URI_HOST:http://localhost:8081/realms/inventory-realm}}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:${KEYCLOAK_JWKS_URI_HOST:http://localhost:8081/realms/inventory-realm/protocol/openid-connect/certs}}
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/inventory}
     username: ${DATABASE_USERNAME:inventory_user}
