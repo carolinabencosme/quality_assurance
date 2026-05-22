@@ -1,0 +1,5 @@
+# Perfil dev - Fase 0 (sin JPA/Flyway hasta Fase 1)
+logging:
+  level:
+    com.company.inventory: INFO
+    root: INFO

@@ -1,0 +1,11 @@
+# Ambiente staging/preview - Plan v3.0 secciones 10 y 16 (Fases 5-6)
+#
+# Servicios previstos (puertos según plan):
+#   frontend:3000, backend:8080, postgres:5432, keycloak:8081,
+#   prometheus:9090, grafana:3001, loki:3100, tempo:3200,
+#   alloy:4317/4318, alertmanager:9093, sonarqube:9000, jenkins:8082
+#
+# Por ahora usar desarrollo local:
+#   docker compose -f docker-compose.dev.yml up -d --build
+#
+# El archivo completo de staging se entregará en Fase 5-6 (observabilidad + CI/CD).

@@ -1,0 +1,50 @@
+{
+  "realm": "inventory-realm",
+  "enabled": true,
+  "displayName": "Inventory QAS",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "clients": [
+    {
+      "clientId": "inventory-frontend",
+      "name": "Inventory Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "+"
+      ]
+    },
+    {
+      "clientId": "inventory-backend",
+      "name": "Inventory Backend",
+      "enabled": true,
+      "bearerOnly": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": true
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "inventory-admin",
+        "description": "Administrador con permisos compuestos (configuracion completa en Fase 2)"
+      },
+      {
+        "name": "inventory-operator",
+        "description": "Operador de inventario (permisos granulares en Fase 2)"
+      }
+    ]
+  }
+}

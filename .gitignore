@@ -1,0 +1,120 @@
+# =============================================================================
+# Inventory QAS - .gitignore (Plan v3.0: sin secretos en repositorio)
+# =============================================================================
+
+# --- Secretos y entorno local ---
+.env
+.env.local
+.env.*.local
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+secrets/
+
+# --- Documentos del curso (referencia local, no versionar) ---
+*.pdf
+!docs/**/*.pdf
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# --- IDEs y editores ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# --- Java / Maven (backend) ---
+backend/target/
+backend/.classpath
+backend/.project
+backend/.settings/
+*.class
+*.log
+*.ctxt
+.mtj.tmp/
+hs_err_pid*
+replay_pid*
+
+# Maven wrapper jar se descarga; conservar scripts wrapper si existen
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# --- Node / Frontend ---
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/playwright-report/
+frontend/test-results/
+frontend/.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Mantener lockfile para CI reproducible
+!frontend/package-lock.json
+
+# --- Pruebas y reportes generados ---
+tests/**/reports/
+tests/**/results/
+tests/**/output/
+coverage/
+*.lcov
+.nyc_output/
+.zap/
+zap-report.html
+k6-summary.*
+*.har
+
+# --- Docker / datos locales ---
+.docker/
+docker-compose.override.yml
+docker-compose.*.local.yml
+**/postgres_data/
+**/jenkins_home/
+**/sonarqube_data/
+
+# --- Observabilidad / herramientas locales ---
+.sonar/
+.sonarqube/
+grafana-storage/
+prometheus-data/
+loki-data/
+tempo-data/
+
+# --- Build artifacts globales ---
+*.jar
+*.war
+*.ear
+!backend/src/**
+dist/
+build/
+out/
+target/
+
+# --- Logs y temporales ---
+logs/
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# --- OS / herramientas varias ---
+*.stackdump
+.cache/
