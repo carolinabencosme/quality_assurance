@@ -18,8 +18,8 @@
 | `product:manage` | Crear, editar, inactivar productos |
 | `stock:view` | Ver existencias e historial |
 | `stock:manage` | Registrar entradas, salidas, ajustes |
-| `report:view` | Reportes y dashboard (Fase 3) |
-| `audit:view` | Auditoría (Fase 3) |
+| `report:view` | Reportes y dashboard |
+| `audit:view` | Auditoría Envers (`GET /api/v1/audit`) |
 | `user:manage` | Gestión de usuarios en Keycloak |
 
 ## Roles compuestos (realm)

@@ -1,6 +1,7 @@
 package com.company.inventory.product.repository;
 
 import com.company.inventory.product.entity.Product;
+import com.company.inventory.product.entity.ProductStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -18,4 +19,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     boolean existsBySkuIgnoreCaseAndIdNot(String sku, Long id);
 
     Optional<Product> findBySkuIgnoreCase(String sku);
+
+    long countByStatus(ProductStatus status);
 }
