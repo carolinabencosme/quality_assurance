@@ -20,6 +20,7 @@ Consolida evidencias de **QA-2** a **QA-8** y checklist de aceptación para la p
 | 5 | QA-7 | Observabilidad | `observability/`, `docs/observability-guide.md` |
 | 6 | QA-8 | CI/CD | `.github/workflows/`, `Jenkinsfile`, `docs/ci-cd-guide.md` |
 | 7 | QA-9 | Docs + defensa | Este documento, `docs/defensa/` |
+| — | QA-10 | Estructura monorepo plan técnico | `docs/monorepo-structure.md`, `verify-monorepo-structure.ps1` |
 
 ---
 

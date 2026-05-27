@@ -1,0 +1,36 @@
+# Ambiente de pruebas (E2E / integración) — Plan v3.0 / QA-10
+# Apila sobre desarrollo sin perfil observability (arranque más rápido).
+#
+# Uso:
+#   docker compose -f docker-compose.dev.yml -f docker-compose.test.yml up -d --build
+#   cd tests/e2e && npm test
+#   docker compose -f docker-compose.dev.yml -f docker-compose.test.yml down -v
+#
+# Variables: copiar .env.example → .env (opcional)
+
+name: inventory-qas-test
+
+services:
+  postgres:
+    container_name: inventory-postgres-test
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ./docker/init/postgres:/docker-entrypoint-initdb.d:ro
+
+  keycloak:
+    container_name: inventory-keycloak-test
+
+  backend:
+    container_name: inventory-backend-test
+    restart: "no"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/inventory-realm
+      KEYCLOAK_JWKS_URI: http://host.docker.internal:8081/realms/inventory-realm/protocol/openid-connect/certs
+
+  frontend:
+    container_name: inventory-frontend-test
+    restart: "no"
+
+volumes:
+  postgres_test_data:
