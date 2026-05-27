@@ -132,7 +132,7 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | 3 | Dashboard y auditoría (Envers) | En curso (`QA-5`) |
 | 4 | Testing full stack (JaCoCo, E2E, k6, evidencias) | En curso (`QA-6`) |
 | 5 | Observabilidad (Grafana stack) | En curso (`QA-7`) |
-| 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | Pendiente |
+| 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | En curso (`QA-8`) |
 | 7 | Documentación y defensa | Pendiente |
 
 ## API Fase 1 (QA-3)
@@ -184,6 +184,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-5** — Fase 3: Dashboard, reportes y auditoría Envers  
 - **QA-6** — Fase 4: Testing full stack y evidencias  
 - **QA-7** — Fase 5: Observabilidad OpenTelemetry y Grafana stack  
+- **QA-8** — Fase 6: CI/CD GitHub Actions, Jenkins y SonarQube  
 - Etiquetas: `inventory-qas_fase-0_setup`, `inventory-qas_fase-1_core`, `inventory-qas_fase-2_security`, `inventory-qas_fase-3_dashboard`
 
 ## Documentación
@@ -195,6 +196,7 @@ Ver carpeta [`docs/`](docs/):
 - [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue y variables
 - [`docs/testing-guide.md`](docs/testing-guide.md) — Pruebas Fase 4 (QA-6)
 - [`docs/qa-evidence.md`](docs/qa-evidence.md) — Evidencias QA
+- [`docs/ci-cd-guide.md`](docs/ci-cd-guide.md) — CI/CD Fase 6 (QA-8)
 
 ## Licencia y equipo
 

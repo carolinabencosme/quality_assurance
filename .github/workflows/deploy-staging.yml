@@ -1,0 +1,43 @@
+name: Deploy Staging
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop]
+
+jobs:
+  deploy-and-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start core stack (Docker Compose)
+        run: |
+          docker compose -f docker-compose.dev.yml up -d --build postgres keycloak backend frontend
+          docker compose -f docker-compose.dev.yml ps
+
+      - name: Wait for backend health
+        run: |
+          for i in $(seq 1 36); do
+            if curl -sf http://localhost:8080/actuator/health; then
+              echo "Backend ready"
+              exit 0
+            fi
+            echo "Waiting... ($i/36)"
+            sleep 10
+          done
+          echo "Backend did not become healthy in time"
+          docker compose -f docker-compose.dev.yml logs backend --tail 80
+          exit 1
+
+      - name: Post-deploy smoke
+        env:
+          RUN_OBSERVABILITY_SMOKE: 'false'
+        run: |
+          chmod +x scripts/post-deploy-smoke.sh
+          ./scripts/post-deploy-smoke.sh
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.dev.yml logs --tail 100

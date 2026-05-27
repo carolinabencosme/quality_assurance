@@ -13,9 +13,15 @@ Servicios: `postgres`, `keycloak`, `backend`, `frontend`.
    - http://localhost:3000
    - http://localhost:8081 (Keycloak)
 
-## Staging
+## Staging (Fase 6)
 
-El archivo `docker-compose.staging.yml` se completará en Fases 5–6 con observabilidad, SonarQube y Jenkins.
+```powershell
+docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml -f docker-compose.staging.yml up -d --build
+# o
+.\scripts\deploy-staging.ps1
+```
+
+SonarQube `:9000`, Jenkins `:8082`. Ver [`ci-cd-guide.md`](ci-cd-guide.md).
 
 ## Variables críticas
 

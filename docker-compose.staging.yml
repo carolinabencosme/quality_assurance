@@ -1,8 +1,52 @@
-# Staging / preview — Plan v3.0 (Fases 5-6)
-# Misma base que dev + observabilidad. SonarQube/Jenkins en Fase 6.
+# Staging / preview — Plan v3.0 Fase 6 (QA-8)
+# Uso completo (app + observabilidad + CI tooling):
+#   docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml -f docker-compose.staging.yml up -d --build
 #
-# Uso:
-#   docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up -d --build
-#
-# Puertos: frontend 3000, backend 8080, grafana 3001, prometheus 9090,
-#          loki 3100, tempo 3200, alloy 4317/4318, alertmanager 9093
+# Puertos extra: SonarQube 9000, Jenkins 8082
+
+services:
+  sonarqube:
+    image: sonarqube:10.8.1-community
+    container_name: inventory-sonarqube-staging
+    restart: unless-stopped
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks:
+      - inventory-net
+
+  jenkins:
+    image: jenkins/jenkins:2.492.2-lts-jdk21
+    container_name: inventory-jenkins-staging
+    restart: unless-stopped
+    user: root
+    ports:
+      - "8082:8080"
+      - "50000:50000"
+    environment:
+      JAVA_OPTS: -Djenkins.install.runSetupWizard=false
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - inventory-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.staging
+    environment:
+      NODE_ENV: production
+      API_PROXY_TARGET: http://backend:8080
+      KEYCLOAK_PROXY_TARGET: http://host.docker.internal:8081
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  jenkins_home:

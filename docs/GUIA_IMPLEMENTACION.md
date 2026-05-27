@@ -47,3 +47,4 @@ cd frontend; npm install; npm run dev
 - [Modelo de seguridad](security-model.md) — Fase 2
 - [Guía de pruebas](testing-guide.md) — Fase 4 (QA-6)
 - [Evidencias QA](qa-evidence.md) — Plantilla §17
+- [CI/CD](ci-cd-guide.md) — Fase 6 (QA-8)
