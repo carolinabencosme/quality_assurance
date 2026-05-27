@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: Inventory QAS
+    orgId: 1
+    folder: Inventory QAS
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json

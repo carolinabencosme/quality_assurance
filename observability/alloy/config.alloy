@@ -1,0 +1,62 @@
+// Grafana Alloy — OTLP (trazas) + logs Docker → Loki (Plan v3.0 Fase 5)
+
+logging {
+  level = "info"
+}
+
+// --- Trazas: Spring Boot OTLP → Alloy → Tempo ---
+otelcol.receiver.otlp "inventory" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    traces = [otelcol.processor.batch.traces.input]
+  }
+}
+
+otelcol.processor.batch "traces" {
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls {
+      insecure             = true
+      insecure_skip_verify = true
+    }
+  }
+}
+
+// --- Logs: contenedores inventory-* → Loki ---
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "inventory_containers" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/inventory-.*"
+    action        = "keep"
+  }
+}
+
+loki.source.docker "inventory" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.inventory_containers.output
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
