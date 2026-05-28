@@ -4,7 +4,7 @@
 
 Servicios: `postgres`, `keycloak`, `backend`, `frontend`.
 
-1. Copiar `.env.example` → `.env`
+1. Copiar `.env.example` → `.env` (el archivo `.env` es solo local; Git lo ignora vía `.gitignore`. No hacer `git add .env` si aparece en `git status`).
 2. `docker compose -f docker-compose.dev.yml up -d --build`
 3. Validar:
    - http://localhost:8080/actuator/health

@@ -73,6 +73,13 @@ Detener:
 docker compose -f docker-compose.dev.yml down
 ```
 
+## Variables de entorno y secretos
+
+- **`.env.example`** sí se versiona: plantilla con nombres de variables y valores de ejemplo (sin secretos reales de producción).
+- **`.env`** no se versiona: está en [`.gitignore`](.gitignore). Cada desarrollador lo crea en local con `copy .env.example .env` y ajusta contraseñas o tokens propios.
+- No subir al repositorio contraseñas, tokens de SonarQube/Jenkins ni claves privadas; en CI usar secretos del proveedor (GitHub Actions, Jenkins credentials).
+- Si `git status` muestra `.env`, no ejecutar `git add .env`.
+
 ## Desarrollo local (sin Docker)
 
 **Backend**
