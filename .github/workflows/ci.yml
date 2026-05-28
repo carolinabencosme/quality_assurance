@@ -12,6 +12,7 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    # Testcontainers requiere Docker (disponible en ubuntu-latest)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

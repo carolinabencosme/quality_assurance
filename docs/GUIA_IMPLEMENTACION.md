@@ -13,7 +13,7 @@ Documento operativo alineado con **Plan de Implementación v3.0** y **Proyecto F
 
 1. Crear rama desde `develop` (o `main` si aún no existe `develop`):
    - `feature/<jira-id>-<descripcion-corta>`
-   - Ejemplo: `feature/qa-2-fase-0-setup`
+   - Ejemplo: `feature/qa-2-fase-0-setup`, `feature/qa-3-fase-1-core-productos-stock`
 2. Implementar con commits atómicos (`feat:`, `chore:`, etc.).
 3. Abrir PR hacia `develop` con descripción, pruebas y capturas.
 4. Tras revisión, merge a `develop`; release periódico a `main`.
