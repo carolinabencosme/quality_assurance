@@ -122,7 +122,8 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 
 ## Issues y Jira
 
-- **QA-2** — Fase 0: Setup repositorio y entorno local  
+- **QA-2** — Fase 0: Setup repositorio y entorno local
+- **QA-18** — Módulo common: excepciones y respuesta error estándar
 - Etiqueta sugerida: `inventory-qas_fase-0_setup`
 
 ## Documentación
@@ -132,6 +133,7 @@ Ver carpeta [`docs/`](docs/):
 - [`docs/GUIA_IMPLEMENTACION.md`](docs/GUIA_IMPLEMENTACION.md) — Guía de implementación del equipo
 - [`docs/architecture.md`](docs/architecture.md) — Arquitectura (borrador)
 - [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue y variables
+- [`docs/common-error-response.md`](docs/common-error-response.md) — Formato JSON de errores (QA-18)
 
 ## Licencia y equipo
 
