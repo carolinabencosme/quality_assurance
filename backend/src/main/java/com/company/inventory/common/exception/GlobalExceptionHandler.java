@@ -4,6 +4,8 @@ import com.company.inventory.observability.CorrelationIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,6 +22,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getStatus())
                 .body(buildError(ex.getStatus(), ex.getStatus().getReasonPhrase(), ex.getMessage(),
                         request, ex.getErrorCode().name()));
+    }
+
+    @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+    public ResponseEntity<ApiErrorResponse> handleAccessDenied(Exception ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(buildError(HttpStatus.FORBIDDEN, HttpStatus.FORBIDDEN.getReasonPhrase(),
+                        "Access denied: insufficient permissions", request, "ACCESS_DENIED"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
