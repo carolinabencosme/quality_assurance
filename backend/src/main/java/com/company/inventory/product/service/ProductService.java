@@ -8,6 +8,7 @@ import com.company.inventory.product.entity.Category;
 import com.company.inventory.product.entity.Product;
 import com.company.inventory.product.entity.ProductStatus;
 import com.company.inventory.product.mapper.ProductMapper;
+import com.company.inventory.product.repository.CategoryRepository;
 import com.company.inventory.product.repository.ProductRepository;
 import com.company.inventory.product.repository.ProductSpecifications;
 import com.company.inventory.stock.service.StockService;
@@ -22,14 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final CategoryService categoryService;
+    private final CategoryRepository categoryRepository;
     private final StockService stockService;
 
     public ProductService(ProductRepository productRepository,
-                          CategoryService categoryService,
+                          CategoryRepository categoryRepository,
                           StockService stockService) {
         this.productRepository = productRepository;
-        this.categoryService = categoryService;
+        this.categoryRepository = categoryRepository;
         this.stockService = stockService;
     }
 
@@ -52,7 +53,7 @@ public class ProductService {
         validateSkuUnique(request.sku(), null);
         validateNonNegative(request.price(), request.quantity(), request.minStock());
 
-        Category category = categoryService.getByIdOrThrow(request.categoryId());
+        Category category = getCategoryOrThrow(request.categoryId());
         Product product = new Product();
         product.setName(request.name().trim());
         product.setSku(request.sku().trim().toUpperCase());
@@ -77,7 +78,7 @@ public class ProductService {
         validateSkuUnique(request.sku(), id);
         validateNonNegative(request.price(), product.getQuantity(), request.minStock());
 
-        Category category = categoryService.getByIdOrThrow(request.categoryId());
+        Category category = getCategoryOrThrow(request.categoryId());
         product.setName(request.name().trim());
         product.setSku(request.sku().trim().toUpperCase());
         product.setDescription(request.description());
@@ -98,6 +99,11 @@ public class ProductService {
     Product getProductOrThrow(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> ApiException.notFound("Product not found: " + id));
+    }
+
+    private Category getCategoryOrThrow(Long categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> ApiException.notFound("Category not found: " + categoryId));
     }
 
     private void validateSkuUnique(String sku, Long excludeId) {
