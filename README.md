@@ -130,6 +130,7 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 Ver carpeta [`docs/`](docs/):
 
 - [`docs/GUIA_IMPLEMENTACION.md`](docs/GUIA_IMPLEMENTACION.md) — Guía de implementación del equipo
+- [`docs/data-model.md`](docs/data-model.md) — Modelo de datos y Flyway V1–V7 (QA-17)
 - [`docs/architecture.md`](docs/architecture.md) — Arquitectura (borrador)
 - [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue y variables
 

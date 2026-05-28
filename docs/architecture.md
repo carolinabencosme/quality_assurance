@@ -1,6 +1,7 @@
 # Arquitectura — Inventory QAS
 
-> Borrador Fase 0. Se completa en fases 1–3 según Plan v3.0.
+> Borrador Fase 0. Se completa en fases 1–3 según Plan v3.0.  
+> Modelo de datos: [data-model.md](data-model.md) (Flyway V1–V7, QA-17).
 
 ## Decisión principal
 
