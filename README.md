@@ -17,20 +17,30 @@ Monorepo del proyecto **Aseguramiento de Calidad de Software** (PUCMM): inventar
 | Seguridad | Keycloak + OAuth2 + JWT (Fase 2) |
 | Contenedores | Docker + Docker Compose |
 
-## Estructura del repositorio
+## Estructura del repositorio (QA-10)
+
+Monorepo según **Plan técnico v3.0**. Árbol completo y verificación: [`docs/monorepo-structure.md`](docs/monorepo-structure.md).
+
+```powershell
+.\scripts\verify-monorepo-structure.ps1
+```
 
 ```
-inventory-qas-project/
-├── backend/          # API Spring Boot (monolito modular)
-├── frontend/         # Next.js App Router
-├── docker/           # Init DB, Nginx
-├── keycloak/         # Realm export
-├── observability/    # Prometheus, Grafana, Loki, Tempo, Alloy (Fase 5+)
-├── tests/            # E2E, performance, security (Fase 4+)
-├── docs/             # Documentación técnica
-├── .github/workflows/
+quality_assurance/
+├── backend/                        # Spring Boot API
+├── frontend/                       # Next.js App Router
+├── docker/                         # Init PostgreSQL, Nginx
+├── keycloak/                       # realm-export.json
+├── observability/                  # Prometheus, Grafana, Loki, Tempo, Alloy
+├── tests/                          # E2E, k6, security, observability smoke
+├── docs/                           # Documentación
+├── scripts/                        # Deploy, smoke, verify estructura
+├── .github/workflows/              # CI + deploy staging
+├── Jenkinsfile
 ├── docker-compose.dev.yml
+├── docker-compose.test.yml           # Overlay E2E / integración
 ├── docker-compose.staging.yml
+├── docker-compose.observability.yml
 ├── .env.example
 └── README.md
 ```
@@ -78,6 +88,13 @@ docker compose -f docker-compose.dev.yml ps
 | Alertmanager | http://localhost:9093 |
 
 Ver [`docs/observability-guide.md`](docs/observability-guide.md).
+
+**Ambiente de pruebas (E2E)** — overlay `docker-compose.test.yml`:
+
+```powershell
+docker compose -f docker-compose.dev.yml -f docker-compose.test.yml up -d --build
+cd tests/e2e; npm install; npm test
+```
 
 Detener:
 
@@ -186,12 +203,14 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-7** — Fase 5: Observabilidad OpenTelemetry y Grafana stack  
 - **QA-8** — Fase 6: CI/CD GitHub Actions, Jenkins y SonarQube  
 - **QA-9** — Fase 7: Documentación final y defensa  
+- **QA-10** — Estructura monorepo según plan técnico  
 - Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
 
 ## Documentación
 
 Ver carpeta [`docs/`](docs/):
 
+- [`docs/monorepo-structure.md`](docs/monorepo-structure.md) — Árbol y convenciones (QA-10)
 - [`docs/GUIA_IMPLEMENTACION.md`](docs/GUIA_IMPLEMENTACION.md) — Guía de implementación del equipo
 - [`docs/architecture.md`](docs/architecture.md) — Arquitectura del sistema
 - [`docs/requirements.md`](docs/requirements.md) — Requisitos RF/RNF

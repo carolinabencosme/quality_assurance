@@ -42,6 +42,7 @@ cd frontend; npm install; npm run dev
 
 ## Enlaces internos
 
+- [Estructura monorepo](monorepo-structure.md) — QA-10
 - [Arquitectura](architecture.md)
 - [Despliegue](deployment-guide.md)
 - [Modelo de seguridad](security-model.md) — Fase 2
