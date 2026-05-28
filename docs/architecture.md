@@ -2,6 +2,8 @@
 
 Documento final **Fase 7 (QA-9)**. Alineado con Plan de implementación v3.0.
 
+Modelo de datos: [data-model.md](data-model.md) (Flyway V1–V7, QA-17).
+
 ## Decisión principal
 
 **Monolito modular empresarial** (no microservicios): una API Spring Boot 3 (Java 21) con paquetes por dominio y un frontend **Next.js 15** (App Router).

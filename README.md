@@ -204,6 +204,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-8** — Fase 6: CI/CD GitHub Actions, Jenkins y SonarQube  
 - **QA-9** — Fase 7: Documentación final y defensa  
 - **QA-10** — Estructura monorepo según plan técnico  
+- **QA-17** — Migraciones Flyway V1–V7 del dominio inventario
 - Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
 
 ## Documentación
@@ -212,6 +213,7 @@ Ver carpeta [`docs/`](docs/):
 
 - [`docs/monorepo-structure.md`](docs/monorepo-structure.md) — Árbol y convenciones (QA-10)
 - [`docs/GUIA_IMPLEMENTACION.md`](docs/GUIA_IMPLEMENTACION.md) — Guía de implementación del equipo
+- [`docs/data-model.md`](docs/data-model.md) — Modelo de datos y Flyway V1–V7 (QA-17)
 - [`docs/architecture.md`](docs/architecture.md) — Arquitectura del sistema
 - [`docs/requirements.md`](docs/requirements.md) — Requisitos RF/RNF
 - [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue y variables

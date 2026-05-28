@@ -1,3 +1,5 @@
+-- V2: products — dominio inventario (QA-17)
+
 CREATE TABLE products (
     id          BIGSERIAL PRIMARY KEY,
     name        VARCHAR(200)   NOT NULL,

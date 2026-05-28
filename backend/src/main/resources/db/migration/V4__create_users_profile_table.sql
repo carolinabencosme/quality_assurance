@@ -1,3 +1,5 @@
+-- V4: users_profile — perfil local vinculado a Keycloak (QA-17)
+
 CREATE TABLE users_profile (
     id               BIGSERIAL PRIMARY KEY,
     keycloak_user_id VARCHAR(100) NOT NULL,
