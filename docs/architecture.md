@@ -4,7 +4,7 @@
 
 ## Decisión principal
 
-**Monolito modular empresarial** (no microservicios): una API Spring Boot con paquetes por dominio y un frontend React.
+**Monolito modular empresarial** (no microservicios): una API Spring Boot con paquetes por dominio y un frontend Next.js.
 
 ```
 [Usuario] → [React] → [Spring Boot API] → [PostgreSQL + Flyway + Envers]

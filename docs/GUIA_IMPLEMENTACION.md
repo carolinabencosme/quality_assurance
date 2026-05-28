@@ -27,7 +27,7 @@ docker compose -f docker-compose.dev.yml up -d --build
 # Backend — tests
 cd backend; mvn test
 
-# Frontend — dev
+# Frontend (Next.js) — dev
 cd frontend; npm install; npm run dev
 ```
 
@@ -45,4 +45,5 @@ cd frontend; npm install; npm run dev
 - [Arquitectura](architecture.md)
 - [Despliegue](deployment-guide.md)
 - [Modelo de seguridad](security-model.md) — Fase 2
-- [Guía de pruebas](testing-guide.md) — Fase 4
+- [Guía de pruebas](testing-guide.md) — Fase 4 (QA-6)
+- [Evidencias QA](qa-evidence.md) — Plantilla §17
