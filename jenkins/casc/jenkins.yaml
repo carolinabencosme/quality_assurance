@@ -1,0 +1,8 @@
+jenkins:
+  systemMessage: |
+    Inventory QAS — Jenkins (Fase 6 / QA-8).
+    Crear un Pipeline job apuntando al Jenkinsfile del repositorio.
+
+unclassified:
+  location:
+    url: http://localhost:8082/
