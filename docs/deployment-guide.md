@@ -8,7 +8,8 @@ Servicios: `postgres`, `keycloak`, `backend`, `frontend`.
 2. `docker compose -f docker-compose.dev.yml up -d --build`
 3. Validar:
    - http://localhost:8080/actuator/health
-   - http://localhost:8080/api/v1/setup/info
+   - http://localhost:8080/swagger-ui.html
+   - http://localhost:8080/api/v1/products
    - http://localhost:3000
    - http://localhost:8081 (Keycloak)
 
