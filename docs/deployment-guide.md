@@ -25,10 +25,15 @@ Ver `.env.example` y Anexo A del Plan v3.0.
 |----------|-------------|
 | `DATABASE_URL` | JDBC hacia PostgreSQL |
 | `KEYCLOAK_ISSUER_URI` | Issuer del realm (red Docker: `keycloak:8080`) |
-| `VITE_API_URL` | Base URL API para el frontend |
+| `NEXT_PUBLIC_API_URL` | Base API (`/api/v1` con rewrites Next.js) |
+| `NEXT_PUBLIC_KEYCLOAK_URL` | Base Keycloak (`/keycloak`) |
+| `API_PROXY_TARGET` / `KEYCLOAK_PROXY_TARGET` | Destinos rewrite (Docker: `backend:8080`, `keycloak:8080`) |
+| `KEYCLOAK_ISSUER_URI` | Debe coincidir con `iss` del JWT (`http://localhost:8081/realms/...`) |
 
 ## Troubleshooting
 
 - **Backend no arranca:** revisar logs `docker compose -f docker-compose.dev.yml logs backend`
 - **Keycloak lento en primer arranque:** esperar ~60s; healthcheck con `start_period`
-- **Frontend no ve API:** confirmar `VITE_API_URL` y CORS; en Docker usar URLs publicadas en host
+- **Sesión expirada / 401 en dashboard:** alinear `KEYCLOAK_ISSUER_URI` con el issuer del token (`localhost:8081`); reiniciar Keycloak y backend tras cambiar `.env`
+- **Login falla:** usar `NEXT_PUBLIC_KEYCLOAK_URL=/keycloak` y rewrites Next.js
+- **Frontend no ve API:** `NEXT_PUBLIC_API_URL=/api/v1` y `API_PROXY_TARGET` en Docker

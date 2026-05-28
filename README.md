@@ -12,7 +12,7 @@ Monorepo del proyecto **Aseguramiento de Calidad de Software** (PUCMM): inventar
 | Capa | Tecnología |
 |------|------------|
 | Backend | Spring Boot 3 + Java 21 |
-| Frontend | React + Vite + TypeScript |
+| Frontend | Next.js 15 + React + TypeScript |
 | Base de datos | PostgreSQL 16 |
 | Seguridad | Keycloak + OAuth2 + JWT (Fase 2) |
 | Contenedores | Docker + Docker Compose |
@@ -22,7 +22,7 @@ Monorepo del proyecto **Aseguramiento de Calidad de Software** (PUCMM): inventar
 ```
 inventory-qas-project/
 ├── backend/          # API Spring Boot (monolito modular)
-├── frontend/         # React + Vite
+├── frontend/         # Next.js App Router
 ├── docker/           # Init DB, Nginx
 ├── keycloak/         # Realm export
 ├── observability/    # Prometheus, Grafana, Loki, Tempo, Alloy (Fase 5+)
@@ -95,7 +95,7 @@ npm install
 npm run dev
 ```
 
-Configurar `VITE_API_URL` en `.env` o en el entorno según `.env.example`.
+En desarrollo, Next.js reescribe `/api` y `/keycloak` al backend y Keycloak (sin CORS). Ver `NEXT_PUBLIC_*` en `.env.example`.
 
 ## Estrategia de ramas (Plan v3.0 §15)
 
@@ -119,8 +119,8 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | 0 | Setup repo, Docker dev, README, `.env.example` | Completado (`QA-2`) |
 | 1 | Core: productos, stock, Flyway, Swagger | Completado (`QA-3`) |
 | 2 | Keycloak y permisos granulares | En curso (`QA-4`) |
-| 3 | Dashboard y auditoría (Envers) | Pendiente |
-| 4 | Testing full stack | Pendiente |
+| 3 | Dashboard y auditoría (Envers) | En curso (`QA-5`) |
+| 4 | Testing full stack (JaCoCo, E2E, k6, evidencias) | En curso (`QA-6`) |
 | 5 | Observabilidad (Grafana stack) | Pendiente |
 | 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | Pendiente |
 | 7 | Documentación y defensa | Pendiente |
@@ -140,6 +140,16 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | POST | `/api/v1/stock/movements` | IN / OUT / ADJUSTMENT |
 
 Reglas MVP: SKU duplicado → 409; precio/stock negativo → 400; salida sin stock → 409; cada cambio de cantidad genera movimiento.
+
+## Dashboard y auditoría Fase 3 (QA-5)
+
+| Método | Endpoint | Permiso |
+|--------|----------|---------|
+| GET | `/api/v1/reports/dashboard` | `report:view` |
+| GET | `/api/v1/reports/critical-products` | `report:view` |
+| GET | `/api/v1/audit` | `audit:view` |
+
+Frontend (Next.js): `/dashboard`, `/products`, `/audit`. Productos auditados con **Hibernate Envers**. Sesión con JWT + refresh token en cookie.
 
 ## Seguridad Fase 2 (QA-4)
 
@@ -161,7 +171,9 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-2** — Fase 0: Setup repositorio y entorno local  
 - **QA-3** — Fase 1: Core funcional productos y stock  
 - **QA-4** — Fase 2: Seguridad Keycloak y permisos granulares  
-- Etiquetas: `inventory-qas_fase-0_setup`, `inventory-qas_fase-1_core`, `inventory-qas_fase-2_security`
+- **QA-5** — Fase 3: Dashboard, reportes y auditoría Envers  
+- **QA-6** — Fase 4: Testing full stack y evidencias  
+- Etiquetas: `inventory-qas_fase-0_setup`, `inventory-qas_fase-1_core`, `inventory-qas_fase-2_security`, `inventory-qas_fase-3_dashboard`
 
 ## Documentación
 
@@ -170,6 +182,8 @@ Ver carpeta [`docs/`](docs/):
 - [`docs/GUIA_IMPLEMENTACION.md`](docs/GUIA_IMPLEMENTACION.md) — Guía de implementación del equipo
 - [`docs/architecture.md`](docs/architecture.md) — Arquitectura (borrador)
 - [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue y variables
+- [`docs/testing-guide.md`](docs/testing-guide.md) — Pruebas Fase 4 (QA-6)
+- [`docs/qa-evidence.md`](docs/qa-evidence.md) — Evidencias QA
 
 ## Licencia y equipo
 
