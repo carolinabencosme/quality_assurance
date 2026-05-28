@@ -1,0 +1,143 @@
+package com.company.inventory.stock.service;
+
+import com.company.inventory.common.exception.ApiException;
+import com.company.inventory.observability.CorrelationIdFilter;
+import com.company.inventory.product.entity.Product;
+import com.company.inventory.product.entity.ProductStatus;
+import com.company.inventory.product.repository.ProductRepository;
+import com.company.inventory.product.repository.ProductSpecifications;
+import com.company.inventory.stock.dto.StockLevelResponse;
+import com.company.inventory.stock.dto.StockMovementRequest;
+import com.company.inventory.stock.dto.StockMovementResponse;
+import com.company.inventory.stock.entity.StockMovement;
+import com.company.inventory.stock.entity.StockMovementType;
+import com.company.inventory.stock.mapper.StockMovementMapper;
+import com.company.inventory.stock.repository.StockMovementRepository;
+import com.company.inventory.stock.repository.StockMovementSpecifications;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional
+public class StockService {
+
+    private final StockMovementRepository stockMovementRepository;
+    private final ProductRepository productRepository;
+
+    public StockService(StockMovementRepository stockMovementRepository,
+                        ProductRepository productRepository) {
+        this.stockMovementRepository = stockMovementRepository;
+        this.productRepository = productRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<StockLevelResponse> findStockLevels(
+            String search, Boolean critical, Pageable pageable) {
+        Specification<Product> spec = Specification.where(ProductSpecifications.withSearch(search))
+                .and(ProductSpecifications.criticalOnly(critical))
+                .and((root, query, cb) -> cb.equal(root.get("status"), ProductStatus.ACTIVE));
+        return productRepository.findAll(spec, pageable)
+                .map(p -> new StockLevelResponse(
+                        p.getId(),
+                        p.getSku(),
+                        p.getName(),
+                        p.getQuantity(),
+                        p.getMinStock(),
+                        p.isCritical(),
+                        p.getStatus()
+                ));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<StockMovementResponse> findMovements(Long productId, StockMovementType type, Pageable pageable) {
+        Specification<StockMovement> spec = Specification
+                .where(StockMovementSpecifications.withProductId(productId))
+                .and(StockMovementSpecifications.withType(type));
+        return stockMovementRepository.findAll(spec, pageable).map(StockMovementMapper::toResponse);
+    }
+
+    public StockMovementResponse registerMovement(StockMovementRequest request) {
+        Product product = getProductOrThrow(request.productId());
+        ensureActive(product);
+        return StockMovementMapper.toResponse(applyMovement(
+                product,
+                request.type(),
+                request.quantity(),
+                request.newQuantity(),
+                request.observations(),
+                request.userId(),
+                CorrelationIdFilter.currentCorrelationId()
+        ));
+    }
+
+    public void registerInitialStock(Product product, int quantity, String userId) {
+        applyMovement(product, StockMovementType.IN, quantity, null,
+                "Initial stock on product creation", userId,
+                CorrelationIdFilter.currentCorrelationId());
+    }
+
+    private StockMovement applyMovement(Product product,
+                                        StockMovementType type,
+                                        Integer quantity,
+                                        Integer newQuantity,
+                                        String observations,
+                                        String userId,
+                                        String correlationId) {
+        int previousQty = product.getQuantity();
+        int newQty = switch (type) {
+            case IN -> {
+                if (quantity == null || quantity < 1) {
+                    throw ApiException.badRequest("IN movement requires quantity >= 1");
+                }
+                yield previousQty + quantity;
+            }
+            case OUT -> {
+                if (quantity == null || quantity < 1) {
+                    throw ApiException.badRequest("OUT movement requires quantity >= 1");
+                }
+                int result = previousQty - quantity;
+                if (result < 0) {
+                    throw ApiException.conflict(
+                            "Insufficient stock. Current: " + previousQty + ", requested OUT: " + quantity);
+                }
+                yield result;
+            }
+            case ADJUSTMENT -> {
+                if (newQuantity == null || newQuantity < 0) {
+                    throw ApiException.badRequest("ADJUSTMENT requires newQuantity >= 0");
+                }
+                yield newQuantity;
+            }
+        };
+
+        int delta = newQty - previousQty;
+        product.setQuantity(newQty);
+        productRepository.save(product);
+
+        StockMovement movement = new StockMovement();
+        movement.setProduct(product);
+        movement.setUserId(userId);
+        movement.setType(type);
+        movement.setPreviousQty(previousQty);
+        movement.setNewQty(newQty);
+        movement.setDelta(delta);
+        movement.setObservations(observations);
+        movement.setCorrelationId(correlationId);
+
+        return stockMovementRepository.save(movement);
+    }
+
+    private Product getProductOrThrow(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound("Product not found: " + id));
+    }
+
+    private void ensureActive(Product product) {
+        if (product.getStatus() != ProductStatus.ACTIVE) {
+            throw ApiException.badRequest("Cannot modify stock of inactive product");
+        }
+    }
+}

@@ -1,5 +1,23 @@
-# Perfil dev - Fase 0 (sin JPA/Flyway hasta Fase 1)
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:${KEYCLOAK_ISSUER_URI_HOST:http://localhost:8081/realms/inventory-realm}}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:${KEYCLOAK_JWKS_URI_HOST:http://localhost:8081/realms/inventory-realm/protocol/openid-connect/certs}}
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/inventory}
+    username: ${DATABASE_USERNAME:inventory_user}
+    password: ${DATABASE_PASSWORD:inventory_password}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+
 logging:
   level:
     com.company.inventory: INFO
+    org.hibernate.SQL: WARN
     root: INFO

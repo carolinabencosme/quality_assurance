@@ -14,6 +14,7 @@ public record ApiErrorResponse(
         String error,
         String message,
         String path,
-        String correlationId
+        String correlationId,
+        String code
 ) {
 }

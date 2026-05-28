@@ -2,12 +2,128 @@
   "realm": "inventory-realm",
   "enabled": true,
   "displayName": "Inventory QAS",
+  "sslRequired": "external",
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "bruteForceProtected": true,
+  "accessTokenLifespan": 3600,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "roles": {
+    "realm": [
+      {
+        "name": "inventory-admin",
+        "description": "Administrador — todos los permisos del API",
+        "composite": true,
+        "composites": {
+          "client": {
+            "inventory-backend": [
+              "product:view",
+              "product:manage",
+              "stock:view",
+              "stock:manage",
+              "report:view",
+              "audit:view",
+              "user:manage"
+            ]
+          }
+        }
+      },
+      {
+        "name": "warehouse-manager",
+        "description": "Gestión operativa de inventario",
+        "composite": true,
+        "composites": {
+          "client": {
+            "inventory-backend": [
+              "product:view",
+              "product:manage",
+              "stock:view",
+              "stock:manage",
+              "report:view"
+            ]
+          }
+        }
+      },
+      {
+        "name": "inventory-clerk",
+        "description": "Registro de entradas y salidas",
+        "composite": true,
+        "composites": {
+          "client": {
+            "inventory-backend": [
+              "product:view",
+              "stock:view",
+              "stock:manage"
+            ]
+          }
+        }
+      },
+      {
+        "name": "inventory-viewer",
+        "description": "Solo lectura de productos y stock",
+        "composite": true,
+        "composites": {
+          "client": {
+            "inventory-backend": [
+              "product:view",
+              "stock:view",
+              "report:view"
+            ]
+          }
+        }
+      }
+    ],
+    "client": {
+      "inventory-backend": [
+        {
+          "name": "product:view",
+          "description": "Ver productos y categorías",
+          "composite": false,
+          "clientRole": true
+        },
+        {
+          "name": "product:manage",
+          "description": "Crear, editar e inactivar productos",
+          "composite": false,
+          "clientRole": true
+        },
+        {
+          "name": "stock:view",
+          "description": "Ver existencias e historial",
+          "composite": false,
+          "clientRole": true
+        },
+        {
+          "name": "stock:manage",
+          "description": "Registrar entradas, salidas y ajustes",
+          "composite": false,
+          "clientRole": true
+        },
+        {
+          "name": "report:view",
+          "description": "Ver reportes y dashboard",
+          "composite": false,
+          "clientRole": true
+        },
+        {
+          "name": "audit:view",
+          "description": "Consultar auditoría",
+          "composite": false,
+          "clientRole": true
+        },
+        {
+          "name": "user:manage",
+          "description": "Gestionar usuarios y permisos",
+          "composite": false,
+          "clientRole": true
+        }
+      ]
+    }
+  },
   "clients": [
     {
       "clientId": "inventory-frontend",
@@ -16,6 +132,10 @@
       "publicClient": true,
       "directAccessGrantsEnabled": true,
       "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true,
       "redirectUris": [
         "http://localhost:3000/*",
         "http://127.0.0.1:3000/*"
@@ -24,27 +144,92 @@
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "+"
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "email"
       ]
     },
     {
       "clientId": "inventory-backend",
-      "name": "Inventory Backend",
+      "name": "Inventory Backend API",
       "enabled": true,
       "bearerOnly": true,
       "publicClient": false,
-      "serviceAccountsEnabled": true
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
     }
   ],
-  "roles": {
-    "realm": [
-      {
-        "name": "inventory-admin",
-        "description": "Administrador con permisos compuestos (configuracion completa en Fase 2)"
-      },
-      {
-        "name": "inventory-operator",
-        "description": "Operador de inventario (permisos granulares en Fase 2)"
-      }
-    ]
-  }
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@inventory.local",
+      "firstName": "Admin",
+      "lastName": "Inventory",
+      "emailVerified": true,
+      "realmRoles": ["inventory-admin"],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "warehouse",
+      "enabled": true,
+      "email": "warehouse@inventory.local",
+      "firstName": "Warehouse",
+      "lastName": "Manager",
+      "emailVerified": true,
+      "realmRoles": ["warehouse-manager"],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "warehouse123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "clerk",
+      "enabled": true,
+      "email": "clerk@inventory.local",
+      "firstName": "Inventory",
+      "lastName": "Clerk",
+      "emailVerified": true,
+      "realmRoles": ["inventory-clerk"],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "clerk123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "viewer",
+      "enabled": true,
+      "email": "viewer@inventory.local",
+      "firstName": "Read",
+      "lastName": "Only",
+      "emailVerified": true,
+      "realmRoles": ["inventory-viewer"],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "viewer123",
+          "temporary": false
+        }
+      ]
+    }
+  ]
 }

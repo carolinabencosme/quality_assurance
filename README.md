@@ -12,7 +12,7 @@ Monorepo del proyecto **Aseguramiento de Calidad de Software** (PUCMM): inventar
 | Capa | Tecnología |
 |------|------------|
 | Backend | Spring Boot 3 + Java 21 |
-| Frontend | React + Vite + TypeScript |
+| Frontend | Next.js 15 + React + TypeScript |
 | Base de datos | PostgreSQL 16 |
 | Seguridad | Keycloak + OAuth2 + JWT (Fase 2) |
 | Contenedores | Docker + Docker Compose |
@@ -22,7 +22,7 @@ Monorepo del proyecto **Aseguramiento de Calidad de Software** (PUCMM): inventar
 ```
 inventory-qas-project/
 ├── backend/          # API Spring Boot (monolito modular)
-├── frontend/         # React + Vite
+├── frontend/         # Next.js App Router
 ├── docker/           # Init DB, Nginx
 ├── keycloak/         # Realm export
 ├── observability/    # Prometheus, Grafana, Loki, Tempo, Alloy (Fase 5+)
@@ -63,9 +63,21 @@ docker compose -f docker-compose.dev.yml ps
 | Frontend | http://localhost:3000 |
 | Backend API | http://localhost:8080 |
 | Health | http://localhost:8080/actuator/health |
-| Setup info (Fase 0) | http://localhost:8080/api/v1/setup/info |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| API productos | http://localhost:8080/api/v1/products |
+| API stock | http://localhost:8080/api/v1/stock |
 | Keycloak Admin | http://localhost:8081 (admin / admin) |
 | PostgreSQL | localhost:5432 |
+
+**Fase 5 — observabilidad** (`-f docker-compose.observability.yml`):
+
+| Servicio | URL |
+|----------|-----|
+| Grafana | http://localhost:3001 (admin / admin) |
+| Prometheus | http://localhost:9090 |
+| Alertmanager | http://localhost:9093 |
+
+Ver [`docs/observability-guide.md`](docs/observability-guide.md).
 
 Detener:
 
@@ -75,12 +87,15 @@ docker compose -f docker-compose.dev.yml down
 
 ## Desarrollo local (sin Docker)
 
-**Backend**
+**Backend** (no requiere Maven instalado; usa el wrapper incluido)
 
 ```powershell
 cd backend
-mvn spring-boot:run
+.\mvnw.cmd test          # pruebas (Docker Desktop encendido para Testcontainers)
+.\mvnw.cmd spring-boot:run
 ```
+
+Requisitos: **Java 21+** (recomendado 21 LTS) y **Docker Desktop** en ejecución para el test de contexto con PostgreSQL.
 
 **Frontend**
 
@@ -90,7 +105,7 @@ npm install
 npm run dev
 ```
 
-Configurar `VITE_API_URL` en `.env` o en el entorno según `.env.example`.
+En desarrollo, Next.js reescribe `/api` y `/keycloak` al backend y Keycloak (sin CORS). Ver `NEXT_PUBLIC_*` en `.env.example`.
 
 ## Estrategia de ramas (Plan v3.0 §15)
 
@@ -111,20 +126,67 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 
 | Fase | Objetivo | Estado |
 |------|----------|--------|
-| 0 | Setup repo, Docker dev, README, `.env.example` | En curso (`QA-2`) |
-| 1 | Core: productos, stock, Flyway, Swagger | Pendiente |
-| 2 | Keycloak y permisos granulares | Pendiente |
-| 3 | Dashboard y auditoría (Envers) | Pendiente |
-| 4 | Testing full stack | Pendiente |
-| 5 | Observabilidad (Grafana stack) | Pendiente |
-| 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | Pendiente |
+| 0 | Setup repo, Docker dev, README, `.env.example` | Completado (`QA-2`) |
+| 1 | Core: productos, stock, Flyway, Swagger | Completado (`QA-3`) |
+| 2 | Keycloak y permisos granulares | En curso (`QA-4`) |
+| 3 | Dashboard y auditoría (Envers) | En curso (`QA-5`) |
+| 4 | Testing full stack (JaCoCo, E2E, k6, evidencias) | En curso (`QA-6`) |
+| 5 | Observabilidad (Grafana stack) | En curso (`QA-7`) |
+| 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | En curso (`QA-8`) |
 | 7 | Documentación y defensa | Pendiente |
+
+## API Fase 1 (QA-3)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/v1/products` | Lista con `search`, `categoryId`, `status`, `critical`, paginación |
+| GET | `/api/v1/products/{id}` | Detalle |
+| POST | `/api/v1/products` | Crear (SKU único, stock inicial opcional) |
+| PUT | `/api/v1/products/{id}` | Actualizar (sin cambiar cantidad directa) |
+| DELETE | `/api/v1/products/{id}` | Inactivar (soft delete) |
+| GET | `/api/v1/categories` | Categorías para filtros |
+| GET | `/api/v1/stock` | Existencias actuales |
+| GET | `/api/v1/stock/movements` | Historial (`productId`, `type`) |
+| POST | `/api/v1/stock/movements` | IN / OUT / ADJUSTMENT |
+
+Reglas MVP: SKU duplicado → 409; precio/stock negativo → 400; salida sin stock → 409; cada cambio de cantidad genera movimiento.
+
+## Dashboard y auditoría Fase 3 (QA-5)
+
+| Método | Endpoint | Permiso |
+|--------|----------|---------|
+| GET | `/api/v1/reports/dashboard` | `report:view` |
+| GET | `/api/v1/reports/critical-products` | `report:view` |
+| GET | `/api/v1/audit` | `audit:view` |
+
+Frontend (Next.js): `/dashboard`, `/products`, `/audit`. Productos auditados con **Hibernate Envers**. Sesión con JWT + refresh token en cookie.
+
+## Seguridad Fase 2 (QA-4)
+
+Todos los endpoints `/api/v1/*` exigen JWT Bearer. Permisos granulares vía `@PreAuthorize` (ej. `product:view`).
+
+Usuarios de prueba (Keycloak): `admin`/`admin123`, `viewer`/`viewer123` — ver [docs/security-model.md](docs/security-model.md).
+
+```powershell
+# Token de ejemplo (viewer)
+curl -s -X POST "http://localhost:8081/realms/inventory-realm/protocol/openid-connect/token" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d "grant_type=password&client_id=inventory-frontend&username=viewer&password=viewer123"
+```
+
+Frontend: login en http://localhost:3000 con las mismas credenciales.
 
 ## Issues y Jira
 
 - **QA-2** — Fase 0: Setup repositorio y entorno local
 - **QA-18** — Módulo common: excepciones y respuesta error estándar
-- Etiqueta sugerida: `inventory-qas_fase-0_setup`
+- **QA-3** — Fase 1: Core funcional productos y stock  
+- **QA-4** — Fase 2: Seguridad Keycloak y permisos granulares  
+- **QA-5** — Fase 3: Dashboard, reportes y auditoría Envers  
+- **QA-6** — Fase 4: Testing full stack y evidencias  
+- **QA-7** — Fase 5: Observabilidad OpenTelemetry y Grafana stack  
+- **QA-8** — Fase 6: CI/CD GitHub Actions, Jenkins y SonarQube  
+- Etiquetas: `inventory-qas_fase-0_setup`, `inventory-qas_fase-1_core`, `inventory-qas_fase-2_security`, `inventory-qas_fase-3_dashboard`
 
 ## Documentación
 
@@ -134,6 +196,9 @@ Ver carpeta [`docs/`](docs/):
 - [`docs/architecture.md`](docs/architecture.md) — Arquitectura (borrador)
 - [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue y variables
 - [`docs/common-error-response.md`](docs/common-error-response.md) — Formato JSON de errores (QA-18)
+- [`docs/testing-guide.md`](docs/testing-guide.md) — Pruebas Fase 4 (QA-6)
+- [`docs/qa-evidence.md`](docs/qa-evidence.md) — Evidencias QA
+- [`docs/ci-cd-guide.md`](docs/ci-cd-guide.md) — CI/CD Fase 6 (QA-8)
 
 ## Licencia y equipo
 

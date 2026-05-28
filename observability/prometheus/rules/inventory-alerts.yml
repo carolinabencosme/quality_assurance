@@ -1,0 +1,22 @@
+groups:
+  - name: inventory-api
+    rules:
+      - alert: InventoryApiDown
+        expr: up{job="inventory-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Inventory API no responde a scrape de Prometheus
+          description: El job inventory-api lleva más de 2 minutos caído.
+
+      - alert: HighHttpErrorRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count{job="inventory-api",status=~"5.."}[5m]))
+          /
+          sum(rate(http_server_requests_seconds_count{job="inventory-api"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Tasa elevada de errores HTTP 5xx en inventory-api

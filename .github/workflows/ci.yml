@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, develop]
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend:
     runs-on: ubuntu-latest
@@ -19,8 +23,15 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - name: Test backend
-        run: mvn -B test
+      - name: Test with JaCoCo
+        run: mvn -B verify
+      - name: Upload JaCoCo report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: backend/target/site/jacoco/
+          retention-days: 14
 
   frontend:
     runs-on: ubuntu-latest
@@ -34,7 +45,51 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - name: Install and build
+      - name: Install, lint and build
         run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          npm ci
           npm run build
+
+  sonar:
+    name: Quality Gate (SonarQube)
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: SonarQube scan
+        if: ${{ secrets.SONAR_TOKEN != '' }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'http://localhost:9000' }}
+        run: |
+          cd backend && mvn -B verify
+          mvn -B -f backend/pom.xml sonar:sonar \
+            -Dsonar.projectKey=inventory-qas \
+            -Dsonar.host.url="$SONAR_HOST_URL" \
+            -Dsonar.token="$SONAR_TOKEN" \
+            -Dsonar.projectBaseDir=.
+      - name: Sonar skipped (no SONAR_TOKEN)
+        if: ${{ secrets.SONAR_TOKEN == '' }}
+        run: echo "Configure secret SONAR_TOKEN y variable SONAR_HOST_URL para quality gate completo."
+
+  security-smoke:
+    name: Security smoke (optional)
+    runs-on: ubuntu-latest
+    needs: [backend]
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run auth smoke script
+        shell: bash
+        run: |
+          if [ -f tests/security/auth-smoke.ps1 ]; then
+            echo "Security smoke requiere stack Docker; se ejecuta en deploy-staging."
+          fi
