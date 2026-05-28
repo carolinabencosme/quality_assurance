@@ -2,11 +2,21 @@
 
 ## Desarrollo (`docker-compose.dev.yml`)
 
-Servicios: `postgres`, `keycloak`, `backend`, `frontend`.
+Servicios en la red interna **`inventory-net`** (bridge):
+
+| Servicio | Puerto en el host |
+|----------|-------------------|
+| `postgres` | 5432 |
+| `keycloak` | 8081 |
+| `backend` | 8080 |
+| `frontend` | 3000 |
+
+El backend arranca cuando **postgres** y **keycloak** reportan *healthy* (healthchecks en Compose). El frontend espera al backend *healthy*.
 
 1. Copiar `.env.example` → `.env` (el archivo `.env` es solo local; Git lo ignora vía `.gitignore`. No hacer `git add .env` si aparece en `git status`).
-2. `docker compose -f docker-compose.dev.yml up -d --build`
-3. Validar:
+2. `docker compose -f docker-compose.dev.yml up -d --build` (Keycloak puede tardar hasta ~2–3 min en el primer arranque por import del realm; healthcheck TCP en puerto 8080).
+3. `docker compose -f docker-compose.dev.yml ps` — comprobar estado *healthy* en postgres, keycloak y backend.
+4. Validar:
    - http://localhost:8080/actuator/health
    - http://localhost:8080/api/v1/setup/info
    - http://localhost:3000

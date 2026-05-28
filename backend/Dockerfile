@@ -9,7 +9,8 @@ RUN mvn -q -B -DskipTests package
 # Run
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-RUN addgroup -S inventory && adduser -S inventory -G inventory
+RUN apk add --no-cache wget \
+    && addgroup -S inventory && adduser -S inventory -G inventory
 USER inventory
 COPY --from=build /app/target/inventory-api-*.jar app.jar
 EXPOSE 8080
