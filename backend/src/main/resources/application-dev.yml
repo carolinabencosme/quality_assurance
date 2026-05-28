@@ -1,4 +1,9 @@
 # Perfil dev - Fase 0 (sin JPA/Flyway hasta Fase 1)
+management:
+  endpoint:
+    health:
+      show-details: always
+
 logging:
   level:
     com.company.inventory: INFO
