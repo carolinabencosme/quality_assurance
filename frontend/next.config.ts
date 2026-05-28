@@ -4,6 +4,7 @@ const apiTarget = process.env.API_PROXY_TARGET ?? 'http://localhost:8080';
 const keycloakTarget = process.env.KEYCLOAK_PROXY_TARGET ?? 'http://localhost:8081';
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   async rewrites() {
     return [
       {
