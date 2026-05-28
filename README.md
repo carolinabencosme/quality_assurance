@@ -69,6 +69,16 @@ docker compose -f docker-compose.dev.yml ps
 | Keycloak Admin | http://localhost:8081 (admin / admin) |
 | PostgreSQL | localhost:5432 |
 
+**Fase 5 — observabilidad** (`-f docker-compose.observability.yml`):
+
+| Servicio | URL |
+|----------|-----|
+| Grafana | http://localhost:3001 (admin / admin) |
+| Prometheus | http://localhost:9090 |
+| Alertmanager | http://localhost:9093 |
+
+Ver [`docs/observability-guide.md`](docs/observability-guide.md).
+
 Detener:
 
 ```powershell
@@ -121,7 +131,7 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | 2 | Keycloak y permisos granulares | En curso (`QA-4`) |
 | 3 | Dashboard y auditoría (Envers) | En curso (`QA-5`) |
 | 4 | Testing full stack (JaCoCo, E2E, k6, evidencias) | En curso (`QA-6`) |
-| 5 | Observabilidad (Grafana stack) | Pendiente |
+| 5 | Observabilidad (Grafana stack) | En curso (`QA-7`) |
 | 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | Pendiente |
 | 7 | Documentación y defensa | Pendiente |
 
@@ -173,6 +183,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-4** — Fase 2: Seguridad Keycloak y permisos granulares  
 - **QA-5** — Fase 3: Dashboard, reportes y auditoría Envers  
 - **QA-6** — Fase 4: Testing full stack y evidencias  
+- **QA-7** — Fase 5: Observabilidad OpenTelemetry y Grafana stack  
 - Etiquetas: `inventory-qas_fase-0_setup`, `inventory-qas_fase-1_core`, `inventory-qas_fase-2_security`, `inventory-qas_fase-3_dashboard`
 
 ## Documentación

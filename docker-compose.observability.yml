@@ -1,0 +1,121 @@
+# Overlay Fase 5 (QA-7): OpenTelemetry + Grafana stack
+# Uso: docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up -d --build
+
+name: inventory-qas-dev
+
+services:
+  alloy:
+    image: grafana/alloy:v1.5.1
+    container_name: inventory-alloy-dev
+    restart: unless-stopped
+    command:
+      - run
+      - /etc/alloy/config.alloy
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "12345:12345"
+    volumes:
+      - ./observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy_data:/var/lib/alloy/data
+    networks:
+      - inventory-net
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: inventory-prometheus-dev
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus_data:/prometheus
+    networks:
+      - inventory-net
+
+  loki:
+    image: grafana/loki:3.3.2
+    container_name: inventory-loki-dev
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./observability/loki/loki.yaml:/etc/loki/loki.yaml:ro
+      - loki_data:/loki
+    networks:
+      - inventory-net
+
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: inventory-tempo-dev
+    restart: unless-stopped
+    command: -config.file=/etc/tempo/tempo.yaml
+    ports:
+      - "3200:3200"
+    volumes:
+      - ./observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - tempo_data:/var/tempo
+    networks:
+      - inventory-net
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: inventory-grafana-dev
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_DEFAULT_THEME: dark
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+    networks:
+      - inventory-net
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.0
+    container_name: inventory-alertmanager-dev
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./observability/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    networks:
+      - inventory-net
+
+  backend:
+    environment:
+      SPRING_PROFILES_ACTIVE: dev,observability
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://alloy:4318/v1/traces
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://alloy:4318/v1/metrics
+      OTEL_TRACES_SAMPLER_PROBABILITY: "1.0"
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://alloy:4318/v1/traces
+      MANAGEMENT_OTLP_METRICS_EXPORT_URL: http://alloy:4318/v1/metrics
+    depends_on:
+      alloy:
+        condition: service_started
+
+volumes:
+  alloy_data:
+  prometheus_data:
+  loki_data:
+  tempo_data:
+  grafana_data:
