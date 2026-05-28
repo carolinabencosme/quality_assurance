@@ -122,7 +122,8 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 
 ## Issues y Jira
 
-- **QA-2** — Fase 0: Setup repositorio y entorno local  
+- **QA-2** — Fase 0: Setup repositorio y entorno local
+- **QA-17** — Migraciones Flyway V1–V7 del dominio inventario
 - Etiqueta sugerida: `inventory-qas_fase-0_setup`
 
 ## Documentación
