@@ -1,7 +1,7 @@
 package com.company.inventory.common.exception;
 
 import com.company.inventory.common.response.ErrorProbeController;
-import com.company.inventory.common.web.CorrelationIdFilter;
+import com.company.inventory.observability.CorrelationIdFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
