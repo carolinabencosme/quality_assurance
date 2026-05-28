@@ -128,12 +128,12 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 |------|----------|--------|
 | 0 | Setup repo, Docker dev, README, `.env.example` | Completado (`QA-2`) |
 | 1 | Core: productos, stock, Flyway, Swagger | Completado (`QA-3`) |
-| 2 | Keycloak y permisos granulares | En curso (`QA-4`) |
-| 3 | Dashboard y auditoría (Envers) | En curso (`QA-5`) |
-| 4 | Testing full stack (JaCoCo, E2E, k6, evidencias) | En curso (`QA-6`) |
-| 5 | Observabilidad (Grafana stack) | En curso (`QA-7`) |
-| 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | En curso (`QA-8`) |
-| 7 | Documentación y defensa | Pendiente |
+| 2 | Keycloak y permisos granulares | Completado (`QA-4`) |
+| 3 | Dashboard y auditoría (Envers) | Completado (`QA-5`) |
+| 4 | Testing full stack (JaCoCo, E2E, k6, evidencias) | Completado (`QA-6`) |
+| 5 | Observabilidad (Grafana stack) | Completado (`QA-7`) |
+| 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | Completado (`QA-8`) |
+| 7 | Documentación y defensa | Completado (`QA-9`) |
 
 ## API Fase 1 (QA-3)
 
@@ -185,18 +185,23 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-6** — Fase 4: Testing full stack y evidencias  
 - **QA-7** — Fase 5: Observabilidad OpenTelemetry y Grafana stack  
 - **QA-8** — Fase 6: CI/CD GitHub Actions, Jenkins y SonarQube  
-- Etiquetas: `inventory-qas_fase-0_setup`, `inventory-qas_fase-1_core`, `inventory-qas_fase-2_security`, `inventory-qas_fase-3_dashboard`
+- **QA-9** — Fase 7: Documentación final y defensa  
+- Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
 
 ## Documentación
 
 Ver carpeta [`docs/`](docs/):
 
 - [`docs/GUIA_IMPLEMENTACION.md`](docs/GUIA_IMPLEMENTACION.md) — Guía de implementación del equipo
-- [`docs/architecture.md`](docs/architecture.md) — Arquitectura (borrador)
+- [`docs/architecture.md`](docs/architecture.md) — Arquitectura del sistema
+- [`docs/requirements.md`](docs/requirements.md) — Requisitos RF/RNF
 - [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue y variables
+- [`docs/observability-guide.md`](docs/observability-guide.md) — Observabilidad Fase 5 (QA-7)
 - [`docs/testing-guide.md`](docs/testing-guide.md) — Pruebas Fase 4 (QA-6)
-- [`docs/qa-evidence.md`](docs/qa-evidence.md) — Evidencias QA
+- [`docs/qa-evidence.md`](docs/qa-evidence.md) — Evidencias QA (todas las fases)
 - [`docs/ci-cd-guide.md`](docs/ci-cd-guide.md) — CI/CD Fase 6 (QA-8)
+- [`docs/defensa/guion-presentacion.md`](docs/defensa/guion-presentacion.md) — Guión defensa (~15 min)
+- [`docs/defensa/checklist-defensa.md`](docs/defensa/checklist-defensa.md) — Checklist demo
 
 ## Licencia y equipo
 
