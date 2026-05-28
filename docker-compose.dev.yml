@@ -1,6 +1,7 @@
 # Ambiente de desarrollo local - Plan v3.0 sección 10
 # Servicios: postgres, keycloak, backend, frontend
 # Uso: docker compose -f docker-compose.dev.yml up -d --build
+# Fase 5 (observabilidad): añadir -f docker-compose.observability.yml
 
 name: inventory-qas-dev
 
@@ -58,14 +59,13 @@ services:
     ports:
       - "${SERVER_PORT:-8080}:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev,observability}
       DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://postgres:5432/inventory}
       DATABASE_USERNAME: ${DATABASE_USERNAME:-inventory_user}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-inventory_password}
       # iss del JWT = http://localhost:8081/... (debe coincidir exactamente)
       KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/inventory-realm
       KEYCLOAK_JWKS_URI: http://host.docker.internal:8081/realms/inventory-realm/protocol/openid-connect/certs
-      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://alloy:4317}
       OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-inventory-api}
     extra_hosts:
       - "host.docker.internal:host-gateway"
