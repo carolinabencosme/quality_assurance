@@ -1,6 +1,7 @@
 package com.company.inventory.product.service;
 
 import com.company.inventory.common.exception.ApiException;
+import com.company.inventory.observability.ObservabilityMdc;
 import com.company.inventory.product.dto.ProductRequest;
 import com.company.inventory.product.dto.ProductResponse;
 import com.company.inventory.product.dto.ProductUpdateRequest;
@@ -17,10 +18,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
 public class ProductService {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductService.class);
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
@@ -70,6 +75,8 @@ public class ProductService {
             stockService.registerInitialStock(saved, request.quantity(), null);
         }
 
+        log.info("event=product_created productId={} sku={} correlationId={}",
+                saved.getId(), saved.getSku(), ObservabilityMdc.correlationIdOrUnknown());
         return ProductMapper.toResponse(getProductOrThrow(saved.getId()));
     }
 
@@ -87,13 +94,18 @@ public class ProductService {
         product.setMinStock(request.minStock());
         product.setStatus(request.status());
 
-        return ProductMapper.toResponse(productRepository.save(product));
+        Product saved = productRepository.save(product);
+        log.info("event=product_updated productId={} sku={} correlationId={}",
+                saved.getId(), saved.getSku(), ObservabilityMdc.correlationIdOrUnknown());
+        return ProductMapper.toResponse(saved);
     }
 
     public void delete(Long id) {
         Product product = getProductOrThrow(id);
-        product.setStatus(ProductStatus.INACTIVE);
+        product.deactivate();
         productRepository.save(product);
+        log.info("event=product_deactivated productId={} sku={} correlationId={}",
+                product.getId(), product.getSku(), ObservabilityMdc.correlationIdOrUnknown());
     }
 
     Product getProductOrThrow(Long id) {
