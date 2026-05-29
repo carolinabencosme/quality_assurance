@@ -151,6 +151,7 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | 5 | Observabilidad (Grafana stack) | Completado (`QA-7`) |
 | 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | Completado (`QA-8`) |
 | 7 | Documentación y defensa | Completado (`QA-9`) |
+| — | Common: excepciones y error estándar | Completado (`QA-18`) |
 
 ## API Fase 1 (QA-3)
 
@@ -195,8 +196,8 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 
 ## Issues y Jira
 
-- **QA-2** — Fase 0: Setup repositorio y entorno local  
-- **QA-3** — Fase 1: Core funcional productos y stock  
+- **QA-2** — Fase 0: Setup repositorio y entorno local
+- **QA-3** — Fase 1: Core funcional productos y stock
 - **QA-4** — Fase 2: Seguridad Keycloak y permisos granulares  
 - **QA-5** — Fase 3: Dashboard, reportes y auditoría Envers  
 - **QA-6** — Fase 4: Testing full stack y evidencias  
@@ -205,6 +206,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-9** — Fase 7: Documentación final y defensa  
 - **QA-10** — Estructura monorepo según plan técnico  
 - **QA-17** — Migraciones Flyway V1–V7 del dominio inventario
+- **QA-18** — Módulo common: excepciones y respuesta error estándar
 - Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
 
 ## Documentación
@@ -218,6 +220,7 @@ Ver carpeta [`docs/`](docs/):
 - [`docs/requirements.md`](docs/requirements.md) — Requisitos RF/RNF
 - [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue y variables
 - [`docs/observability-guide.md`](docs/observability-guide.md) — Observabilidad Fase 5 (QA-7)
+- [`docs/common-error-response.md`](docs/common-error-response.md) — Formato JSON de errores (QA-18)
 - [`docs/testing-guide.md`](docs/testing-guide.md) — Pruebas Fase 4 (QA-6)
 - [`docs/qa-evidence.md`](docs/qa-evidence.md) — Evidencias QA (todas las fases)
 - [`docs/ci-cd-guide.md`](docs/ci-cd-guide.md) — CI/CD Fase 6 (QA-8)
