@@ -19,10 +19,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
 public class StockService {
+
+    private static final Logger log = LoggerFactory.getLogger(StockService.class);
 
     private final StockMovementRepository stockMovementRepository;
     private final ProductRepository productRepository;
@@ -127,7 +131,10 @@ public class StockService {
         movement.setObservations(observations);
         movement.setCorrelationId(correlationId);
 
-        return stockMovementRepository.save(movement);
+        StockMovement saved = stockMovementRepository.save(movement);
+        log.info("event=stock_movement_registered productId={} type={} previousQty={} newQty={} delta={} correlationId={}",
+                product.getId(), type, previousQty, newQty, delta, correlationId);
+        return saved;
     }
 
     private Product getProductOrThrow(Long id) {
