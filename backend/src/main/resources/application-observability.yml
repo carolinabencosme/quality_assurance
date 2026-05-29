@@ -25,3 +25,11 @@ management:
       export:
         enabled: ${OTEL_METRICS_EXPORT_ENABLED:true}
         url: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:http://localhost:4318/v1/metrics}
+
+# Logging estructurado JSON (Loki / Grafana) — QA-19
+logging:
+  structured:
+    format:
+      console: logstash
+  pattern:
+    level: "%5p [${spring.application.name:},trace=%X{traceId:-},corr=%X{correlationId:-}]"
