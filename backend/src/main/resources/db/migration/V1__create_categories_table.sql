@@ -1,3 +1,6 @@
+-- V1: categories — dominio inventario (QA-17)
+-- Ver docs/data-model.md
+
 CREATE TABLE categories (
     id          BIGSERIAL PRIMARY KEY,
     name        VARCHAR(100) NOT NULL,

@@ -1,3 +1,5 @@
+-- V6: datos iniciales de catálogo y movimientos (QA-17)
+
 INSERT INTO categories (name, description, status) VALUES
     ('Electronics', 'Electronic devices and accessories', 'ACTIVE'),
     ('Office', 'Office supplies and equipment', 'ACTIVE'),

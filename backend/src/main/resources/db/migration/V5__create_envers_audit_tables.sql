@@ -1,3 +1,6 @@
+-- V5: auditoría Hibernate Envers — revinfo + products_aud (QA-17)
+-- Alineado con InventoryRevisionEntity (@Table revinfo) y Product @Audited
+
 CREATE SEQUENCE IF NOT EXISTS revinfo_seq INCREMENT BY 50 START WITH 1;
 
 CREATE TABLE revinfo (
