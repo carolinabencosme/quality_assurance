@@ -21,7 +21,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 100, unique = true)
     private String name;
 
     @Column(length = 500)
@@ -79,6 +79,10 @@ public class Category {
 
     public void setStatus(CategoryStatus status) {
         this.status = status;
+    }
+
+    public boolean isActive() {
+        return status == CategoryStatus.ACTIVE;
     }
 
     public Instant getCreatedAt() {

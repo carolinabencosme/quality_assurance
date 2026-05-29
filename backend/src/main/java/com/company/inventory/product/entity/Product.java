@@ -77,6 +77,15 @@ public class Product {
         return quantity != null && minStock != null && quantity <= minStock;
     }
 
+    public boolean isActive() {
+        return status == ProductStatus.ACTIVE;
+    }
+
+    /** Inactivación lógica (RF-AUD conserva historial Envers). */
+    public void deactivate() {
+        this.status = ProductStatus.INACTIVE;
+    }
+
     public Long getId() {
         return id;
     }

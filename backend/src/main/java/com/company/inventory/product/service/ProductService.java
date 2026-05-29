@@ -92,7 +92,7 @@ public class ProductService {
 
     public void delete(Long id) {
         Product product = getProductOrThrow(id);
-        product.setStatus(ProductStatus.INACTIVE);
+        product.deactivate();
         productRepository.save(product);
     }
 
