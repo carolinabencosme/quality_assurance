@@ -16,6 +16,11 @@ spring:
   flyway:
     enabled: true
 
+management:
+  endpoint:
+    health:
+      show-details: always
+
 logging:
   level:
     com.company.inventory: INFO

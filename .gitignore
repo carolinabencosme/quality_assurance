@@ -70,7 +70,8 @@ pnpm-debug.log*
 # Mantener lockfile para CI reproducible
 !frontend/package-lock.json
 
-# --- Pruebas y reportes generados ---
+# --- Pruebas y reportes generados (QA-10: node_modules, target, .env, dist, reportes, .idea) ---
+reportes/
 tests/**/reports/
 tests/**/results/
 tests/**/output/

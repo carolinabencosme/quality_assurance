@@ -1,20 +1,26 @@
 # Inventory QAS — Sistema de Gestión de Inventarios
 
-Monorepo del proyecto **Aseguramiento de Calidad de Software** (PUCMM): inventario empresarial con Full Stack Testing, observabilidad y DevSecOps.
+## Descripción del proyecto
+
+Monorepo del curso **Aseguramiento de Calidad de Software** (PUCMM) para un **sistema empresarial de gestión de inventarios**: catálogo de productos, movimientos de stock, reportes y auditoría, con calidad demostrable en producción académica.
+
+El proyecto va más allá de un CRUD: incluye **seguridad granular** (Keycloak), **testing por capas**, **observabilidad**, **CI/CD** y **calidad de código** medible, según el Plan de Implementación Técnica v3.0. Guía operativa del equipo: [docs/GUIA_IMPLEMENTACION.md](docs/GUIA_IMPLEMENTACION.md).
 
 | Documento | Versión |
 |-----------|---------|
 | Plan de implementación | 3.0 — Mayo 2026 |
 | Proyecto final | V3 |
 
-## Stack
+## Stack tecnológico
 
 | Capa | Tecnología |
 |------|------------|
 | Backend | Spring Boot 3 + Java 21 |
 | Frontend | Next.js 15 + React + TypeScript |
 | Base de datos | PostgreSQL 16 |
-| Seguridad | Keycloak + OAuth2 + JWT (Fase 2) |
+| Identidad / seguridad | Keycloak + OAuth2 + JWT |
+| API | REST `/api/v1`, OpenAPI, Swagger UI |
+| Persistencia | Flyway V1–V7, Hibernate Envers |
 | Contenedores | Docker + Docker Compose |
 
 ## Estructura del repositorio (QA-10)
@@ -47,25 +53,26 @@ quality_assurance/
 
 ## Requisitos previos
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (o Docker Engine + Compose v2)
-- [Java 21](https://adoptium.net/) y Maven 3.9+ (desarrollo backend sin Docker)
-- [Node.js 22 LTS](https://nodejs.org/) (desarrollo frontend sin Docker)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (o Docker Engine + **Compose v2**) — **obligatorio** para el flujo recomendado de desarrollo.
+- [Java 21](https://adoptium.net/) y Maven 3.9+ — **opcional** (solo si desarrollas el backend sin Docker).
+- [Node.js 22 LTS](https://nodejs.org/) — **opcional** (solo si desarrollas el frontend sin Docker).
 - Git
 
-## Inicio rápido (Docker — recomendado)
+## Arranque en desarrollo (Docker)
 
 ```powershell
-# 1. Clonar y entrar al repo
+# Clonar y entrar al repo (si aplica)
 cd quality_assurance
 
-# 2. Variables de entorno
 copy .env.example .env
-
-# 3. Levantar ambiente de desarrollo
 docker compose -f docker-compose.dev.yml up -d --build
-
-# 4. Verificar servicios
 docker compose -f docker-compose.dev.yml ps
+```
+
+Verificación rápida del backend:
+
+```powershell
+Invoke-RestMethod http://localhost:8080/actuator/health
 ```
 
 | Servicio | URL |
@@ -102,6 +109,13 @@ Detener:
 docker compose -f docker-compose.dev.yml down
 ```
 
+## Variables de entorno y secretos
+
+- **`.env.example`** sí se versiona: plantilla con nombres de variables y valores de ejemplo (sin secretos reales de producción).
+- **`.env`** no se versiona: está en [`.gitignore`](.gitignore). Cada desarrollador lo crea en local con `copy .env.example .env` y ajusta contraseñas o tokens propios.
+- No subir al repositorio contraseñas, tokens de SonarQube/Jenkins ni claves privadas; en CI usar secretos del proveedor (GitHub Actions, Jenkins credentials).
+- Si `git status` muestra `.env`, no ejecutar `git add .env`.
+
 ## Desarrollo local (sin Docker)
 
 **Backend** (no requiere Maven instalado; usa el wrapper incluido)
@@ -130,7 +144,7 @@ En desarrollo, Next.js reescribe `/api` y `/keycloak` al backend y Keycloak (sin
 |------|-----|
 | `main` | Estable y protegida; solo merge vía Pull Request |
 | `develop` | Integración de features validadas |
-| `feature/*` | Nuevas funcionalidades (ej. `feature/qa-2-fase-0-setup`) |
+| `feature/*` | Nuevas funcionalidades (ej. `feature/qa-11-readme-inicial`) |
 | `fix/*` | Correcciones de bugs |
 | `test/*` | Pruebas y evidencias |
 | `docs/*` | Documentación |
@@ -143,14 +157,14 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 
 | Fase | Objetivo | Estado |
 |------|----------|--------|
-| 0 | Setup repo, Docker dev, README, `.env.example` | Completado (`QA-2`) |
-| 1 | Core: productos, stock, Flyway, Swagger | Completado (`QA-3`) |
+| 0 | Setup repo, Docker dev, README, `.env.example` | Completado (`QA-2`, `QA-10`–`QA-13`) |
+| 1 | Core: productos, stock, Flyway, Swagger | Completado (`QA-3`, `QA-17`) |
 | 2 | Keycloak y permisos granulares | Completado (`QA-4`) |
 | 3 | Dashboard y auditoría (Envers) | Completado (`QA-5`) |
-| 4 | Testing full stack (JaCoCo, E2E, k6, evidencias) | Completado (`QA-6`) |
+| 4 | Testing full stack (JaCoCo, E2E, k6, evidencias) | Completado (`QA-6`, `QA-14`) |
 | 5 | Observabilidad (Grafana stack) | Completado (`QA-7`) |
 | 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | Completado (`QA-8`) |
-| 7 | Documentación y defensa | Completado (`QA-9`) |
+| 7 | Documentación y defensa | Completado (`QA-9`, `QA-11`) |
 | — | Common: excepciones y error estándar | Completado (`QA-18`) |
 
 ## API Fase 1 (QA-3)
@@ -198,27 +212,32 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 
 - **QA-2** — Fase 0: Setup repositorio y entorno local
 - **QA-3** — Fase 1: Core funcional productos y stock
-- **QA-4** — Fase 2: Seguridad Keycloak y permisos granulares  
-- **QA-5** — Fase 3: Dashboard, reportes y auditoría Envers  
-- **QA-6** — Fase 4: Testing full stack y evidencias  
-- **QA-7** — Fase 5: Observabilidad OpenTelemetry y Grafana stack  
-- **QA-8** — Fase 6: CI/CD GitHub Actions, Jenkins y SonarQube  
-- **QA-9** — Fase 7: Documentación final y defensa  
-- **QA-10** — Estructura monorepo según plan técnico  
+- **QA-4** — Fase 2: Seguridad Keycloak y permisos granulares
+- **QA-5** — Fase 3: Dashboard, reportes y auditoría Envers
+- **QA-6** — Fase 4: Testing full stack y evidencias
+- **QA-7** — Fase 5: Observabilidad OpenTelemetry y Grafana stack
+- **QA-8** — Fase 6: CI/CD GitHub Actions, Jenkins y SonarQube
+- **QA-9** — Fase 7: Documentación final y defensa
+- **QA-10** — Estructura monorepo según plan técnico
+- **QA-11** — README inicial: stack y arranque en dev
+- **QA-12** — `.env.example` alineado al plan
+- **QA-13** — Healthchecks en Docker Compose
+- **QA-14** — Perfil `test` y smoke health
 - **QA-17** — Migraciones Flyway V1–V7 del dominio inventario
 - **QA-18** — Módulo common: excepciones y respuesta error estándar
 - Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
 
 ## Documentación
 
-Ver carpeta [`docs/`](docs/):
+Índice en la carpeta [`docs/`](docs/):
 
 - [`docs/monorepo-structure.md`](docs/monorepo-structure.md) — Árbol y convenciones (QA-10)
 - [`docs/GUIA_IMPLEMENTACION.md`](docs/GUIA_IMPLEMENTACION.md) — Guía de implementación del equipo
 - [`docs/data-model.md`](docs/data-model.md) — Modelo de datos y Flyway V1–V7 (QA-17)
 - [`docs/architecture.md`](docs/architecture.md) — Arquitectura del sistema
 - [`docs/requirements.md`](docs/requirements.md) — Requisitos RF/RNF
-- [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue y variables
+- [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue, healthchecks y variables
+- [`docs/security-model.md`](docs/security-model.md) — Keycloak, JWT y permisos
 - [`docs/observability-guide.md`](docs/observability-guide.md) — Observabilidad Fase 5 (QA-7)
 - [`docs/common-error-response.md`](docs/common-error-response.md) — Formato JSON de errores (QA-18)
 - [`docs/testing-guide.md`](docs/testing-guide.md) — Pruebas Fase 4 (QA-6)

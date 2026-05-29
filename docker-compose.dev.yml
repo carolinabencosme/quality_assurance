@@ -1,5 +1,7 @@
-# Ambiente de desarrollo local - Plan v3.0 sección 10
+# Ambiente de desarrollo local - Plan v3.0 sección 10 (QA-13)
 # Servicios: postgres, keycloak, backend, frontend
+# Puertos host: postgres 5432 | keycloak 8081 | backend 8080 | frontend 3000
+# Red: inventory-net (bridge)
 # Uso: docker compose -f docker-compose.dev.yml up -d --build
 # Fase 5 (observabilidad): añadir -f docker-compose.observability.yml
 
@@ -46,7 +48,13 @@ services:
       - "8081:8080"
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
-    # Keycloak tarda en el primer arranque; backend solo espera que el contenedor exista (Fase 0)
+    healthcheck:
+      # Sin curl en la imagen; comprobación TCP al puerto HTTP (import realm ~2 min en primer arranque)
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8080'"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 180s
     networks:
       - inventory-net
 
@@ -73,7 +81,13 @@ services:
       postgres:
         condition: service_healthy
       keycloak:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 40s
     networks:
       - inventory-net
 
@@ -99,8 +113,16 @@ services:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
     depends_on:
-      - backend
-      - keycloak
+      backend:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - inventory-net
 

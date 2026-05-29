@@ -25,6 +25,7 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
 
+# /actuator/health debe permanecer publico (Docker healthcheck, Fase 2 Security)
 management:
   endpoints:
     web:
