@@ -167,6 +167,7 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | 7 | Documentación y defensa | Completado (`QA-9`, `QA-11`) |
 | — | Common: excepciones y error estándar | Completado (`QA-18`) |
 | — | CorrelationId, MDC y logging estructurado | En curso (`QA-19`) |
+| 1b | Entidades JPA Product, Category y repos | En curso (`QA-20`) |
 
 ## API Fase 1 (QA-3)
 
@@ -227,6 +228,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-17** — Migraciones Flyway V1–V7 del dominio inventario
 - **QA-18** — Módulo common: excepciones y respuesta error estándar
 - **QA-19** — CorrelationIdFilter, MDC y logging estructurado
+- **QA-20** — Entidades JPA Product, Category y repositorios
 - Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
 
 ## Documentación
@@ -236,6 +238,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - [`docs/monorepo-structure.md`](docs/monorepo-structure.md) — Árbol y convenciones (QA-10)
 - [`docs/GUIA_IMPLEMENTACION.md`](docs/GUIA_IMPLEMENTACION.md) — Guía de implementación del equipo
 - [`docs/data-model.md`](docs/data-model.md) — Modelo de datos y Flyway V1–V7 (QA-17)
+- [`docs/product-jpa-entities.md`](docs/product-jpa-entities.md) — Entidades JPA Product/Category (QA-20)
 - [`docs/architecture.md`](docs/architecture.md) — Arquitectura del sistema
 - [`docs/requirements.md`](docs/requirements.md) — Requisitos RF/RNF
 - [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue, healthchecks y variables
