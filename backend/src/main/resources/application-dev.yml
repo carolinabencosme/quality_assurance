@@ -26,3 +26,5 @@ logging:
     com.company.inventory: INFO
     org.hibernate.SQL: WARN
     root: INFO
+  pattern:
+    level: "%5p [${spring.application.name:},corr=%X{correlationId:-}]"
