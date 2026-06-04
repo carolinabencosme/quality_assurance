@@ -240,6 +240,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-25** — UI productos: tabla, filtros, crear/editar (Next.js)
 - **QA-26** — Cliente Axios: baseURL, interceptors Bearer, errores 401/403
 - **QA-28** — AppShell: layout con sidebar, topbar y usuario
+- **QA-29** — Keycloak: realm inventory-realm y export versionado
 - Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
 
 ## Documentación
@@ -251,6 +252,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - [`docs/data-model.md`](docs/data-model.md) — Modelo de datos y Flyway V1–V7 (QA-17)
 - [`docs/product-jpa-entities.md`](docs/product-jpa-entities.md) — Entidades JPA Product/Category (QA-20)
 - [`docs/appshell.md`](docs/appshell.md) — AppShell sidebar, topbar y navegación (QA-28)
+- [`docs/keycloak-realm.md`](docs/keycloak-realm.md) — Realm Keycloak versionado (QA-29)
 - [`docs/stock-get-api.md`](docs/stock-get-api.md) — GET stock/movimientos, paginación y DTOs (QA-24)
 - [`docs/stock-api-crud.md`](docs/stock-api-crud.md) — API stock, movimientos y reglas RF-STK (QA-23)
 - [`docs/product-api-crud.md`](docs/product-api-crud.md) — CRUD `/api/v1/products` (QA-21)

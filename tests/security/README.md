@@ -16,6 +16,6 @@ Valida:
 
 ## Evidencia manual recomendada
 
-- Captura de Keycloak (roles `inventory-backend`)
+- Captura de Keycloak (roles `inventory-api`)
 - Respuesta 403 en Swagger con usuario sin permiso
 - (Opcional) OWASP ZAP baseline contra `http://localhost:3000`
