@@ -2,13 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { logout } from '@/lib/auth';
-
-const links = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/products', label: 'Productos' },
-  { href: '/audit', label: 'Auditoría' },
-];
+import { APP_NAV, isNavActive } from '@/lib/navigation';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -24,23 +18,18 @@ export default function Sidebar() {
       </div>
 
       <nav className="sidebar-nav" aria-label="Principal">
-        {links.map(({ href, label }) => (
+        {APP_NAV.map((item) => (
           <Link
-            key={href}
-            href={href}
-            className={pathname === href || pathname.startsWith(`${href}/`) ? 'active' : undefined}
+            key={item.href}
+            href={item.href}
+            className={isNavActive(pathname, item) ? 'active' : undefined}
+            aria-current={isNavActive(pathname, item) ? 'page' : undefined}
           >
             <span aria-hidden>●</span>
-            <span>{label}</span>
+            <span>{item.label}</span>
           </Link>
         ))}
       </nav>
-
-      <div style={{ padding: '0 0.5rem' }}>
-        <button type="button" className="btn btn-outline" onClick={() => logout()}>
-          Salir
-        </button>
-      </div>
     </aside>
   );
 }

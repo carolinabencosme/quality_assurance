@@ -61,6 +61,10 @@ function getRefreshToken(): string | null {
   return localStorage.getItem(REFRESH_KEY);
 }
 
+export function getAccessToken(): string | null {
+  return readAccessFromCookie();
+}
+
 function readAccessFromCookie(): string | null {
   if (typeof document === 'undefined') return null;
   const match = document.cookie
