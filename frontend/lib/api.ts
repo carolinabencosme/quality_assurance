@@ -1,45 +1,22 @@
-import { getValidAccessToken, clearSession } from './auth';
+import { axiosClient, ApiError } from './axiosClient';
 
-const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '/api/v1').replace(/\/$/, '');
-
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    readonly status: number,
-  ) {
-    super(message);
-    this.name = 'ApiError';
-  }
-}
+export { ApiError };
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const token = await getValidAccessToken();
-  if (!token) {
-    clearSession();
-    if (typeof window !== 'undefined') {
-      window.location.href = '/?reason=session';
-    }
-    throw new ApiError('Sesión no válida', 401);
-  }
+  const { data } = await axiosClient.get<T>(path);
+  return data;
+}
 
-  const response = await fetch(`${apiBase}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
-  });
+export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+  const { data } = await axiosClient.post<T>(path, body);
+  return data;
+}
 
-  if (response.status === 401) {
-    clearSession();
-    if (typeof window !== 'undefined') {
-      window.location.href = '/?reason=session';
-    }
-    throw new ApiError('Sesión expirada', 401);
-  }
-  if (response.status === 403) {
-    throw new ApiError('Sin permiso para este recurso', 403);
-  }
-  if (!response.ok) {
-    throw new ApiError(`Error del servidor (${response.status})`, response.status);
-  }
+export async function apiPut<T>(path: string, body: unknown): Promise<T> {
+  const { data } = await axiosClient.put<T>(path, body);
+  return data;
+}
 
-  return response.json() as Promise<T>;
+export async function apiDelete(path: string): Promise<void> {
+  await axiosClient.delete(path);
 }

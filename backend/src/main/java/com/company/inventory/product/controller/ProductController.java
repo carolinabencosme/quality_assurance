@@ -63,6 +63,7 @@ public class ProductController {
     @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "')")
     @Operation(summary = "Crear producto", description = "Valida SKU unico, precio y stock inicial no negativos")
     @ApiResponse(responseCode = "201", description = "Producto creado")
+    @ApiResponse(responseCode = "409", description = "SKU duplicado")
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
         ProductResponse created = productService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -71,6 +72,7 @@ public class ProductController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "')")
     @Operation(summary = "Actualizar producto", description = "No modifica cantidad; usar movimientos de stock")
+    @ApiResponse(responseCode = "409", description = "SKU duplicado")
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductUpdateRequest request) {
         return productService.update(id, request);
     }

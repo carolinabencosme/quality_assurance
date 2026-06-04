@@ -22,6 +22,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <springdoc.version>2.8.6</springdoc.version>
         <sonar.maven.plugin.version>4.0.0.4121</sonar.maven.plugin.version>
+        <!-- 0.8.14+ required for JDK 25 (class file major version 69) -->
+        <jacoco.version>0.8.14</jacoco.version>
     </properties>
 
     <dependencies>
@@ -116,8 +118,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <!-- Mockito/Byte Buddy en JDK 23+; @{argLine} incluye agente JaCoCo -->
-                    <argLine>@{argLine} -Dnet.bytebuddy.experimental=true</argLine>
+                    <!-- @{argLine} incluye agente JaCoCo; mockito-core como agente en JDK 21+ -->
+                    <argLine>@{argLine}
+                        -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
+                        -Dnet.bytebuddy.experimental=true
+                        -XX:+EnableDynamicAgentLoading
+                    </argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -128,7 +134,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
                         <goals>
