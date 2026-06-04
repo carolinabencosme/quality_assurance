@@ -124,6 +124,9 @@
                         -Dnet.bytebuddy.experimental=true
                         -XX:+EnableDynamicAgentLoading
                     </argLine>
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>

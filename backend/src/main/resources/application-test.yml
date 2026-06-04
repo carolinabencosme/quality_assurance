@@ -1,13 +1,9 @@
-# Perfil test - mvn test / CI (Fase 0, sin BD)
+# Perfil test - mvn test / CI (sin Keycloak; JwtDecoder solo en tests que lo importan)
 spring:
   main:
     banner-mode: off
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost/realms/inventory-realm
-          jwk-set-uri: http://localhost/realms/inventory-realm/protocol/openid-connect/certs
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
 
 logging:
   level:
