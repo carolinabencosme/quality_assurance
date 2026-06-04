@@ -28,7 +28,7 @@ export default function Sidebar() {
           <Link
             key={href}
             href={href}
-            className={pathname === href ? 'active' : undefined}
+            className={pathname === href || pathname.startsWith(`${href}/`) ? 'active' : undefined}
           >
             <span aria-hidden>●</span>
             <span>{label}</span>

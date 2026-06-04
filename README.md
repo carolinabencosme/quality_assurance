@@ -171,6 +171,7 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | 1c | CRUD API productos DTOs mapper validaciones | En curso (`QA-21`) |
 | 1d | Stock: movimientos y reglas RF-STK | En curso (`QA-23`) |
 | 1e | GET stock y movimientos con paginación y DTOs | En curso (`QA-24`) |
+| 2b | UI productos: tabla, filtros y formularios | En curso (`QA-25`) |
 
 ## API Fase 1 (QA-3)
 
@@ -235,6 +236,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-24** — GET /api/v1/stock y /movements con paginación y DTOs
 - **QA-21** — CRUD API productos: DTOs, mapper y validaciones (RF-PROD)
 - **QA-23** — Módulo stock: movimientos IN/OUT/ADJUSTMENT y reglas RF-STK
+- **QA-25** — UI productos: tabla, filtros, crear/editar (Next.js)
 - Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
 
 ## Documentación
