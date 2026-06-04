@@ -168,6 +168,7 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | — | Common: excepciones y error estándar | Completado (`QA-18`) |
 | — | CorrelationId, MDC y logging estructurado | En curso (`QA-19`) |
 | 1b | Entidades JPA Product, Category y repos | En curso (`QA-20`) |
+| 2a | Cliente Axios (baseURL, interceptors, 401/403) | En curso (`QA-26`) |
 
 ## API Fase 1 (QA-3)
 
@@ -229,6 +230,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-18** — Módulo common: excepciones y respuesta error estándar
 - **QA-19** — CorrelationIdFilter, MDC y logging estructurado
 - **QA-20** — Entidades JPA Product, Category y repositorios
+- **QA-26** — Cliente Axios: baseURL, interceptors Bearer, errores 401/403
 - Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
 
 ## Documentación
