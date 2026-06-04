@@ -2,6 +2,12 @@
 spring:
   main:
     banner-mode: off
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost/realms/inventory-realm
+          jwk-set-uri: http://localhost/realms/inventory-realm/protocol/openid-connect/certs
 
 logging:
   level:
