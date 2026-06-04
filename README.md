@@ -229,6 +229,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-18** — Módulo common: excepciones y respuesta error estándar
 - **QA-19** — CorrelationIdFilter, MDC y logging estructurado
 - **QA-20** — Entidades JPA Product, Category y repositorios
+- **QA-28** — AppShell: layout con sidebar, topbar y usuario
 - Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
 
 ## Documentación
@@ -239,6 +240,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - [`docs/GUIA_IMPLEMENTACION.md`](docs/GUIA_IMPLEMENTACION.md) — Guía de implementación del equipo
 - [`docs/data-model.md`](docs/data-model.md) — Modelo de datos y Flyway V1–V7 (QA-17)
 - [`docs/product-jpa-entities.md`](docs/product-jpa-entities.md) — Entidades JPA Product/Category (QA-20)
+- [`docs/appshell.md`](docs/appshell.md) — AppShell sidebar, topbar y navegación (QA-28)
 - [`docs/architecture.md`](docs/architecture.md) — Arquitectura del sistema
 - [`docs/requirements.md`](docs/requirements.md) — Requisitos RF/RNF
 - [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue, healthchecks y variables

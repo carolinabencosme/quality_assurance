@@ -1,13 +1,10 @@
-import Sidebar from '@/components/Sidebar';
+import AppShell from '@/components/AppShell';
 import SessionGuard from '@/components/SessionGuard';
 
 export default function AppSectionLayout({ children }: { children: React.ReactNode }) {
   return (
     <SessionGuard>
-      <div className="app-layout">
-        <Sidebar />
-        <div className="main-area">{children}</div>
-      </div>
+      <AppShell>{children}</AppShell>
     </SessionGuard>
   );
 }

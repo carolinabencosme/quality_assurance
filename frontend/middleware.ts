@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PROTECTED = ['/dashboard', '/products', '/audit'];
+const PROTECTED = ['/dashboard', '/products', '/audit', '/reports', '/stock'];
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('inventory_access')?.value;
@@ -25,5 +25,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/dashboard', '/products', '/audit'],
+  matcher: ['/', '/dashboard/:path*', '/products/:path*', '/audit/:path*', '/reports/:path*', '/stock/:path*'],
 };
