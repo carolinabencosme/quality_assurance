@@ -52,3 +52,11 @@ export function hasPermission(permission: string): boolean {
 export function canManageProducts(): boolean {
   return hasPermission('product:manage');
 }
+
+export function canManageStock(): boolean {
+  return hasPermission('stock:manage');
+}
+
+export function canViewStock(): boolean {
+  return hasPermission('stock:view') || canManageStock();
+}
