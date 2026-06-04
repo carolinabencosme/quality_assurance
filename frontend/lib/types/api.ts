@@ -14,4 +14,5 @@ export type ApiErrorBody = {
   status?: number;
   error?: string;
   code?: string;
+  correlationId?: string;
 };
