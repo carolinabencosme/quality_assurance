@@ -38,7 +38,8 @@ public class StockController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('" + Permission.STOCK_VIEW + "')")
-    @Operation(summary = "Consultar existencias", description = "Lista productos activos con cantidad y alerta critica")
+    @Operation(summary = "Consultar existencias",
+            description = "Lista paginada de productos activos como StockLevelResponse (sin entidades JPA)")
     public Page<StockLevelResponse> findStockLevels(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Boolean critical,
@@ -48,7 +49,8 @@ public class StockController {
 
     @GetMapping("/movements")
     @PreAuthorize("hasAuthority('" + Permission.STOCK_VIEW + "')")
-    @Operation(summary = "Historial de movimientos", description = "Entradas, salidas y ajustes con paginacion")
+    @Operation(summary = "Historial de movimientos",
+            description = "Lista paginada de movimientos como StockMovementResponse (producto aplanado, sin entidades JPA)")
     public Page<StockMovementResponse> findMovements(
             @RequestParam(required = false) Long productId,
             @RequestParam(required = false) StockMovementType type,

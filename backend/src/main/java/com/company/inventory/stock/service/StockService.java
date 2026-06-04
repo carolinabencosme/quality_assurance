@@ -11,6 +11,7 @@ import com.company.inventory.stock.dto.StockMovementRequest;
 import com.company.inventory.stock.dto.StockMovementResponse;
 import com.company.inventory.stock.entity.StockMovement;
 import com.company.inventory.stock.entity.StockMovementType;
+import com.company.inventory.stock.mapper.StockLevelMapper;
 import com.company.inventory.stock.mapper.StockMovementMapper;
 import com.company.inventory.stock.repository.StockMovementRepository;
 import com.company.inventory.stock.repository.StockMovementSpecifications;
@@ -43,16 +44,7 @@ public class StockService {
         Specification<Product> spec = Specification.where(ProductSpecifications.withSearch(search))
                 .and(ProductSpecifications.criticalOnly(critical))
                 .and((root, query, cb) -> cb.equal(root.get("status"), ProductStatus.ACTIVE));
-        return productRepository.findAll(spec, pageable)
-                .map(p -> new StockLevelResponse(
-                        p.getId(),
-                        p.getSku(),
-                        p.getName(),
-                        p.getQuantity(),
-                        p.getMinStock(),
-                        p.isCritical(),
-                        p.getStatus()
-                ));
+        return productRepository.findAll(spec, pageable).map(StockLevelMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
