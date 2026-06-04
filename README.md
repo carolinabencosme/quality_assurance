@@ -170,6 +170,7 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | 1b | Entidades JPA Product, Category y repos | Completado (`QA-20`) |
 | 1c | CRUD API productos DTOs mapper validaciones | En curso (`QA-21`) |
 | 1d | Stock: movimientos y reglas RF-STK | En curso (`QA-23`) |
+| 1e | GET stock y movimientos con paginación y DTOs | En curso (`QA-24`) |
 
 ## API Fase 1 (QA-3)
 
@@ -231,6 +232,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-18** — Módulo common: excepciones y respuesta error estándar
 - **QA-19** — CorrelationIdFilter, MDC y logging estructurado
 - **QA-20** — Entidades JPA Product, Category y repositorios
+- **QA-24** — GET /api/v1/stock y /movements con paginación y DTOs
 - **QA-21** — CRUD API productos: DTOs, mapper y validaciones (RF-PROD)
 - **QA-23** — Módulo stock: movimientos IN/OUT/ADJUSTMENT y reglas RF-STK
 - Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
@@ -243,6 +245,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - [`docs/GUIA_IMPLEMENTACION.md`](docs/GUIA_IMPLEMENTACION.md) — Guía de implementación del equipo
 - [`docs/data-model.md`](docs/data-model.md) — Modelo de datos y Flyway V1–V7 (QA-17)
 - [`docs/product-jpa-entities.md`](docs/product-jpa-entities.md) — Entidades JPA Product/Category (QA-20)
+- [`docs/stock-get-api.md`](docs/stock-get-api.md) — GET stock/movimientos, paginación y DTOs (QA-24)
 - [`docs/stock-api-crud.md`](docs/stock-api-crud.md) — API stock, movimientos y reglas RF-STK (QA-23)
 - [`docs/product-api-crud.md`](docs/product-api-crud.md) — CRUD `/api/v1/products` (QA-21)
 - [`docs/architecture.md`](docs/architecture.md) — Arquitectura del sistema
