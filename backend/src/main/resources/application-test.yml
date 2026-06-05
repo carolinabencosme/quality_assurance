@@ -1,7 +1,9 @@
-# Perfil test - mvn test / CI (Fase 0, sin BD)
+# Perfil test - mvn test / CI (sin Keycloak; JwtDecoder solo en tests que lo importan)
 spring:
   main:
     banner-mode: off
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
 
 logging:
   level:

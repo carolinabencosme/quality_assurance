@@ -240,6 +240,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - **QA-25** — UI productos: tabla, filtros, crear/editar (Next.js)
 - **QA-26** — Cliente Axios: baseURL, interceptors Bearer, errores 401/403
 - **QA-28** — AppShell: layout con sidebar, topbar y usuario
+- **QA-30** — Spring Security OAuth2 Resource Server (JWT)
 - Etiquetas: `inventory-qas_fase-0_setup` … `inventory-qas_fase-7_docs`
 
 ## Documentación
@@ -258,6 +259,7 @@ Frontend: login en http://localhost:3000 con las mismas credenciales.
 - [`docs/requirements.md`](docs/requirements.md) — Requisitos RF/RNF
 - [`docs/deployment-guide.md`](docs/deployment-guide.md) — Despliegue, healthchecks y variables
 - [`docs/security-model.md`](docs/security-model.md) — Keycloak, JWT y permisos
+- [`docs/oauth2-resource-server.md`](docs/oauth2-resource-server.md) — Resource Server JWT (QA-30)
 - [`docs/observability-guide.md`](docs/observability-guide.md) — Observabilidad Fase 5 (QA-7)
 - [`docs/common-error-response.md`](docs/common-error-response.md) — Formato JSON de errores (QA-18)
 - [`docs/observability-correlation-logging.md`](docs/observability-correlation-logging.md) — MDC, correlationId y OTEL (QA-19)
