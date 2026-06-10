@@ -1,0 +1,11 @@
+{
+  "name": "inventory-qas-api-tests",
+  "private": true,
+  "description": "Pruebas de API (Newman) — escenarios HTTP, errores y permisos",
+  "scripts": {
+    "test": "newman run inventory-qas.postman_collection.json -r cli"
+  },
+  "devDependencies": {
+    "newman": "^6.2.1"
+  }
+}

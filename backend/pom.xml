@@ -24,6 +24,8 @@
         <sonar.maven.plugin.version>4.0.0.4121</sonar.maven.plugin.version>
         <!-- 0.8.14+ required for JDK 25 (class file major version 69) -->
         <jacoco.version>0.8.14</jacoco.version>
+        <!-- Requisito académico: cobertura mínima de líneas (JaCoCo COVEREDRATIO) -->
+        <jacoco.line.minimum.covered.ratio>0.60</jacoco.line.minimum.covered.ratio>
     </properties>
 
     <dependencies>
@@ -146,6 +148,27 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>${jacoco.line.minimum.covered.ratio}</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

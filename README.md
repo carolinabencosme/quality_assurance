@@ -38,7 +38,7 @@ quality_assurance/
 ├── docker/                         # Init PostgreSQL, Nginx
 ├── keycloak/                       # realm-export.json
 ├── observability/                  # Prometheus, Grafana, Loki, Tempo, Alloy
-├── tests/                          # E2E, k6, security, observability smoke
+├── tests/                          # E2E (Playwright), API (Newman), k6, security smoke
 ├── docs/                           # Documentación
 ├── scripts/                        # Deploy, smoke, verify estructura
 ├── .github/workflows/              # CI + deploy staging
@@ -103,6 +103,17 @@ docker compose -f docker-compose.dev.yml -f docker-compose.test.yml up -d --buil
 cd tests/e2e; npm install; npm test
 ```
 
+**Pruebas de API (Newman)** — con backend + Keycloak en marcha (≥10 escenarios: auth, validación, permisos, conflictos, CRUD):
+
+```powershell
+cd tests/api
+npm install
+$sku = "NM-$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())"
+npm test -- --env-var "baseUrl=http://localhost:8080" --env-var "keycloakUrl=http://localhost:8081" --env-var "sku=$sku"
+```
+
+Detalle y reporter HTML opcional: [`tests/api/README.md`](tests/api/README.md). En GitHub Actions: workflow **API — Newman** (`.github/workflows/api-postman.yml`).
+
 Detener:
 
 ```powershell
@@ -122,7 +133,8 @@ docker compose -f docker-compose.dev.yml down
 
 ```powershell
 cd backend
-.\mvnw.cmd test          # pruebas (Docker Desktop encendido para Testcontainers)
+.\mvnw.cmd verify       # pruebas + informe JaCoCo + umbral mínimo 60 % líneas (jacoco:check)
+.\mvnw.cmd test         # solo tests (Docker Desktop encendido para Testcontainers)
 .\mvnw.cmd spring-boot:run
 ```
 

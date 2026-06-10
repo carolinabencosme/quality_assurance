@@ -1,0 +1,84 @@
+name: API — Newman (stack real)
+
+# Ejecución más lenta (Keycloak + import realm). Útil para evidencias o validación periódica.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'tests/api/**'
+      - 'keycloak/**'
+      - 'docker-compose.dev.yml'
+      - 'backend/**'
+
+concurrency:
+  group: api-newman-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Postgres, Keycloak, backend
+        run: docker compose -f docker-compose.dev.yml up -d --build postgres keycloak backend
+
+      - name: Wait for Keycloak realm
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 120); do
+            if curl -fsS "http://localhost:8081/realms/inventory-realm/.well-known/openid-configuration" >/dev/null; then
+              echo "Keycloak OK"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Timeout waiting for Keycloak"
+          exit 1
+
+      - name: Wait for backend health
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 90); do
+            if curl -fsS "http://localhost:8080/actuator/health" | jq -e '.status == "UP"' >/dev/null 2>&1; then
+              echo "Backend UP"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Timeout waiting for backend"
+          docker logs inventory-backend-dev --tail 200 || true
+          exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/api/package-lock.json
+
+      - name: Install Newman deps
+        working-directory: tests/api
+        run: npm ci
+
+      - name: Run Postman collection (Newman)
+        working-directory: tests/api
+        shell: bash
+        run: |
+          set -euo pipefail
+          SKU="NM-${{ github.run_id }}-${{ github.run_attempt }}"
+          npm test -- --env-var "baseUrl=http://localhost:8080" --env-var "keycloakUrl=http://localhost:8081" --env-var "sku=${SKU}"
+
+      - name: Docker compose logs (on failure)
+        if: failure()
+        run: docker compose -f docker-compose.dev.yml logs --tail 120
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.dev.yml down -v

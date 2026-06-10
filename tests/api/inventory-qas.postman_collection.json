@@ -1,0 +1,342 @@
+{
+  "info": {
+    "name": "Inventory QAS — API scenarios",
+    "description": "Escenarios HTTP: salud, auth, validación, permisos, conflictos y CRUD producto (≥10).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "keycloakUrl", "value": "http://localhost:8081" },
+    { "key": "sku", "value": "" },
+    { "key": "token", "value": "" },
+    { "key": "tokenViewer", "value": "" },
+    { "key": "productId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 Token (warehouse)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const d = pm.response.json();",
+              "pm.collectionVariables.set('token', d.access_token);",
+              "pm.test('HTTP 200 token', () => pm.response.to.have.status(200));",
+              "pm.test('access_token present', () => pm.expect(d.access_token).to.be.a('string').and.not.empty);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+        "body": {
+          "mode": "raw",
+          "raw": "grant_type=password&client_id=inventory-frontend&username=warehouse&password=warehouse123"
+        },
+        "url": "{{keycloakUrl}}/realms/inventory-realm/protocol/openid-connect/token"
+      }
+    },
+    {
+      "name": "02 Token (viewer)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const d = pm.response.json();",
+              "pm.collectionVariables.set('tokenViewer', d.access_token);",
+              "pm.test('HTTP 200 viewer token', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+        "body": {
+          "mode": "raw",
+          "raw": "grant_type=password&client_id=inventory-frontend&username=viewer&password=viewer123"
+        },
+        "url": "{{keycloakUrl}}/realms/inventory-realm/protocol/openid-connect/token"
+      }
+    },
+    {
+      "name": "03 Actuator health (público)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.test('HTTP 200 health', () => pm.response.to.have.status(200));"],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/actuator/health"
+      }
+    },
+    {
+      "name": "04 Listar productos sin JWT → 401",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.test('HTTP 401 sin auth', () => pm.response.to.have.status(401));"],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/products?page=0&size=1"
+      }
+    },
+    {
+      "name": "05 Categorías con JWT → 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 200 categories', () => pm.response.to.have.status(200));",
+              "pm.test('JSON array', () => pm.expect(pm.response.json()).to.be.an('array'));",
+              "pm.test('Al menos una categoría', () => pm.expect(pm.response.json().length).to.be.above(0));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/v1/categories"
+      }
+    },
+    {
+      "name": "06 Listar productos con JWT → 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 200 products page', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('Spring page content', () => pm.expect(j).to.have.property('content'));",
+              "pm.test('totalElements', () => pm.expect(j.totalElements).to.be.a('number'));",
+              "pm.test('totalElements >= 1', () => pm.expect(j.totalElements).to.be.at.least(1));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/v1/products?page=0&size=5&sort=name,asc"
+      }
+    },
+    {
+      "name": "07 Detalle producto id=1 → 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 200 product detail', () => pm.response.to.have.status(200));",
+              "pm.test('tiene sku', () => pm.expect(pm.response.json().sku).to.exist);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/v1/products/1"
+      }
+    },
+    {
+      "name": "08 Crear producto inválido → 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 400 validación', () => pm.response.to.have.status(400));",
+              "const j = pm.response.json();",
+              "pm.test('cuerpo error estándar', () => pm.expect(j).to.include.keys('status', 'message', 'code'));",
+              "pm.test('code VALIDATION_ERROR', () => pm.expect(j.code).to.eql('VALIDATION_ERROR'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{}" },
+        "url": "{{baseUrl}}/api/v1/products"
+      }
+    },
+    {
+      "name": "09 Crear producto válido → 201",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 201 created', () => pm.response.to.have.status(201));",
+              "const j = pm.response.json();",
+              "pm.collectionVariables.set('productId', String(j.id));",
+              "pm.test('id numérico', () => pm.expect(j.id).to.be.a('number'));",
+              "pm.test('sku coincide', () => pm.expect(String(j.sku).toUpperCase()).to.eql(String(pm.collectionVariables.get('sku')).toUpperCase()));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Newman API product\",\n  \"sku\": \"{{sku}}\",\n  \"description\": \"created by Newman\",\n  \"categoryId\": 1,\n  \"price\": 10.0,\n  \"quantity\": 1,\n  \"minStock\": 0,\n  \"status\": \"ACTIVE\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/products"
+      }
+    },
+    {
+      "name": "10 Crear mismo SKU → 409",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 409 conflicto', () => pm.response.to.have.status(409));",
+              "const j = pm.response.json();",
+              "pm.test('code CONFLICT', () => pm.expect(j.code).to.eql('CONFLICT'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Newman API product\",\n  \"sku\": \"{{sku}}\",\n  \"description\": \"created by Newman\",\n  \"categoryId\": 1,\n  \"price\": 10.0,\n  \"quantity\": 1,\n  \"minStock\": 0,\n  \"status\": \"ACTIVE\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/products"
+      }
+    },
+    {
+      "name": "11 Actualizar producto → 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 200 update', () => pm.response.to.have.status(200));",
+              "pm.test('nombre actualizado', () => pm.expect(pm.response.json().name).to.include('Updated'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Newman API product Updated\",\n  \"sku\": \"{{sku}}\",\n  \"description\": \"updated\",\n  \"categoryId\": 1,\n  \"price\": 11.5,\n  \"minStock\": 1,\n  \"status\": \"ACTIVE\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/products/{{productId}}"
+      }
+    },
+    {
+      "name": "12 Inactivar producto (DELETE) → 204",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.test('HTTP 204 delete', () => pm.response.to.have.status(204));"],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/v1/products/{{productId}}"
+      }
+    },
+    {
+      "name": "13 Viewer crea producto → 403",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 403 forbidden', () => pm.response.to.have.status(403));",
+              "try { const j = pm.response.json(); pm.test('JSON error body', () => pm.expect(j).to.have.property('status')); } catch (e) { /* algunos proxies devuelven cuerpo vacío */ }",
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{tokenViewer}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Should fail\",\n  \"sku\": \"NO-PERM-{{sku}}\",\n  \"categoryId\": 1,\n  \"price\": 1.0,\n  \"quantity\": 0,\n  \"minStock\": 0,\n  \"status\": \"ACTIVE\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/products"
+      }
+    },
+    {
+      "name": "14 Demo 404 (perfil dev) → 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 404 not found', () => pm.response.to.have.status(404));",
+              "const j = pm.response.json();",
+              "pm.test('code NOT_FOUND', () => pm.expect(j.code).to.eql('NOT_FOUND'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/v1/demo/errors/not-found"
+      }
+    }
+  ]
+}
