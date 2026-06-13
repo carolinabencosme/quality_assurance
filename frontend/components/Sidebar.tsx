@@ -13,7 +13,7 @@ export default function Sidebar() {
         <div className="brand-mark">IQ</div>
         <div>
           <strong>Inventory QAS</strong>
-          <span>PUCMM · Fase 3</span>
+          <span>PUCMM - Fase 3</span>
         </div>
       </div>
 
@@ -25,7 +25,6 @@ export default function Sidebar() {
             className={isNavActive(pathname, item) ? 'active' : undefined}
             aria-current={isNavActive(pathname, item) ? 'page' : undefined}
           >
-            <span aria-hidden>●</span>
             <span>{item.label}</span>
           </Link>
         ))}

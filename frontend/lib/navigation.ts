@@ -1,7 +1,7 @@
 export type NavItem = {
   href: string;
   label: string;
-  /** Prefijo de ruta para marcar activo (por defecto usa href). */
+  /** Prefijo de ruta para marcar activo; por defecto usa href. */
   activePrefix?: string;
 };
 
@@ -10,7 +10,7 @@ export const APP_NAV: NavItem[] = [
   { href: '/products', label: 'Productos' },
   { href: '/stock/movements', label: 'Stock', activePrefix: '/stock' },
   { href: '/reports', label: 'Reportes' },
-  { href: '/audit', label: 'Auditoría' },
+  { href: '/audit', label: 'Auditor\u00eda' },
 ];
 
 export function isNavActive(pathname: string, item: NavItem): boolean {

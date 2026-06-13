@@ -17,14 +17,14 @@ export default function ProductFilters({ filters, categories, onChange, onReset 
         <input
           id="filter-search"
           type="search"
-          placeholder="Nombre o SKU…"
+          placeholder="Nombre o SKU..."
           value={filters.search}
           onChange={(e) => onChange({ search: e.target.value, page: 0 })}
         />
       </div>
 
       <div className="form-field filter-field">
-        <label htmlFor="filter-category">Categoría</label>
+        <label htmlFor="filter-category">Categor&iacute;a</label>
         <select
           id="filter-category"
           value={filters.categoryId}
@@ -53,14 +53,14 @@ export default function ProductFilters({ filters, categories, onChange, onReset 
       </div>
 
       <div className="form-field filter-field">
-        <label htmlFor="filter-critical">Stock crítico</label>
+        <label htmlFor="filter-critical">Stock cr&iacute;tico</label>
         <select
           id="filter-critical"
           value={filters.critical}
           onChange={(e) => onChange({ critical: e.target.value, page: 0 })}
         >
           <option value="">Todos</option>
-          <option value="true">Solo críticos</option>
+          <option value="true">Solo cr&iacute;ticos</option>
           <option value="false">Solo OK</option>
         </select>
       </div>

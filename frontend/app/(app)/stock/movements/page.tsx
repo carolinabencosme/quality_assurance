@@ -64,7 +64,7 @@ export default function StockMovementsPage() {
       const page = await apiGet<Page<StockLevel>>('/stock?size=100&sort=name,asc');
       setProducts(page.content);
     } catch {
-      /* filtros/formulario opcionales si falla */
+      /* Filtros y formulario siguen disponibles si falla la lista auxiliar. */
     }
   }, []);
 
@@ -119,8 +119,7 @@ export default function StockMovementsPage() {
         render: (m: StockMovement) => (
           <>
             <strong>{m.productName}</strong>
-            <br />
-            <span className="text-muted">{m.productSku}</span>
+            <div className="row-meta">{m.productSku}</div>
           </>
         ),
       },
@@ -143,13 +142,13 @@ export default function StockMovementsPage() {
       },
       {
         key: 'qty',
-        header: 'Ant. → Nuevo',
-        render: (m: StockMovement) => `${m.previousQty} → ${m.newQty}`,
+        header: 'Ant. -> Nuevo',
+        render: (m: StockMovement) => `${m.previousQty} -> ${m.newQty}`,
       },
       {
         key: 'obs',
         header: 'Observaciones',
-        render: (m: StockMovement) => m.observations ?? '—',
+        render: (m: StockMovement) => m.observations ?? '-',
       },
     ],
     [],
@@ -158,13 +157,13 @@ export default function StockMovementsPage() {
   return (
     <>
       <h1 className="page-title">Movimientos de stock</h1>
-      <p className="page-sub">Historial y registro — RF-STK (IN / OUT / ADJUSTMENT)</p>
+      <p className="page-sub">Historial y registro - RF-STK (IN / OUT / ADJUSTMENT)</p>
 
       {canManage && (
         <section className="panel">
           <div className="panel-head">
             <h2>Registrar movimiento</h2>
-            <span>Requiere permiso stock:manage</span>
+            <span>Permiso stock:manage</span>
           </div>
           <StockMovementForm
             products={products}
@@ -180,7 +179,8 @@ export default function StockMovementsPage() {
           <h2>Historial</h2>
           {!listLoading && (
             <span>
-              {totalElements} movimientos · pág. {filters.page + 1}/{Math.max(totalPages, 1)}
+              {totalElements.toLocaleString('es-DO')} movimientos - p&aacute;g. {filters.page + 1}/
+              {Math.max(totalPages, 1)}
             </span>
           )}
         </div>

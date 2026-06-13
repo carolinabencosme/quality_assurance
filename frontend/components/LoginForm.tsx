@@ -19,13 +19,13 @@ export default function LoginForm({ sessionExpired }: Props) {
     setError(null);
     try {
       await login(username, password);
-      // Recarga completa para que middleware y cookie queden sincronizados
+      // Recarga completa para que middleware y cookie queden sincronizados.
       window.location.href = '/dashboard';
     } catch (err) {
       setError(
         err instanceof AuthError
           ? err.message
-          : 'No se pudo autenticar. Revisa usuario y contraseña.',
+          : 'No se pudo autenticar. Revisa usuario y contrase\u00f1a.',
       );
     } finally {
       setLoading(false);
@@ -36,11 +36,11 @@ export default function LoginForm({ sessionExpired }: Props) {
     <div className="login-card">
       <div className="brand-mark">IQ</div>
       <h2>Acceso al sistema</h2>
-      <p className="sub">Realm inventory-realm · Keycloak</p>
+      <p className="sub">Realm inventory-realm - Keycloak</p>
 
       {sessionExpired && (
         <div className="alert alert-info" role="alert">
-          Tu sesión expiró. Vuelve a iniciar sesión para continuar.
+          Tu sesi&oacute;n expir&oacute;. Vuelve a iniciar sesi&oacute;n para continuar.
         </div>
       )}
 
@@ -56,7 +56,7 @@ export default function LoginForm({ sessionExpired }: Props) {
           />
         </div>
         <div className="form-field">
-          <label htmlFor="password">Contraseña</label>
+          <label htmlFor="password">Contrase&ntilde;a</label>
           <input
             id="password"
             type="password"
@@ -67,7 +67,7 @@ export default function LoginForm({ sessionExpired }: Props) {
           />
         </div>
         <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Autenticando…' : 'Entrar'}
+          {loading ? 'Autenticando...' : 'Entrar'}
         </button>
       </form>
 
@@ -82,7 +82,7 @@ export default function LoginForm({ sessionExpired }: Props) {
         <br />
         Dashboard: <code>viewer / viewer123</code>
         <br />
-        Auditoría: <code>admin / admin123</code>
+        Auditor&iacute;a: <code>admin / admin123</code>
       </p>
     </div>
   );

@@ -26,7 +26,7 @@ export default function Topbar() {
         </div>
         <div className="topbar-user-meta">
           <strong>{displayName}</strong>
-          <span>{user?.email ?? user?.username ?? '—'}</span>
+          <span>{user?.email ?? user?.username ?? 'Sin correo'}</span>
         </div>
         <button type="button" className="btn btn-outline btn-sm" onClick={() => logout()}>
           Salir
