@@ -70,10 +70,10 @@ export default function StockMovementForm({
             onChange={(e) => update({ productId: e.target.value })}
             required
           >
-            <option value="">Seleccionar…</option>
+            <option value="">Seleccionar...</option>
             {products.map((p) => (
               <option key={p.productId} value={String(p.productId)}>
-                {p.sku} — {p.name} (stock: {p.quantity})
+                {p.sku} - {p.name} (stock: {p.quantity})
               </option>
             ))}
           </select>
@@ -108,9 +108,7 @@ export default function StockMovementForm({
             onChange={(e) => update({ newQuantity: e.target.value })}
             required
           />
-          {selectedProduct && (
-            <span className="field-hint">Actual: {selectedProduct.quantity}</span>
-          )}
+          {selectedProduct && <span className="field-hint">Actual: {selectedProduct.quantity}</span>}
         </div>
       ) : (
         <div className="form-field">
@@ -138,13 +136,13 @@ export default function StockMovementForm({
           maxLength={500}
           value={values.observations}
           onChange={(e) => update({ observations: e.target.value })}
-          placeholder="Motivo del movimiento…"
+          placeholder="Motivo del movimiento..."
         />
       </div>
 
       <div className="form-actions">
         <button type="submit" className="btn btn-primary btn-inline" disabled={submitting}>
-          {submitting ? 'Registrando…' : 'Registrar movimiento'}
+          {submitting ? 'Registrando...' : 'Registrar movimiento'}
         </button>
       </div>
     </form>

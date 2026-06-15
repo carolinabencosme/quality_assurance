@@ -91,7 +91,7 @@ export default function ProductForm({
       </div>
 
       <div className="form-field">
-        <label htmlFor="description">Descripción</label>
+        <label htmlFor="description">Descripci&oacute;n</label>
         <textarea
           id="description"
           rows={3}
@@ -103,14 +103,14 @@ export default function ProductForm({
 
       <div className="grid-2">
         <div className="form-field">
-          <label htmlFor="categoryId">Categoría *</label>
+          <label htmlFor="categoryId">Categor&iacute;a *</label>
           <select
             id="categoryId"
             value={values.categoryId}
             onChange={(e) => update({ categoryId: e.target.value })}
             required
           >
-            <option value="">Seleccionar…</option>
+            <option value="">Seleccionar...</option>
             {categories.map((c) => (
               <option key={c.id} value={String(c.id)}>
                 {c.name}
@@ -150,7 +150,7 @@ export default function ProductForm({
         )}
 
         <div className="form-field">
-          <label htmlFor="minStock">Stock mínimo *</label>
+          <label htmlFor="minStock">Stock m&iacute;nimo *</label>
           <input
             id="minStock"
             type="number"
@@ -178,7 +178,8 @@ export default function ProductForm({
 
       {mode === 'edit' && (
         <p className="form-hint">
-          La cantidad en inventario se modifica desde movimientos de stock, no desde este formulario.
+          La cantidad en inventario se modifica desde movimientos de stock, no desde este
+          formulario.
         </p>
       )}
 
@@ -187,7 +188,7 @@ export default function ProductForm({
           Cancelar
         </button>
         <button type="submit" className="btn btn-primary btn-inline" disabled={submitting}>
-          {submitting ? 'Guardando…' : mode === 'create' ? 'Crear producto' : 'Guardar cambios'}
+          {submitting ? 'Guardando...' : mode === 'create' ? 'Crear producto' : 'Guardar cambios'}
         </button>
       </div>
     </form>

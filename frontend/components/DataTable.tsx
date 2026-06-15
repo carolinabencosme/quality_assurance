@@ -29,7 +29,7 @@ export default function DataTable<T>({
 }: DataTableProps<T>) {
   if (loading) {
     return (
-      <div style={{ overflowX: 'auto' }}>
+      <div className="data-table-wrap">
         <table className="data-table">
           <thead>
             <tr>
@@ -64,7 +64,7 @@ export default function DataTable<T>({
 
   return (
     <>
-      <div style={{ overflowX: 'auto' }}>
+      <div className="data-table-wrap">
         <table className="data-table">
           <thead>
             <tr>

@@ -45,7 +45,7 @@ export default function ProductsPage() {
       const data = await apiGet<Category[]>('/categories');
       setCategories(data);
     } catch {
-      /* filtros funcionan sin categorías */
+      /* Los filtros funcionan sin categorias. */
     }
   }, []);
 
@@ -81,25 +81,34 @@ export default function ProductsPage() {
         render: (p: Product) => <strong>{p.name}</strong>,
       },
       { key: 'sku', header: 'SKU', render: (p: Product) => p.sku },
-      { key: 'category', header: 'Categoría', render: (p: Product) => p.categoryName },
+      { key: 'category', header: 'Categor\u00eda', render: (p: Product) => p.categoryName },
       { key: 'quantity', header: 'Stock', render: (p: Product) => p.quantity },
-      { key: 'minStock', header: 'Mín.', render: (p: Product) => p.minStock },
+      { key: 'minStock', header: 'Min.', render: (p: Product) => p.minStock },
       {
         key: 'stockStatus',
         header: 'Alerta',
         render: (p: Product) =>
-          p.critical ? <span className="badge">Crítico</span> : <span className="badge badge-ok">OK</span>,
+          p.critical ? (
+            <span className="badge">Cr&iacute;tico</span>
+          ) : (
+            <span className="badge badge-ok">OK</span>
+          ),
       },
       {
         key: 'status',
         header: 'Estado',
-        render: (p: Product) => (p.status === 'ACTIVE' ? 'Activo' : 'Inactivo'),
+        render: (p: Product) =>
+          p.status === 'ACTIVE' ? (
+            <span className="badge badge-ok">Activo</span>
+          ) : (
+            <span className="badge badge-adj">Inactivo</span>
+          ),
       },
       ...(canManage
         ? [
             {
               key: 'actions',
-              header: '',
+              header: 'Accion',
               render: (p: Product) => (
                 <Link href={`/products/${p.id}/edit`} className="link-action">
                   Editar
@@ -117,7 +126,9 @@ export default function ProductsPage() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Productos</h1>
-          <p className="page-sub">Catálogo — {totalElements} registros</p>
+          <p className="page-sub">
+            Cat&aacute;logo - {totalElements.toLocaleString('es-DO')} registros
+          </p>
         </div>
         {canManage && (
           <Link href="/products/new" className="btn btn-primary btn-inline">
@@ -131,7 +142,11 @@ export default function ProductsPage() {
       <section className="panel">
         <div className="panel-head">
           <h2>Inventario</h2>
-          {!loading && <span>Página {filters.page + 1} de {Math.max(totalPages, 1)}</span>}
+          {!loading && (
+            <span>
+              P&aacute;gina {filters.page + 1} de {Math.max(totalPages, 1)}
+            </span>
+          )}
         </div>
 
         <ProductFilters

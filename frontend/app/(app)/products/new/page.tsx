@@ -47,7 +47,7 @@ export default function NewProductPage() {
   if (loading) {
     return (
       <div className="loading">
-        <span className="spinner" /> Cargando formulario…
+        <span className="spinner" /> Cargando formulario...
       </div>
     );
   }
@@ -59,7 +59,7 @@ export default function NewProductPage() {
           <h1 className="page-title">Nuevo producto</h1>
           <p className="page-sub">
             <Link href="/products" className="link-action">
-              ← Volver al listado
+              &larr; Volver al listado
             </Link>
           </p>
         </div>

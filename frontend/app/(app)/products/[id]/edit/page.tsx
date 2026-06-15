@@ -30,7 +30,7 @@ export default function EditProductPage() {
       return;
     }
     if (Number.isNaN(productId)) {
-      setError('ID de producto inválido');
+      setError('ID de producto invalido');
       setLoading(false);
       return;
     }
@@ -62,7 +62,7 @@ export default function EditProductPage() {
   };
 
   const handleDeactivate = async () => {
-    if (!confirm('¿Inactivar este producto?')) return;
+    if (!confirm('\u00bfInactivar este producto?')) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -78,7 +78,7 @@ export default function EditProductPage() {
   if (loading) {
     return (
       <div className="loading">
-        <span className="spinner" /> Cargando producto…
+        <span className="spinner" /> Cargando producto...
       </div>
     );
   }
@@ -89,7 +89,7 @@ export default function EditProductPage() {
         <h1 className="page-title">Editar producto</h1>
         <div className="alert alert-error">{error}</div>
         <Link href="/products" className="link-action">
-          ← Volver al listado
+          &larr; Volver al listado
         </Link>
       </>
     );
@@ -103,10 +103,9 @@ export default function EditProductPage() {
         <div>
           <h1 className="page-title">Editar producto</h1>
           <p className="page-sub">
-            {product.sku} · Stock actual: {product.quantity}
-            {' · '}
+            {product.sku} - Stock actual: {product.quantity} -{' '}
             <Link href="/products" className="link-action">
-              ← Volver al listado
+              &larr; Volver al listado
             </Link>
           </p>
         </div>

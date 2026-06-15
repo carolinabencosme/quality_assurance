@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import DataTable from '@/components/DataTable';
 import { apiGet } from '@/lib/api';
 
 type AuditEvent = {
@@ -34,53 +35,52 @@ export default function AuditPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const columns = useMemo(
+    () => [
+      { key: 'revisionId', header: 'Rev', render: (e: AuditEvent) => `#${e.revisionId}` },
+      {
+        key: 'entity',
+        header: 'Entidad',
+        render: (e: AuditEvent) => `${e.entityName} #${e.entityId}`,
+      },
+      {
+        key: 'action',
+        header: 'Accion',
+        render: (e: AuditEvent) => <span className="badge badge-adj">{e.action}</span>,
+      },
+      { key: 'modifiedBy', header: 'Usuario', render: (e: AuditEvent) => e.modifiedBy || '-' },
+      {
+        key: 'modifiedAt',
+        header: 'Fecha',
+        render: (e: AuditEvent) => new Date(e.modifiedAt).toLocaleString('es-DO'),
+      },
+      { key: 'summary', header: 'Resumen', render: (e: AuditEvent) => e.summary },
+    ],
+    [],
+  );
+
   return (
     <>
-      <h1 className="page-title">Auditoría</h1>
-      <p className="page-sub">Envers — {total} eventos (permiso audit:view)</p>
+      <h1 className="page-title">Auditor&iacute;a</h1>
+      <p className="page-sub">
+        Envers - {total.toLocaleString('es-DO')} eventos (permiso audit:view)
+      </p>
 
-      {error && <div className="alert alert-info">{error}</div>}
-      {loading && (
-        <div className="loading">
-          <span className="spinner" /> Cargando historial…
+      {error && <div className="alert alert-error">{error}</div>}
+
+      <section className="panel">
+        <div className="panel-head">
+          <h2>Revisiones</h2>
         </div>
-      )}
-
-      {!loading && (
-        <section className="panel">
-          <div className="panel-head">
-            <h2>Revisiones</h2>
-          </div>
-          <div style={{ overflowX: 'auto' }}>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Rev</th>
-                  <th>Entidad</th>
-                  <th>Acción</th>
-                  <th>Usuario</th>
-                  <th>Fecha</th>
-                  <th>Resumen</th>
-                </tr>
-              </thead>
-              <tbody>
-                {events.map((e) => (
-                  <tr key={`${e.revisionId}-${e.entityId}`}>
-                    <td>#{e.revisionId}</td>
-                    <td>
-                      {e.entityName} #{e.entityId}
-                    </td>
-                    <td>{e.action}</td>
-                    <td>{e.modifiedBy || '—'}</td>
-                    <td>{new Date(e.modifiedAt).toLocaleString('es')}</td>
-                    <td>{e.summary}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
+        <DataTable
+          columns={columns}
+          rows={events}
+          rowKey={(e) => `${e.revisionId}-${e.entityId}`}
+          loading={loading}
+          skeletonRows={8}
+          emptyMessage="No hay eventos de auditoria registrados."
+        />
+      </section>
     </>
   );
 }

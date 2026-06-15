@@ -41,7 +41,7 @@ export default function ReportsPage() {
       {error && <div className="alert alert-error">{error}</div>}
       {loading && (
         <div className="loading">
-          <span className="spinner" /> Cargando reportes…
+          <span className="spinner" /> Cargando reportes...
         </div>
       )}
 
@@ -49,20 +49,19 @@ export default function ReportsPage() {
         <div className="grid-2">
           <section className="panel">
             <div className="panel-head">
-              <h2>Productos críticos</h2>
+              <h2>Productos cr&iacute;ticos</h2>
               <span>{data.criticalProducts.length}</span>
             </div>
             {data.criticalProducts.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', margin: 0 }}>Sin alertas.</p>
+              <p className="empty-copy">Sin alertas.</p>
             ) : (
               data.criticalProducts.map((p) => (
                 <div key={p.id} className="list-row list-row--critical">
                   <div>
-                    <strong>{p.name}</strong>
-                    <span className="badge"> Crítico</span>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.sku}</div>
+                    <strong>{p.name}</strong> <span className="badge">Cr&iacute;tico</span>
+                    <div className="row-meta">{p.sku}</div>
                   </div>
-                  <strong>
+                  <strong className="list-row-value">
                     {p.quantity} / {p.minStock}
                   </strong>
                 </div>
@@ -75,19 +74,19 @@ export default function ReportsPage() {
               <h2>Movimientos recientes</h2>
             </div>
             {data.recentMovements.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', margin: 0 }}>Sin movimientos.</p>
+              <p className="empty-copy">Sin movimientos.</p>
             ) : (
               data.recentMovements.map((m) => (
                 <div key={m.movementId} className="list-row">
                   <div>
                     <strong>{m.productName}</strong>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      {m.type} · {m.productSku}
+                    <div className="row-meta">
+                      {m.type} - {m.productSku}
                     </div>
                   </div>
-                  <span>
+                  <span className={m.delta >= 0 ? 'delta-pos' : 'delta-neg'}>
                     {m.delta > 0 ? '+' : ''}
-                    {m.delta} → {m.newQty}
+                    {m.delta} -&gt; {m.newQty}
                   </span>
                 </div>
               ))

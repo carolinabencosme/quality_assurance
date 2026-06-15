@@ -10,7 +10,7 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: 'Inventory QAS',
-  description: 'Gestión de inventario — PUCMM Plan v3.0',
+  description: 'Gesti\u00f3n de inventario - PUCMM Plan v3.0',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
