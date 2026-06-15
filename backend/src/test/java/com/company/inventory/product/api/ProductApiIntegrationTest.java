@@ -179,7 +179,8 @@ class ProductApiIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        long id = com.jayway.jsonpath.JsonPath.read(created, "$.id");
+        Number idNum = com.jayway.jsonpath.JsonPath.read(created, "$.id");
+        long id = idNum.longValue();
 
         String update = """
                 {
@@ -222,7 +223,8 @@ class ProductApiIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        long id = com.jayway.jsonpath.JsonPath.read(created, "$.id");
+        Number idNum = com.jayway.jsonpath.JsonPath.read(created, "$.id");
+        long id = idNum.longValue();
 
         mockMvc.perform(delete("/api/v1/products/" + id))
                 .andExpect(status().isNoContent());
