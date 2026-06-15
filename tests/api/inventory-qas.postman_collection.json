@@ -192,6 +192,16 @@
       "name": "09 Crear producto válido → 201",
       "event": [
         {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const sku = pm.variables.get('sku') || pm.collectionVariables.get('sku');",
+              "if (sku) pm.collectionVariables.set('sku', sku);"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
           "listen": "test",
           "script": {
             "exec": [
@@ -199,7 +209,8 @@
               "const j = pm.response.json();",
               "pm.collectionVariables.set('productId', String(j.id));",
               "pm.test('id numérico', () => pm.expect(j.id).to.be.a('number'));",
-              "pm.test('sku coincide', () => pm.expect(String(j.sku).toUpperCase()).to.eql(String(pm.collectionVariables.get('sku')).toUpperCase()));"
+              "const expectedSku = pm.variables.get('sku') || pm.collectionVariables.get('sku');",
+              "pm.test('sku coincide', () => pm.expect(String(j.sku).toUpperCase()).to.eql(String(expectedSku).toUpperCase()));"
             ],
             "type": "text/javascript"
           }
