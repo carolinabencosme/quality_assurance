@@ -2,6 +2,19 @@ const ACCESS_COOKIE = 'inventory_access';
 const KEYCLOAK_CLIENT =
   process.env.NEXT_PUBLIC_KEYCLOAK_API_CLIENT_ID ?? 'inventory-api';
 
+/** Espejo de composites en keycloak/realm-export.json */
+const REALM_ROLE_PERMISSIONS: Record<string, string[]> = {
+  'inventory-admin': [
+    'product:view', 'product:manage', 'stock:view', 'stock:manage',
+    'report:view', 'audit:view', 'user:manage',
+  ],
+  'warehouse-manager': [
+    'product:view', 'product:manage', 'stock:view', 'stock:manage', 'report:view',
+  ],
+  'inventory-clerk': ['product:view', 'stock:view', 'stock:manage'],
+  'inventory-viewer': ['product:view', 'stock:view', 'report:view'],
+};
+
 function readAccessFromCookie(): string | null {
   if (typeof document === 'undefined') return null;
   const match = document.cookie
@@ -32,7 +45,12 @@ function extractRoles(payload: Record<string, unknown>): string[] {
   const roles: string[] = [];
 
   const realmAccess = payload.realm_access as { roles?: string[] } | undefined;
-  if (realmAccess?.roles) roles.push(...realmAccess.roles);
+  if (realmAccess?.roles) {
+    for (const realmRole of realmAccess.roles) {
+      const perms = REALM_ROLE_PERMISSIONS[realmRole];
+      if (perms) roles.push(...perms);
+    }
+  }
 
   const resourceAccess = payload.resource_access as Record<string, { roles?: string[] }> | undefined;
   const clientRoles = resourceAccess?.[KEYCLOAK_CLIENT]?.roles;

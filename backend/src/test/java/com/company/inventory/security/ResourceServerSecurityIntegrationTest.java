@@ -6,7 +6,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
@@ -37,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
                 "management.health.db.enabled=false"
         })
 @ActiveProfiles("test")
-@Import(TestJwtDecoderConfig.class)
 @Testcontainers(disabledWithoutDocker = true)
 @AutoConfigureMockMvc
 class ResourceServerSecurityIntegrationTest {

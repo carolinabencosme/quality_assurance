@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Extrae permisos granulares desde {@code resource_access.inventory-api.roles} del JWT Keycloak.
+ * Extrae permisos granulares desde roles de realm (compuestos) y {@code resource_access.inventory-api.roles}.
  */
 public class KeycloakJwtAuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 
@@ -23,7 +23,9 @@ public class KeycloakJwtAuthoritiesConverter implements Converter<Jwt, Collectio
 
         Map<String, Object> realmAccess = jwt.getClaim("realm_access");
         if (realmAccess != null) {
-            extractRoles(realmAccess.get("roles"), authorities);
+            List<String> realmRoles = new ArrayList<>();
+            extractRoles(realmAccess.get("roles"), realmRoles);
+            authorities.addAll(RealmRolePermissions.permissionsForRealmRoles(realmRoles));
         }
 
         Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
