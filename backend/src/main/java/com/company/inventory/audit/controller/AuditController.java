@@ -4,6 +4,8 @@ import com.company.inventory.audit.dto.AuditEventResponse;
 import com.company.inventory.audit.service.AuditService;
 import com.company.inventory.security.Permission;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
@@ -29,7 +31,12 @@ public class AuditController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('" + Permission.AUDIT_VIEW + "')")
-    @Operation(summary = "Consultar auditoría", description = "Revisiones de productos registradas por Envers")
+    @Operation(summary = "Consultar auditoría", description = "Revisiones de productos registradas por Hibernate Envers")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Página de eventos de auditoría"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso audit:view")
+    })
     public Page<AuditEventResponse> findAll(
             @PageableDefault(size = 20, sort = "revisionId", direction = Sort.Direction.DESC) Pageable pageable) {
         return auditService.findAuditEvents(pageable);

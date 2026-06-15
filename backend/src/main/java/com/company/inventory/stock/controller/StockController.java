@@ -7,6 +7,8 @@ import com.company.inventory.stock.entity.StockMovementType;
 import com.company.inventory.security.Permission;
 import com.company.inventory.stock.service.StockService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -40,6 +42,11 @@ public class StockController {
     @PreAuthorize("hasAuthority('" + Permission.STOCK_VIEW + "')")
     @Operation(summary = "Consultar existencias",
             description = "Lista paginada de productos activos como StockLevelResponse (sin entidades JPA)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Página de existencias"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso stock:view")
+    })
     public Page<StockLevelResponse> findStockLevels(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Boolean critical,
@@ -51,6 +58,11 @@ public class StockController {
     @PreAuthorize("hasAuthority('" + Permission.STOCK_VIEW + "')")
     @Operation(summary = "Historial de movimientos",
             description = "Lista paginada de movimientos como StockMovementResponse (producto aplanado, sin entidades JPA)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Página de movimientos"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso stock:view")
+    })
     public Page<StockMovementResponse> findMovements(
             @RequestParam(required = false) Long productId,
             @RequestParam(required = false) StockMovementType type,
@@ -61,6 +73,13 @@ public class StockController {
     @PostMapping("/movements")
     @PreAuthorize("hasAuthority('" + Permission.STOCK_MANAGE + "')")
     @Operation(summary = "Registrar movimiento", description = "IN suma, OUT resta (sin negativo), ADJUSTMENT fija cantidad")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Movimiento registrado"),
+            @ApiResponse(responseCode = "400", description = "Validación o regla de negocio RF-STK"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso stock:manage"),
+            @ApiResponse(responseCode = "409", description = "Stock insuficiente en salida")
+    })
     public ResponseEntity<StockMovementResponse> registerMovement(
             @Valid @RequestBody StockMovementRequest request) {
         StockMovementResponse response = stockService.registerMovement(request);

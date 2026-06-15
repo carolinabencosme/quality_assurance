@@ -6,6 +6,8 @@ Monorepo del curso **Aseguramiento de Calidad de Software** (PUCMM) para un **si
 
 El proyecto va más allá de un CRUD: incluye **seguridad granular** (Keycloak), **testing por capas**, **observabilidad**, **CI/CD** y **calidad de código** medible, según el Plan de Implementación Técnica v3.0. Guía operativa del equipo: [docs/GUIA_IMPLEMENTACION.md](docs/GUIA_IMPLEMENTACION.md).
 
+**Avance Proyecto V3 (100%):** matriz de cumplimiento en [docs/qa-evidence/EVIDENCIAS-AVANCE-V3.md](docs/qa-evidence/EVIDENCIAS-AVANCE-V3.md) · preguntas técnicas en [docs/defensa/preguntas-tecnicas-avance-v3.md](docs/defensa/preguntas-tecnicas-avance-v3.md) · verificación `.\scripts\verify-avance-v3.ps1`
+
 | Documento | Versión |
 |-----------|---------|
 | Plan de implementación | 3.0 — Mayo 2026 |
@@ -178,13 +180,17 @@ Cada PR debe incluir descripción, checklist (build, tests, sin secretos, docs) 
 | 6 | CI/CD (GitHub Actions, Jenkins, SonarQube) | Completado (`QA-8`) |
 | 7 | Documentación y defensa | Completado (`QA-9`, `QA-11`) |
 | — | Common: excepciones y error estándar | Completado (`QA-18`) |
-| — | CorrelationId, MDC y logging estructurado | En curso (`QA-19`) |
+| — | CorrelationId, MDC y logging estructurado | Completado (`QA-19`) |
 | 1b | Entidades JPA Product, Category y repos | Completado (`QA-20`) |
-| 1c | CRUD API productos DTOs mapper validaciones | En curso (`QA-21`) |
-| 1d | Stock: movimientos y reglas RF-STK | En curso (`QA-23`) |
-| 1e | GET stock y movimientos con paginación y DTOs | En curso (`QA-24`) |
-| 2b | UI productos: tabla, filtros y formularios | En curso (`QA-25`) |
-| 2a | Cliente Axios (baseURL, interceptors, 401/403) | En curso (`QA-26`) |
+| 1c | CRUD API productos DTOs mapper validaciones | Completado (`QA-21`) |
+| 1d | Stock: movimientos y reglas RF-STK | Completado (`QA-23`) |
+| 1e | GET stock y movimientos con paginación y DTOs | Completado (`QA-24`) |
+| 2b | UI productos: tabla, filtros y formularios | Completado (`QA-25`) |
+| 2a | Cliente Axios (baseURL, interceptors, 401/403) | Completado (`QA-26`) |
+| 2c | UI stock movimientos | Completado (`QA-27`) |
+| 2d | AppShell layout (sidebar, topbar) | Completado (`QA-28`) |
+| 2e | Keycloak realm export versionado | Completado (`QA-29`) |
+| 2f | OAuth2 Resource Server JWT | Completado (`QA-30`) |
 
 ## API Fase 1 (QA-3)
 

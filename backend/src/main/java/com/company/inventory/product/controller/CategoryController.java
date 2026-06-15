@@ -4,6 +4,8 @@ import com.company.inventory.product.dto.CategoryResponse;
 import com.company.inventory.product.service.CategoryService;
 import com.company.inventory.security.Permission;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +29,12 @@ public class CategoryController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('" + Permission.PRODUCT_VIEW + "')")
-    @Operation(summary = "Listar categorias")
+    @Operation(summary = "Listar categorías", description = "Catálogo completo para filtros y formularios de producto")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de categorías"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso product:view")
+    })
     public List<CategoryResponse> findAll() {
         return categoryService.findAll();
     }

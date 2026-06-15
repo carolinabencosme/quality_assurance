@@ -7,8 +7,9 @@ import com.company.inventory.product.entity.ProductStatus;
 import com.company.inventory.product.service.ProductService;
 import com.company.inventory.security.Permission;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -42,7 +43,12 @@ public class ProductController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('" + Permission.PRODUCT_VIEW + "')")
-    @Operation(summary = "Listar productos", description = "Paginacion, busqueda por nombre/SKU, filtros y ordenamiento")
+    @Operation(summary = "Listar productos", description = "Paginación, búsqueda por nombre/SKU, filtros y ordenamiento")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Página de productos"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso product:view")
+    })
     public Page<ProductResponse> findAll(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long categoryId,
@@ -55,15 +61,26 @@ public class ProductController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('" + Permission.PRODUCT_VIEW + "')")
     @Operation(summary = "Detalle de producto")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Producto encontrado"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso product:view"),
+            @ApiResponse(responseCode = "404", description = "Producto no existe")
+    })
     public ProductResponse findById(@PathVariable Long id) {
         return productService.findById(id);
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "')")
-    @Operation(summary = "Crear producto", description = "Valida SKU unico, precio y stock inicial no negativos")
-    @ApiResponse(responseCode = "201", description = "Producto creado")
-    @ApiResponse(responseCode = "409", description = "SKU duplicado")
+    @Operation(summary = "Crear producto", description = "Valida SKU único, precio y stock inicial no negativos")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Producto creado"),
+            @ApiResponse(responseCode = "400", description = "Validación Bean Validation o negocio"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso product:manage"),
+            @ApiResponse(responseCode = "409", description = "SKU duplicado")
+    })
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
         ProductResponse created = productService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -72,7 +89,14 @@ public class ProductController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "')")
     @Operation(summary = "Actualizar producto", description = "No modifica cantidad; usar movimientos de stock")
-    @ApiResponse(responseCode = "409", description = "SKU duplicado")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Producto actualizado"),
+            @ApiResponse(responseCode = "400", description = "Validación"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso product:manage"),
+            @ApiResponse(responseCode = "404", description = "Producto no existe"),
+            @ApiResponse(responseCode = "409", description = "SKU duplicado")
+    })
     public ProductResponse update(@PathVariable Long id, @Valid @RequestBody ProductUpdateRequest request) {
         return productService.update(id, request);
     }
@@ -80,7 +104,12 @@ public class ProductController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "')")
     @Operation(summary = "Inactivar producto", description = "Soft delete: status INACTIVE")
-    @ApiResponse(responseCode = "204", description = "Producto inactivado")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Producto inactivado"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso product:manage"),
+            @ApiResponse(responseCode = "404", description = "Producto no existe")
+    })
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.delete(id);
         return ResponseEntity.noContent().build();

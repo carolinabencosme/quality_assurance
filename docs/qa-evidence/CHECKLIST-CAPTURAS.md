@@ -27,4 +27,13 @@ Start-Process "http://localhost:8080/swagger-ui.html"
 
 ## Nota para entrega académica
 
-Si el profesor pide ZIP en lugar de commit, incluir esta carpeta más `docs/qa-evidence.md` y el PDF del plan cuando aplique.
+Generación automática de capturas parciales:
+
+```powershell
+docker compose -f docker-compose.dev.yml up -d
+.\scripts\generate-qa-evidence.ps1
+```
+
+Capturas manuales: Swagger (06), Grafana (07), GitHub Actions (08), JaCoCo HTML (09), Keycloak (10), Jenkins (ver `docs/jenkins-evidence.md`).
+
+Si el profesor pide ZIP en lugar de commit, incluir esta carpeta más `docs/qa-evidence/EVIDENCIAS-AVANCE-V3.md`.

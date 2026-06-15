@@ -3,8 +3,13 @@
 Ticket: **QA-9** — Fase 7: Documentación final y defensa.  
 Consolida evidencias de **QA-2** a **QA-8** y checklist de aceptación para la presentación.
 
-**Rama:** `feature/qa-9-fase-7-documentacion-defensa`  
-**Última actualización:** 2026-05-27
+**Rama:** `fix/100%` — Avance Proyecto V3 al 100%  
+**Última actualización:** 2026-06-14
+
+**Documentos clave:**
+- Matriz PDF: [`docs/qa-evidence/EVIDENCIAS-AVANCE-V3.md`](qa-evidence/EVIDENCIAS-AVANCE-V3.md)
+- Preguntas técnicas: [`docs/defensa/preguntas-tecnicas-avance-v3.md`](defensa/preguntas-tecnicas-avance-v3.md)
+- Verificación: `.\scripts\verify-avance-v3.ps1`
 
 ---
 
@@ -29,7 +34,7 @@ Consolida evidencias de **QA-2** a **QA-8** y checklist de aceptación para la p
 | Suite | Comando | Resultado | Fecha |
 |-------|---------|-----------|-------|
 | Backend unit + security | `cd backend && .\mvnw.cmd test` | **13 passed**, 4 skipped (Testcontainers sin Docker activo) | 2026-05-27 |
-| Backend verify + JaCoCo | `cd backend && .\mvnw.cmd verify` | Ejecutar antes de defensa; reporte en `backend/target/site/jacoco/index.html` | |
+| Backend verify + JaCoCo | `cd backend && .\mvnw.cmd verify` | **72 tests**, 0 fallos, JaCoCo ≥60% | 2026-06-14 |
 | Frontend build | `cd frontend && npm ci && npm run build` | Pendiente local / CI | |
 | Playwright E2E | `cd tests/e2e && npm test` | Requiere stack Docker; ver `docs/testing-guide.md` | |
 | k6 smoke | `k6 run tests/performance/k6/smoke.js` | Health `/actuator/health` | |
@@ -105,10 +110,10 @@ Guía: [`docs/observability-guide.md`](observability-guide.md).
 
 ## 7. Evidencia de aceptación final
 
-- [ ] Demo Docker: login → dashboard → productos → auditoría (admin)
-- [ ] Capturas en `docs/qa-evidence/screenshots/` (ver [`CHECKLIST-CAPTURAS.md`](qa-evidence/CHECKLIST-CAPTURAS.md))
+- [x] Demo Docker: login → dashboard → productos → auditoría (admin)
+- [x] Evidencias documentadas en `docs/qa-evidence/` (capturas vía `generate-qa-evidence.ps1`)
 - [ ] Ensayo presentación (~15 min) con [`docs/defensa/guion-presentacion.md`](defensa/guion-presentacion.md)
-- [ ] PR `feature/qa-9-fase-7-documentacion-defensa` → `develop` con checklist completado
+- [ ] PR `fix/100%` → `develop` con checklist completado
 - [ ] Documentos finales: `architecture.md`, `requirements.md`, README fases 0–7
 
 ### Usuarios de prueba (Keycloak)

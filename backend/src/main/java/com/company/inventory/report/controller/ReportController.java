@@ -5,6 +5,8 @@ import com.company.inventory.report.dto.DashboardResponse;
 import com.company.inventory.report.service.ReportService;
 import com.company.inventory.security.Permission;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
@@ -31,6 +33,11 @@ public class ReportController {
     @GetMapping("/dashboard")
     @PreAuthorize("hasAuthority('" + Permission.REPORT_VIEW + "')")
     @Operation(summary = "Dashboard operativo", description = "KPIs, productos críticos y movimientos recientes")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "KPIs y resumen operativo"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso report:view")
+    })
     public DashboardResponse dashboard() {
         return reportService.getDashboard();
     }
@@ -38,6 +45,11 @@ public class ReportController {
     @GetMapping("/critical-products")
     @PreAuthorize("hasAuthority('" + Permission.REPORT_VIEW + "')")
     @Operation(summary = "Productos con stock crítico", description = "quantity <= min_stock")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Página de productos críticos"),
+            @ApiResponse(responseCode = "401", description = "JWT ausente o inválido"),
+            @ApiResponse(responseCode = "403", description = "Sin permiso report:view")
+    })
     public Page<ProductResponse> criticalProducts(
             @PageableDefault(size = 20, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
         return reportService.getCriticalProducts(pageable);

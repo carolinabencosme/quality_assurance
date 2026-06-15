@@ -22,7 +22,18 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Inventory QAS API")
-                        .description("API REST v1 — productos y stock protegidos con JWT Keycloak y permisos granulares.")
+                .description("""
+                        API REST v1 del sistema de inventarios empresarial.
+                        
+                        **Endpoints documentados:**
+                        - `GET /api/v1/products` — CRUD productos (permisos product:view / product:manage)
+                        - `GET /api/v1/categories` — Catálogo de categorías
+                        - `GET|POST /api/v1/stock` — Existencias y movimientos (stock:view / stock:manage)
+                        - `GET /api/v1/reports/*` — Dashboard y productos críticos (report:view)
+                        - `GET /api/v1/audit` — Historial Envers (audit:view)
+                        
+                        Autenticación: JWT Bearer emitido por Keycloak realm `inventory-realm`.
+                        """)
                         .version("1.0.0")
                         .contact(new Contact().name("Inventory QAS Team")))
                 .servers(List.of(
