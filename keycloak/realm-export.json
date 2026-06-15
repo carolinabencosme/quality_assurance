@@ -2,6 +2,7 @@
   "realm": "inventory-realm",
   "enabled": true,
   "displayName": "Inventory QAS",
+  "displayNameHtml": "<strong>Inventory QAS</strong>",
   "sslRequired": "external",
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,
@@ -20,7 +21,7 @@
         "composite": true,
         "composites": {
           "client": {
-            "inventory-backend": [
+            "inventory-api": [
               "product:view",
               "product:manage",
               "stock:view",
@@ -38,7 +39,7 @@
         "composite": true,
         "composites": {
           "client": {
-            "inventory-backend": [
+            "inventory-api": [
               "product:view",
               "product:manage",
               "stock:view",
@@ -54,7 +55,7 @@
         "composite": true,
         "composites": {
           "client": {
-            "inventory-backend": [
+            "inventory-api": [
               "product:view",
               "stock:view",
               "stock:manage"
@@ -64,11 +65,11 @@
       },
       {
         "name": "inventory-viewer",
-        "description": "Solo lectura de productos y stock",
+        "description": "Solo lectura de productos, stock y reportes",
         "composite": true,
         "composites": {
           "client": {
-            "inventory-backend": [
+            "inventory-api": [
               "product:view",
               "stock:view",
               "report:view"
@@ -78,7 +79,7 @@
       }
     ],
     "client": {
-      "inventory-backend": [
+      "inventory-api": [
         {
           "name": "product:view",
           "description": "Ver productos y categorías",
@@ -111,13 +112,13 @@
         },
         {
           "name": "audit:view",
-          "description": "Consultar auditoría",
+          "description": "Consultar auditoría Envers",
           "composite": false,
           "clientRole": true
         },
         {
           "name": "user:manage",
-          "description": "Gestionar usuarios y permisos",
+          "description": "Gestionar usuarios y permisos en Keycloak",
           "composite": false,
           "clientRole": true
         }
@@ -128,6 +129,7 @@
     {
       "clientId": "inventory-frontend",
       "name": "Inventory Frontend",
+      "description": "Cliente público SPA (Next.js) — Authorization Code + PKCE",
       "enabled": true,
       "publicClient": true,
       "directAccessGrantsEnabled": true,
@@ -136,13 +138,21 @@
       "serviceAccountsEnabled": false,
       "protocol": "openid-connect",
       "fullScopeAllowed": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "+"
+      },
       "redirectUris": [
         "http://localhost:3000/*",
-        "http://127.0.0.1:3000/*"
+        "http://127.0.0.1:3000/*",
+        "http://localhost:3002/*",
+        "http://127.0.0.1:3002/*"
       ],
       "webOrigins": [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "http://localhost:3002",
+        "http://127.0.0.1:3002",
         "+"
       ],
       "defaultClientScopes": [
@@ -151,16 +161,24 @@
         "roles",
         "profile",
         "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
       ]
     },
     {
-      "clientId": "inventory-backend",
-      "name": "Inventory Backend API",
+      "clientId": "inventory-api",
+      "name": "Inventory API",
+      "description": "Resource Server (Spring Boot) — validación JWT bearer-only",
       "enabled": true,
       "bearerOnly": true,
       "publicClient": false,
       "directAccessGrantsEnabled": false,
       "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
       "serviceAccountsEnabled": false,
       "protocol": "openid-connect",
       "fullScopeAllowed": true

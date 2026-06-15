@@ -13,7 +13,7 @@ public final class Permission {
     public static final String AUDIT_VIEW = "audit:view";
     public static final String USER_MANAGE = "user:manage";
 
-    public static final String KEYCLOAK_CLIENT = "inventory-backend";
+    public static final String KEYCLOAK_CLIENT = "inventory-api";
 
     private Permission() {
     }

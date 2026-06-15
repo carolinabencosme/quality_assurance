@@ -36,7 +36,7 @@ quality_assurance/                    # Raíz del monorepo
 | `backend/` | `src/main`, `src/test`, `pom.xml`, `Dockerfile`, `mvnw` | 1–4 |
 | `frontend/` | `app/`, `components/`, `lib/`, `Dockerfile` | 1, 3 |
 | `docker/` | `init/postgres/`, `nginx/` | 0, 6 |
-| `keycloak/` | `realm-export.json` | 2 |
+| `keycloak/` | `realm-export.json`, `realm-export.version` | 2 |
 | `observability/` | Config Alloy, Prometheus, Loki, Tempo, Grafana | 5 |
 | `tests/e2e/` | Playwright | 4 |
 | `tests/performance/k6/` | Smoke carga | 4 |

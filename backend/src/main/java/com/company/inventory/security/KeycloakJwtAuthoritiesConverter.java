@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Extrae permisos granulares desde {@code resource_access.inventory-backend.roles} del JWT Keycloak.
+ * Extrae permisos granulares desde {@code resource_access.inventory-api.roles} del JWT Keycloak.
  */
 public class KeycloakJwtAuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
 

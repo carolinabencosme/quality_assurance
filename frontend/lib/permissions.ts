@@ -1,5 +1,6 @@
 const ACCESS_COOKIE = 'inventory_access';
-const KEYCLOAK_CLIENT = 'inventory-backend';
+const KEYCLOAK_CLIENT =
+  process.env.NEXT_PUBLIC_KEYCLOAK_API_CLIENT_ID ?? 'inventory-api';
 
 function readAccessFromCookie(): string | null {
   if (typeof document === 'undefined') return null;

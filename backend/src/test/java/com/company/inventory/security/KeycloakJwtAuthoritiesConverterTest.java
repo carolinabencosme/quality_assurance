@@ -20,7 +20,7 @@ class KeycloakJwtAuthoritiesConverterTest {
         Jwt jwt = Jwt.withTokenValue("token")
                 .header("alg", "none")
                 .claim("resource_access", Map.of(
-                        "inventory-backend", Map.of("roles", List.of("product:view", "stock:manage"))
+                        "inventory-api", Map.of("roles", List.of("product:view", "stock:manage"))
                 ))
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(60))
