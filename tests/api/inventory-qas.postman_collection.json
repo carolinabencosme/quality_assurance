@@ -298,7 +298,7 @@
           "script": {
             "exec": [
               "pm.test('HTTP 403 forbidden', () => pm.response.to.have.status(403));",
-              "try { const j = pm.response.json(); pm.test('JSON error body', () => pm.expect(j).to.have.property('status')); } catch (e) { /* algunos proxies devuelven cuerpo vacío */ }",
+              "try { const j = pm.response.json(); pm.test('JSON error body', () => pm.expect(j).to.have.property('status')); } catch (e) { /* algunos proxies devuelven cuerpo vacío */ }"
             ],
             "type": "text/javascript"
           }
