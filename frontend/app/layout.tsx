@@ -1,21 +1,22 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
+import { BRAND } from '@/lib/brand';
 
-const jakarta = Plus_Jakarta_Sans({
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'Inventory QAS',
-  description: 'Gesti\u00f3n de inventario - PUCMM Plan v3.0',
+  title: `${BRAND.name} - Inventario inteligente`,
+  description: BRAND.description,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={jakarta.variable}>
+    <html lang="es" className={inter.variable}>
       <body>{children}</body>
     </html>
   );

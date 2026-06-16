@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Icon from '@/components/icons/AppIcons';
 import ProductForm, {
   formValuesToCreatePayload,
   type ProductFormValues,
@@ -47,7 +48,7 @@ export default function NewProductPage() {
   if (loading) {
     return (
       <div className="loading">
-        <span className="spinner" /> Cargando formulario...
+        <span className="spinner" aria-hidden /> Cargando formulario...
       </div>
     );
   }
@@ -59,7 +60,7 @@ export default function NewProductPage() {
           <h1 className="page-title">Nuevo producto</h1>
           <p className="page-sub">
             <Link href="/products" className="link-action">
-              &larr; Volver al listado
+              <Icon name="chevronLeft" size={14} /> Volver al listado
             </Link>
           </p>
         </div>

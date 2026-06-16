@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Icon from '@/components/icons/AppIcons';
 import ProductForm, {
   formValuesToUpdatePayload,
   productToFormValues,
@@ -22,6 +23,7 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (!canManageProducts()) {
@@ -62,7 +64,6 @@ export default function EditProductPage() {
   };
 
   const handleDeactivate = async () => {
-    if (!confirm('\u00bfInactivar este producto?')) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -78,7 +79,7 @@ export default function EditProductPage() {
   if (loading) {
     return (
       <div className="loading">
-        <span className="spinner" /> Cargando producto...
+        <span className="spinner" aria-hidden /> Cargando producto...
       </div>
     );
   }
@@ -89,7 +90,7 @@ export default function EditProductPage() {
         <h1 className="page-title">Editar producto</h1>
         <div className="alert alert-error">{error}</div>
         <Link href="/products" className="link-action">
-          &larr; Volver al listado
+          <Icon name="chevronLeft" size={14} /> Volver al listado
         </Link>
       </>
     );
@@ -105,7 +106,7 @@ export default function EditProductPage() {
           <p className="page-sub">
             {product.sku} - Stock actual: {product.quantity} -{' '}
             <Link href="/products" className="link-action">
-              &larr; Volver al listado
+              <Icon name="chevronLeft" size={14} /> Volver al listado
             </Link>
           </p>
         </div>
@@ -113,10 +114,10 @@ export default function EditProductPage() {
           <button
             type="button"
             className="btn btn-danger btn-inline"
-            onClick={handleDeactivate}
+            onClick={() => setConfirmOpen(true)}
             disabled={submitting}
           >
-            Inactivar
+            <Icon name="alert" size={17} /> Inactivar
           </button>
         )}
       </div>
@@ -135,6 +136,45 @@ export default function EditProductPage() {
           submitting={submitting}
         />
       </section>
+
+      {confirmOpen && (
+        <div className="modal-backdrop" role="presentation">
+          <div className="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+            <span className="confirm-modal-icon" aria-hidden>
+              <Icon name="alert" size={22} />
+            </span>
+            <h2 id="confirm-title">Inactivar producto</h2>
+            <p>
+              {product.name} dejara de estar disponible para nuevos movimientos. Puedes cancelar
+              ahora si solo querias revisar el registro.
+            </p>
+            <div className="form-actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setConfirmOpen(false)}
+                disabled={submitting}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={handleDeactivate}
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <span className="spinner" aria-hidden /> Inactivando...
+                  </>
+                ) : (
+                  'Inactivar'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

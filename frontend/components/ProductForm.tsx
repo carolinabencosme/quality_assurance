@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Icon from '@/components/icons/AppIcons';
 import type { Category, ProductStatus } from '@/lib/types/product';
 
 export type ProductFormValues = {
@@ -75,7 +76,11 @@ export default function ProductForm({
             onChange={(e) => update({ name: e.target.value })}
             required
             maxLength={200}
+            aria-describedby="name-hint"
           />
+          <span id="name-hint" className="field-hint">
+            Nombre visible en reportes, stock y auditoria.
+          </span>
         </div>
 
         <div className="form-field">
@@ -86,7 +91,11 @@ export default function ProductForm({
             onChange={(e) => update({ sku: e.target.value })}
             required
             maxLength={50}
+            aria-describedby="sku-hint"
           />
+          <span id="sku-hint" className="field-hint">
+            Codigo unico, idealmente corto y estable.
+          </span>
         </div>
       </div>
 
@@ -98,6 +107,7 @@ export default function ProductForm({
           value={values.description}
           onChange={(e) => update({ description: e.target.value })}
           maxLength={5000}
+          placeholder="Contexto operativo, proveedor o uso principal..."
         />
       </div>
 
@@ -129,6 +139,7 @@ export default function ProductForm({
             value={values.price}
             onChange={(e) => update({ price: e.target.value })}
             required
+            inputMode="decimal"
           />
         </div>
       </div>
@@ -145,6 +156,7 @@ export default function ProductForm({
               value={values.quantity}
               onChange={(e) => update({ quantity: e.target.value })}
               required
+              inputMode="numeric"
             />
           </div>
         )}
@@ -159,7 +171,9 @@ export default function ProductForm({
             value={values.minStock}
             onChange={(e) => update({ minStock: e.target.value })}
             required
+            inputMode="numeric"
           />
+          <span className="field-hint">Dispara alerta cuando el stock cae por debajo.</span>
         </div>
 
         <div className="form-field">
@@ -188,7 +202,16 @@ export default function ProductForm({
           Cancelar
         </button>
         <button type="submit" className="btn btn-primary btn-inline" disabled={submitting}>
-          {submitting ? 'Guardando...' : mode === 'create' ? 'Crear producto' : 'Guardar cambios'}
+          {submitting ? (
+            <>
+              <span className="spinner spinner--light" aria-hidden /> Guardando...
+            </>
+          ) : (
+            <>
+              <Icon name={mode === 'create' ? 'plus' : 'package'} size={17} />
+              {mode === 'create' ? 'Crear producto' : 'Guardar cambios'}
+            </>
+          )}
         </button>
       </div>
     </form>

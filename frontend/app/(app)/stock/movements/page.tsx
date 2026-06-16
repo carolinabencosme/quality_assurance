@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import DataTable from '@/components/DataTable';
+import Icon from '@/components/icons/AppIcons';
 import StockMovementForm, {
   formValuesToPayload,
   type StockMovementFormValues,
@@ -57,7 +58,11 @@ export default function StockMovementsPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [listLoading, setListLoading] = useState(true);
   const [formSubmitting, setFormSubmitting] = useState(false);
-  const canManage = canManageStock();
+  const [canManage, setCanManage] = useState(false);
+
+  useEffect(() => {
+    setCanManage(canManageStock());
+  }, []);
 
   const loadProducts = useCallback(async () => {
     try {
@@ -134,7 +139,8 @@ export default function StockMovementsPage() {
         key: 'delta',
         header: 'Cambio',
         render: (m: StockMovement) => (
-          <span className={m.delta >= 0 ? 'delta-pos' : 'delta-neg'}>
+          <span className={m.delta >= 0 ? 'delta-pos delta-with-icon' : 'delta-neg delta-with-icon'}>
+            <Icon name={m.delta >= 0 ? 'arrowUp' : 'arrowDown'} size={14} />
             {m.delta >= 0 ? '+' : ''}
             {m.delta}
           </span>
@@ -156,108 +162,125 @@ export default function StockMovementsPage() {
 
   return (
     <>
-      <h1 className="page-title">Movimientos de stock</h1>
-      <p className="page-sub">Historial y registro - RF-STK (IN / OUT / ADJUSTMENT)</p>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Movimientos de stock</h1>
+          <p className="page-sub">Historial y registro RF-STK para entradas, salidas y ajustes.</p>
+        </div>
+        <span className="page-pill">
+          <Icon name="stock" size={15} /> {totalElements.toLocaleString('es-DO')} mov.
+        </span>
+      </div>
 
-      {canManage && (
+      <div className={canManage ? 'stock-layout' : 'stock-layout stock-layout--single'}>
+        {canManage && (
+          <section className="panel panel--sticky">
+            <div className="panel-head">
+              <div>
+                <h2>Registrar movimiento</h2>
+                <p>Actualiza el nivel de inventario con trazabilidad.</p>
+              </div>
+              <span>stock:manage</span>
+            </div>
+            <StockMovementForm
+              products={products}
+              onSubmit={handleRegister}
+              error={formError}
+              submitting={formSubmitting}
+            />
+          </section>
+        )}
+
         <section className="panel">
           <div className="panel-head">
-            <h2>Registrar movimiento</h2>
-            <span>Permiso stock:manage</span>
+            <div>
+              <h2>Historial</h2>
+              <p>Ordenado por movimientos mas recientes.</p>
+            </div>
+            {!listLoading && (
+              <span>
+                Pag. {filters.page + 1}/{Math.max(totalPages, 1)}
+              </span>
+            )}
           </div>
-          <StockMovementForm
-            products={products}
-            onSubmit={handleRegister}
-            error={formError}
-            submitting={formSubmitting}
+
+          <div className="filter-card">
+            <div className="filter-bar">
+              <div className="form-field filter-field">
+                <label htmlFor="filter-product">Producto</label>
+                <select
+                  id="filter-product"
+                  value={filters.productId}
+                  onChange={(e) => setFilters((f) => ({ ...f, productId: e.target.value, page: 0 }))}
+                >
+                  <option value="">Todos</option>
+                  {products.map((product) => (
+                    <option key={product.productId} value={String(product.productId)}>
+                      {product.sku}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-field filter-field">
+                <label htmlFor="filter-type">Tipo</label>
+                <select
+                  id="filter-type"
+                  value={filters.type}
+                  onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value, page: 0 }))}
+                >
+                  <option value="">Todos</option>
+                  <option value="IN">Entrada</option>
+                  <option value="OUT">Salida</option>
+                  <option value="ADJUSTMENT">Ajuste</option>
+                </select>
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setFilters(defaultFilters)}
+              >
+                <Icon name="filter" size={15} /> Limpiar
+              </button>
+            </div>
+          </div>
+
+          {listError && <div className="alert alert-error">{listError}</div>}
+
+          <DataTable
+            columns={columns}
+            rows={movements}
+            rowKey={(m) => m.id}
+            loading={listLoading}
+            emptyTitle="Sin movimientos"
+            emptyMessage="No hay movimientos registrados."
+            footer={
+              !listLoading && totalPages > 1 ? (
+                <div className="table-pagination">
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    disabled={filters.page <= 0}
+                    onClick={() => setFilters((f) => ({ ...f, page: f.page - 1 }))}
+                  >
+                    <Icon name="chevronLeft" size={16} /> Anterior
+                  </button>
+                  <span>
+                    {filters.page + 1} / {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    disabled={filters.page >= totalPages - 1}
+                    onClick={() => setFilters((f) => ({ ...f, page: f.page + 1 }))}
+                  >
+                    Siguiente <Icon name="chevronRight" size={16} />
+                  </button>
+                </div>
+              ) : undefined
+            }
           />
         </section>
-      )}
-
-      <section className="panel">
-        <div className="panel-head">
-          <h2>Historial</h2>
-          {!listLoading && (
-            <span>
-              {totalElements.toLocaleString('es-DO')} movimientos - p&aacute;g. {filters.page + 1}/
-              {Math.max(totalPages, 1)}
-            </span>
-          )}
-        </div>
-
-        <div className="filter-bar">
-          <div className="form-field filter-field">
-            <label htmlFor="filter-product">Producto</label>
-            <select
-              id="filter-product"
-              value={filters.productId}
-              onChange={(e) => setFilters((f) => ({ ...f, productId: e.target.value, page: 0 }))}
-            >
-              <option value="">Todos</option>
-              {products.map((p) => (
-                <option key={p.productId} value={String(p.productId)}>
-                  {p.sku}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-field filter-field">
-            <label htmlFor="filter-type">Tipo</label>
-            <select
-              id="filter-type"
-              value={filters.type}
-              onChange={(e) => setFilters((f) => ({ ...f, type: e.target.value, page: 0 }))}
-            >
-              <option value="">Todos</option>
-              <option value="IN">Entrada</option>
-              <option value="OUT">Salida</option>
-              <option value="ADJUSTMENT">Ajuste</option>
-            </select>
-          </div>
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={() => setFilters(defaultFilters)}
-          >
-            Limpiar
-          </button>
-        </div>
-
-        {listError && <div className="alert alert-error">{listError}</div>}
-
-        <DataTable
-          columns={columns}
-          rows={movements}
-          rowKey={(m) => m.id}
-          loading={listLoading}
-          emptyMessage="No hay movimientos registrados."
-          footer={
-            !listLoading && totalPages > 1 ? (
-              <div className="table-pagination">
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  disabled={filters.page <= 0}
-                  onClick={() => setFilters((f) => ({ ...f, page: f.page - 1 }))}
-                >
-                  Anterior
-                </button>
-                <span>
-                  {filters.page + 1} / {totalPages}
-                </span>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  disabled={filters.page >= totalPages - 1}
-                  onClick={() => setFilters((f) => ({ ...f, page: f.page + 1 }))}
-                >
-                  Siguiente
-                </button>
-              </div>
-            ) : undefined
-          }
-        />
-      </section>
+      </div>
     </>
   );
 }

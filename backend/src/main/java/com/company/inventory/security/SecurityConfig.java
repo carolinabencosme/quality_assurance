@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PublicApiPaths.ACTUATOR).permitAll()
                         .requestMatchers(PublicApiPaths.OPENAPI).permitAll()
+                        .requestMatchers(PublicApiPaths.ROOT).permitAll()
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().denyAll())
                 .oauth2ResourceServer(oauth2 -> oauth2

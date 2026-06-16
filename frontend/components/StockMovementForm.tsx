@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Icon from '@/components/icons/AppIcons';
 import type { StockLevel, StockMovementType } from '@/lib/types/stock';
 
 export type StockMovementFormValues = {
@@ -28,9 +29,15 @@ const defaultValues: StockMovementFormValues = {
 };
 
 const typeLabels: Record<StockMovementType, string> = {
-  IN: 'Entrada (IN)',
-  OUT: 'Salida (OUT)',
-  ADJUSTMENT: 'Ajuste (ADJUSTMENT)',
+  IN: 'Entrada',
+  OUT: 'Salida',
+  ADJUSTMENT: 'Ajuste',
+};
+
+const typeHints: Record<StockMovementType, string> = {
+  IN: 'Suma unidades al inventario.',
+  OUT: 'Descuenta unidades disponibles.',
+  ADJUSTMENT: 'Fija una nueva cantidad final.',
 };
 
 export default function StockMovementForm({
@@ -45,7 +52,7 @@ export default function StockMovementForm({
     setValues((prev) => ({ ...prev, ...patch }));
   };
 
-  const selectedProduct = products.find((p) => String(p.productId) === values.productId);
+  const selectedProduct = products.find((product) => String(product.productId) === values.productId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,38 +68,44 @@ export default function StockMovementForm({
         </div>
       )}
 
-      <div className="grid-2">
-        <div className="form-field">
-          <label htmlFor="movement-product">Producto *</label>
-          <select
-            id="movement-product"
-            value={values.productId}
-            onChange={(e) => update({ productId: e.target.value })}
-            required
-          >
-            <option value="">Seleccionar...</option>
-            {products.map((p) => (
-              <option key={p.productId} value={String(p.productId)}>
-                {p.sku} - {p.name} (stock: {p.quantity})
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="form-field">
+        <label htmlFor="movement-product">Producto *</label>
+        <select
+          id="movement-product"
+          value={values.productId}
+          onChange={(e) => update({ productId: e.target.value })}
+          required
+        >
+          <option value="">Seleccionar...</option>
+          {products.map((product) => (
+            <option key={product.productId} value={String(product.productId)}>
+              {product.sku} - {product.name} (stock: {product.quantity})
+            </option>
+          ))}
+        </select>
+        {selectedProduct && (
+          <span className={selectedProduct.critical ? 'field-hint field-hint--warn' : 'field-hint'}>
+            Actual: {selectedProduct.quantity} unidades. Minimo: {selectedProduct.minStock}.
+          </span>
+        )}
+      </div>
 
-        <div className="form-field">
-          <label htmlFor="movement-type">Tipo *</label>
-          <select
-            id="movement-type"
-            value={values.type}
-            onChange={(e) => update({ type: e.target.value as StockMovementType })}
-            required
-          >
-            {(Object.keys(typeLabels) as StockMovementType[]).map((t) => (
-              <option key={t} value={t}>
-                {typeLabels[t]}
-              </option>
-            ))}
-          </select>
+      <div className="form-field">
+        <span className="form-label">Tipo de movimiento *</span>
+        <div className="movement-type-grid" role="group" aria-label="Tipo de movimiento">
+          {(Object.keys(typeLabels) as StockMovementType[]).map((type) => (
+            <button
+              key={type}
+              type="button"
+              className={values.type === type ? 'movement-type active' : 'movement-type'}
+              onClick={() => update({ type })}
+              aria-pressed={values.type === type}
+            >
+              <Icon name={type === 'IN' ? 'arrowUp' : type === 'OUT' ? 'arrowDown' : 'stock'} size={18} />
+              <strong>{typeLabels[type]}</strong>
+              <span>{typeHints[type]}</span>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -107,8 +120,8 @@ export default function StockMovementForm({
             value={values.newQuantity}
             onChange={(e) => update({ newQuantity: e.target.value })}
             required
+            inputMode="numeric"
           />
-          {selectedProduct && <span className="field-hint">Actual: {selectedProduct.quantity}</span>}
         </div>
       ) : (
         <div className="form-field">
@@ -121,6 +134,7 @@ export default function StockMovementForm({
             value={values.quantity}
             onChange={(e) => update({ quantity: e.target.value })}
             required
+            inputMode="numeric"
           />
           {selectedProduct && values.type === 'OUT' && (
             <span className="field-hint">Disponible: {selectedProduct.quantity}</span>
@@ -142,7 +156,15 @@ export default function StockMovementForm({
 
       <div className="form-actions">
         <button type="submit" className="btn btn-primary btn-inline" disabled={submitting}>
-          {submitting ? 'Registrando...' : 'Registrar movimiento'}
+          {submitting ? (
+            <>
+              <span className="spinner spinner--light" aria-hidden /> Registrando...
+            </>
+          ) : (
+            <>
+              <Icon name="stock" size={17} /> Registrar movimiento
+            </>
+          )}
         </button>
       </div>
     </form>

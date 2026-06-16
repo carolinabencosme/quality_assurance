@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import DataTable from '@/components/DataTable';
+import Icon from '@/components/icons/AppIcons';
 import ProductFilters from '@/components/ProductFilters';
 import { apiGet } from '@/lib/api';
 import { canManageProducts } from '@/lib/permissions';
@@ -38,7 +39,11 @@ export default function ProductsPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const canManage = canManageProducts();
+  const [canManage, setCanManage] = useState(false);
+
+  useEffect(() => {
+    setCanManage(canManageProducts());
+  }, []);
 
   const loadCategories = useCallback(async () => {
     try {
@@ -89,7 +94,7 @@ export default function ProductsPage() {
         header: 'Alerta',
         render: (p: Product) =>
           p.critical ? (
-            <span className="badge">Cr&iacute;tico</span>
+            <span className="badge">Critico</span>
           ) : (
             <span className="badge badge-ok">OK</span>
           ),
@@ -111,7 +116,7 @@ export default function ProductsPage() {
               header: 'Accion',
               render: (p: Product) => (
                 <Link href={`/products/${p.id}/edit`} className="link-action">
-                  Editar
+                  Editar <Icon name="chevronRight" size={14} />
                 </Link>
               ),
             },
@@ -127,12 +132,12 @@ export default function ProductsPage() {
         <div>
           <h1 className="page-title">Productos</h1>
           <p className="page-sub">
-            Cat&aacute;logo - {totalElements.toLocaleString('es-DO')} registros
+            Catalogo - {totalElements.toLocaleString('es-DO')} registros
           </p>
         </div>
         {canManage && (
           <Link href="/products/new" className="btn btn-primary btn-inline">
-            Nuevo producto
+            <Icon name="plus" size={17} /> Nuevo producto
           </Link>
         )}
       </div>
@@ -161,6 +166,7 @@ export default function ProductsPage() {
           rows={products}
           rowKey={(p) => p.id}
           loading={loading}
+          emptyTitle="No encontramos productos"
           emptyMessage="No hay productos que coincidan con los filtros."
           footer={
             !loading && totalPages > 1 ? (
@@ -171,7 +177,7 @@ export default function ProductsPage() {
                   disabled={filters.page <= 0}
                   onClick={() => setFilters((prev) => ({ ...prev, page: prev.page - 1 }))}
                 >
-                  Anterior
+                  <Icon name="chevronLeft" size={16} /> Anterior
                 </button>
                 <span>
                   {filters.page + 1} / {totalPages}
@@ -182,7 +188,7 @@ export default function ProductsPage() {
                   disabled={filters.page >= totalPages - 1}
                   onClick={() => setFilters((prev) => ({ ...prev, page: prev.page + 1 }))}
                 >
-                  Siguiente
+                  Siguiente <Icon name="chevronRight" size={16} />
                 </button>
               </div>
             ) : undefined

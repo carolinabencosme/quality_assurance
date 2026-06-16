@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import BrandMark from '@/components/BrandMark';
 import { APP_NAV, isNavActive } from '@/lib/navigation';
 
 export default function Sidebar() {
@@ -10,11 +11,8 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <div className="brand-mark">IQ</div>
-        <div>
-          <strong>Inventory QAS</strong>
-          <span>PUCMM - Fase 3</span>
-        </div>
+        <BrandMark size="md" showLabel />
+        <span>Panel operativo</span>
       </div>
 
       <nav className="sidebar-nav" aria-label="Principal">

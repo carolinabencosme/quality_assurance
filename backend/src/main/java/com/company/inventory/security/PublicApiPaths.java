@@ -21,6 +21,9 @@ public final class PublicApiPaths {
             "/v3/api-docs/**",
     };
 
+    /** Raíz del backend (redirect a Swagger). */
+    public static final String[] ROOT = { "/" };
+
     private PublicApiPaths() {
     }
 }

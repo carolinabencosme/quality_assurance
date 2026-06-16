@@ -10,7 +10,7 @@ export const APP_NAV: NavItem[] = [
   { href: '/products', label: 'Productos' },
   { href: '/stock/movements', label: 'Stock', activePrefix: '/stock' },
   { href: '/reports', label: 'Reportes' },
-  { href: '/audit', label: 'Auditor\u00eda' },
+  { href: '/audit', label: 'Auditoria' },
 ];
 
 export function isNavActive(pathname: string, item: NavItem): boolean {
