@@ -1,3 +1,0 @@
-JaCoCo HTML: backend/target/site/jacoco/index.html
-Generado: 2026-06-14
-Umbral: 60% line covered ratio (jacoco-check)
