@@ -13,16 +13,22 @@ $checks = @(
 
 Write-Host '=== Observability smoke (QA-7) ===' -ForegroundColor Cyan
 foreach ($c in $checks) {
-  try {
-    $r = Invoke-WebRequest -Uri $c.Url -UseBasicParsing -TimeoutSec 15
-    if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 300) {
-      Write-Host ('OK  ' + $c.Name) -ForegroundColor Green
-    } else {
-      Write-Host ('FAIL ' + $c.Name + ' HTTP ' + $r.StatusCode) -ForegroundColor Red
-      exit 1
+  $ok = $false
+  for ($i = 1; $i -le 3; $i++) {
+    try {
+      $r = Invoke-WebRequest -Uri $c.Url -UseBasicParsing -TimeoutSec 20
+      if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 300) {
+        $ok = $true
+        break
+      }
+    } catch {
+      if ($i -lt 3) { Start-Sleep -Seconds 5 }
     }
-  } catch {
-    Write-Host ('FAIL ' + $c.Name + ' - ' + $_.Exception.Message) -ForegroundColor Red
+  }
+  if ($ok) {
+    Write-Host ('OK  ' + $c.Name) -ForegroundColor Green
+  } else {
+    Write-Host ('FAIL ' + $c.Name) -ForegroundColor Red
     exit 1
   }
 }

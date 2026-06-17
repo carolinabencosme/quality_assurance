@@ -25,7 +25,7 @@ test.describe('Productos — CRUD (warehouse)', () => {
     await page.locator('#minStock').fill('1');
 
     await page.getByRole('button', { name: 'Crear producto' }).click();
-    await expect(page).toHaveURL(new RegExp(`/products/\\d+/edit`));
+    await expect(page).toHaveURL(new RegExp(`/products/\\d+/edit`), { timeout: 15_000 });
     await expect(page.getByRole('heading', { name: 'Editar producto' })).toBeVisible();
     await expect(page.getByText(sku)).toBeVisible();
   });

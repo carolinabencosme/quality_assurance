@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { loginViaKeycloak } from '../helpers/keycloak-login';
+import { loginViaKeycloak, dockLink } from '../helpers/keycloak-login';
 
 test.describe('Inventory QAS — flujo principal', () => {
   test('login viewer y dashboard carga KPIs', async ({ page }) => {
@@ -12,7 +12,7 @@ test.describe('Inventory QAS — flujo principal', () => {
   test('navegación a productos', async ({ page }) => {
     await loginViaKeycloak(page, 'viewer', 'viewer123');
 
-    await page.getByRole('link', { name: 'Productos' }).click();
+    await dockLink(page, 'Productos').click();
     await expect(page).toHaveURL(/\/products/);
     await expect(page.getByRole('heading', { name: 'Productos' })).toBeVisible();
   });

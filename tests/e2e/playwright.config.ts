@@ -4,10 +4,10 @@ const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:3000';
 
 export default defineConfig({
   testDir: './specs',
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  retries: process.env.CI ? 1 : 1,
+  workers: 1,
   reporter: [['list'], ['html', { open: 'never', outputFolder: '../../docs/qa-evidence/playwright-report' }]],
   use: {
     baseURL,

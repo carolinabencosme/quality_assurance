@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import * as path from 'path';
-import { loginViaKeycloak, completeKeycloakLogin } from '../helpers/keycloak-login';
+import { loginViaKeycloak, completeKeycloakLogin, dockLink } from '../helpers/keycloak-login';
 
 const evidenceDir =
   process.env.EVIDENCE_DIR ?? path.join(__dirname, '../../../docs/qa-evidence/screenshots');
@@ -18,7 +18,7 @@ test.describe('Capturas evidencia Avance V3', () => {
 
   test('02 admin productos', async ({ page }) => {
     await loginViaKeycloak(page, 'admin', 'admin123');
-    await page.getByRole('link', { name: 'Productos' }).click();
+    await dockLink(page, 'Productos').click();
     await expect(page).toHaveURL(/\/products/);
     await page.screenshot({ path: path.join(evidenceDir, '02-admin-products.png'), fullPage: true });
   });
@@ -31,7 +31,7 @@ test.describe('Capturas evidencia Avance V3', () => {
 
   test('05 auditoria admin', async ({ page }) => {
     await loginViaKeycloak(page, 'admin', 'admin123');
-    await page.getByRole('link', { name: /Auditor/i }).click();
+    await dockLink(page, 'Auditoria').click();
     await expect(page).toHaveURL(/\/audit/);
     await page.screenshot({ path: path.join(evidenceDir, '05-audit-envers.png'), fullPage: true });
   });
