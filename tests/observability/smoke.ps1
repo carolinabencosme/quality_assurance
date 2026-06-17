@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 
 $checks = @(
   @{ Name = 'Prometheus'; Url = 'http://localhost:9090/-/healthy' },
-  @{ Name = 'Grafana'; Url = 'http://localhost:3001/api/health' },
+  @{ Name = 'Grafana'; Url = 'http://localhost:3030/api/health' },
   @{ Name = 'Loki'; Url = 'http://localhost:3100/ready' },
   @{ Name = 'Tempo'; Url = 'http://localhost:3200/ready' },
   @{ Name = 'Alloy'; Url = 'http://localhost:12345/-/healthy' },

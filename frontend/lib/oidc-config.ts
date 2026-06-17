@@ -12,7 +12,7 @@ export const OIDC = {
   clientId,
   appOrigin,
   callbackPath: '/auth/callback',
-  scopes: 'openid profile email offline_access',
+  scopes: 'openid profile email',
 } as const;
 
 export function oidcRedirectUri(): string {

@@ -1,0 +1,262 @@
+/* Cub — Keycloak login theme (dark, alineado con frontend Next.js) */
+
+:root {
+  --cub-brand: #6266f1;
+  --cub-brand-strong: #4e46e5;
+  --cub-violet: #8a5cf6;
+  --cub-pink: #d946ef;
+  --cub-ink: #111116;
+  --cub-charcoal: #20212a;
+  --cub-text-on-dark: #fbfbff;
+  --cub-text-muted: rgb(255 255 255 / 58%);
+  --cub-card: rgb(28 29 40 / 92%);
+  --cub-card-border: rgb(255 255 255 / 9%);
+  --cub-radius-md: 14px;
+  --cub-radius-sm: 10px;
+  --cub-shadow: 0 28px 90px rgb(0 0 0 / 48%);
+  --cub-gradient-bg: linear-gradient(135deg, #0d0d13 0%, #171826 46%, #11121a 100%);
+  --cub-gradient-brand: linear-gradient(135deg, #6266f1 0%, #8a5cf6 52%, #d946ef 100%);
+}
+
+html.cub-login,
+html.login-pf {
+  color-scheme: dark;
+}
+
+html.cub-login body,
+.login-pf body,
+body#keycloak-bg {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--cub-gradient-bg) !important;
+  background-image: var(--cub-gradient-bg) !important;
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+html.cub-login body::before,
+.login-pf body::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 14%, rgb(98 102 241 / 22%), transparent 34%),
+    radial-gradient(circle at 82% 78%, rgb(217 70 239 / 14%), transparent 30%);
+  content: "";
+  pointer-events: none;
+}
+
+.pf-v5-c-login {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.pf-v5-c-login__container {
+  gap: 1.25rem;
+  max-width: 28rem;
+}
+
+.pf-v5-c-login__header {
+  margin-bottom: 0.25rem;
+}
+
+#kc-header-wrapper.pf-v5-c-brand,
+#kc-header-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 auto;
+  color: var(--cub-text-on-dark) !important;
+  font-size: 1.55rem;
+  font-weight: 750;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: none;
+}
+
+#kc-header-wrapper::before {
+  display: block;
+  width: 52px;
+  height: 52px;
+  background: url("../img/cub-logo.svg") center / contain no-repeat;
+  content: "";
+  filter: drop-shadow(0 10px 26px rgb(98 102 241 / 35%));
+}
+
+#kc-header-wrapper strong {
+  font-weight: 780;
+}
+
+.pf-v5-c-login__main {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--cub-card-border);
+  border-radius: var(--cub-radius-md);
+  background: var(--cub-card);
+  box-shadow: var(--cub-shadow);
+  backdrop-filter: blur(14px);
+}
+
+.pf-v5-c-login__main::before {
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgb(98 102 241 / 34%),
+    transparent 48%,
+    rgb(217 70 239 / 22%)
+  );
+  filter: blur(10px);
+  opacity: 0.55;
+  content: "";
+  pointer-events: none;
+}
+
+.pf-v5-c-login__main-header,
+.pf-v5-c-login__main-body {
+  position: relative;
+  z-index: 1;
+}
+
+.pf-v5-c-login__main-header {
+  padding-top: 1.75rem;
+}
+
+.pf-v5-c-title.pf-m-3xl,
+#kc-page-title {
+  color: var(--cub-text-on-dark) !important;
+  font-size: 1.35rem !important;
+  font-weight: 780 !important;
+  letter-spacing: 0 !important;
+}
+
+.pf-v5-c-form__label-text,
+.pf-v5-c-form__label {
+  color: rgb(255 255 255 / 78%) !important;
+  font-size: 0.78rem !important;
+  font-weight: 760 !important;
+}
+
+.pf-v5-c-form-control,
+.pf-v5-c-form-control input,
+input.pf-v5-c-form-control {
+  min-height: 2.65rem;
+  border: 1px solid rgb(255 255 255 / 12%) !important;
+  border-radius: var(--cub-radius-sm) !important;
+  background: rgb(16 17 24 / 88%) !important;
+  color: var(--cub-text-on-dark) !important;
+  box-shadow: none !important;
+}
+
+.pf-v5-c-form-control:focus-within,
+.pf-v5-c-form-control input:focus {
+  border-color: rgb(98 102 241 / 72%) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgb(98 102 241 / 18%) !important;
+}
+
+.pf-v5-c-form-control::placeholder,
+.pf-v5-c-form-control input::placeholder {
+  color: rgb(255 255 255 / 34%) !important;
+}
+
+.pf-v5-c-button.pf-m-primary,
+input.pf-v5-c-button.pf-m-primary,
+button.pf-v5-c-button.pf-m-primary {
+  min-height: 2.75rem;
+  border: none !important;
+  border-radius: var(--cub-radius-sm) !important;
+  background: var(--cub-gradient-brand) !important;
+  color: #fff !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 12px 28px rgb(98 102 241 / 28%) !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.pf-v5-c-button.pf-m-primary:hover,
+input.pf-v5-c-button.pf-m-primary:hover,
+button.pf-v5-c-button.pf-m-primary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px rgb(98 102 241 / 34%) !important;
+}
+
+.pf-v5-c-button.pf-m-link,
+a.pf-v5-c-button.pf-m-link {
+  color: #9aa3ff !important;
+  font-weight: 650 !important;
+}
+
+.pf-v5-c-button.pf-m-link:hover {
+  color: #c4c9ff !important;
+}
+
+.pf-v5-c-check__label {
+  color: var(--cub-text-muted) !important;
+}
+
+.pf-v5-c-alert {
+  border-radius: var(--cub-radius-sm) !important;
+}
+
+.pf-v5-c-alert.pf-m-danger,
+.pf-v5-c-alert.pf-m-warning {
+  border: 1px solid rgb(201 40 40 / 28%) !important;
+  background: rgb(201 40 40 / 12%) !important;
+  color: #ffd4d4 !important;
+}
+
+.pf-v5-c-alert.pf-m-success {
+  border: 1px solid rgb(8 127 91 / 28%) !important;
+  background: rgb(8 127 91 / 12%) !important;
+  color: #b8f5df !important;
+}
+
+.pf-v5-c-alert.pf-m-info {
+  border: 1px solid rgb(98 102 241 / 28%) !important;
+  background: rgb(98 102 241 / 12%) !important;
+  color: #d8ddff !important;
+}
+
+.cub-login-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1.25rem;
+  padding-top: 0.25rem;
+  text-align: center;
+}
+
+.cub-login-footer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.58rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 999px;
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.cub-login-footer-tagline {
+  color: var(--cub-text-muted);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 767px) {
+  .pf-v5-c-login {
+    padding: 1.25rem 0.85rem;
+  }
+
+  .pf-v5-c-login__container {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
