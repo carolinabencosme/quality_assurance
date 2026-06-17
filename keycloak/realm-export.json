@@ -1,8 +1,12 @@
 {
   "realm": "inventory-realm",
   "enabled": true,
-  "displayName": "Inventory QAS",
-  "displayNameHtml": "<strong>Inventory QAS</strong>",
+  "displayName": "Cub",
+  "displayNameHtml": "Cub",
+  "loginTheme": "cub",
+  "internationalizationEnabled": true,
+  "supportedLocales": ["en", "es"],
+  "defaultLocale": "es",
   "sslRequired": "external",
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,
@@ -160,6 +164,7 @@
       "defaultClientScopes": [
         "web-origins",
         "acr",
+        "openid",
         "roles",
         "profile",
         "email"

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" role="img" aria-label="Cub">
+  <defs>
+    <linearGradient id="cubGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6266f1"/>
+      <stop offset="52%" stop-color="#8a5cf6"/>
+      <stop offset="100%" stop-color="#d946ef"/>
+    </linearGradient>
+  </defs>
+  <circle cx="26" cy="26" r="25" fill="url(#cubGrad)" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+  <circle cx="26" cy="26" r="16" fill="none" stroke="rgba(255,255,255,0.92)" stroke-width="2" stroke-dasharray="72 24"/>
+</svg>

@@ -4,6 +4,7 @@
 |---------|-------------|
 | `realm-export.json` | Realm `inventory-realm` importado al arrancar el contenedor |
 | `realm-export.version` | Versión semver del export (actual: ver archivo) |
+| `themes/cub/` | Tema de login oscuro alineado con la marca Cub |
 
 ## Arranque
 

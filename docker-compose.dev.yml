@@ -48,6 +48,7 @@ services:
       - "8081:8080"
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      - ./keycloak/themes:/opt/keycloak/themes:ro
     healthcheck:
       # Sin curl en la imagen; comprobación TCP al puerto HTTP (import realm ~2 min en primer arranque)
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8080'"]
