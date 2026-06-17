@@ -32,6 +32,22 @@ cd backend
 
 Sin Docker, el test de contexto e integración se omiten (`disabledWithoutDocker = true`).
 
+**Windows + Docker Desktop:** si `mvn verify` muestra tests *Skipped* (Testcontainers), ejecuta antes:
+
+```powershell
+$env:TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE = "//./pipe/docker_engine"
+```
+
+## Batería completa (local)
+
+Con el stack Docker levantado:
+
+```powershell
+cd C:\Users\Josvier\Desktop\quality_assurance
+$env:TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE = "//./pipe/docker_engine"
+.\scripts\run-all-tests.ps1
+```
+
 ## Frontend
 
 ```powershell
