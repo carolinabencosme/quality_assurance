@@ -747,23 +747,66 @@ Backend → OTLP → Alloy → Prometheus/Loki/Tempo → Grafana (3030)
 
 ---
 
-## 10. Comandos rápidos para la defensa
+## 10. Comandos completos para correr todo (Windows)
+
+### A. Preparar entorno (una vez por terminal)
 
 ```powershell
-# Stack
-docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up -d --build
+cd C:\Users\Josvier\Desktop\quality_assurance
+$env:TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE = "//./pipe/docker_engine"
+# Si mvn verify sigue con 38 skipped: Docker Desktop → Expose daemon tcp://localhost:2375
+# $env:DOCKER_HOST = "tcp://localhost:2375"
+```
 
-# Tests clave
-cd backend; .\mvnw.cmd verify
-cd tests\api; npm test
-cd tests\e2e; npm test
+### B. Levantar stack
+
+```powershell
+docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up -d --build
+# Esperar ~2 min. Verificar:
+curl.exe -s -o NUL -w "fe:%{http_code} api:%{http_code} kc:%{http_code} gf:%{http_code}" `
+  http://localhost:3000/ http://localhost:8080/actuator/health `
+  http://localhost:8081/realms/inventory-realm http://localhost:3030/api/health
+```
+
+### C. Todos los tests (recomendado)
+
+```powershell
+.\scripts\run-all-tests.ps1
+```
+
+### D. Tests uno a uno (rutas correctas desde la raíz)
+
+```powershell
+# Backend + JaCoCo
+cd backend; .\mvnw.cmd verify; cd ..
+
+# Newman API
+cd tests\api; npm install
+$sku = "NM-$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())"
+npm test -- --env-var "baseUrl=http://localhost:8080" --env-var "keycloakUrl=http://localhost:8081" --env-var "sku=$sku"
+cd ..\..
+
+# Playwright E2E
+cd tests\e2e; npm install; npx playwright install chromium
+$env:E2E_BASE_URL = "http://localhost:3000"; npm test
+cd ..\..
+
+# Smoke (desde raíz, NO desde backend)
 .\tests\security\auth-smoke.ps1
 .\tests\observability\smoke.ps1
 
-# Capturas evidencia
-cd tests\e2e
-npx playwright test specs/capture-evidence.spec.ts
+# Capturas defensa
+cd tests\e2e; npx playwright test specs/capture-evidence.spec.ts --workers=1; cd ..\..
 ```
+
+### E. URLs demo
+
+| Servicio | URL | Login |
+|----------|-----|-------|
+| Cub | http://localhost:3000 | viewer/viewer123 |
+| Swagger | http://localhost:8080/swagger-ui.html | JWT |
+| Keycloak | http://localhost:8081 | admin/admin |
+| Grafana | http://localhost:3030 | admin/admin |
 
 **Checklist capturas:** `docs/qa-evidence/CHECKLIST-CAPTURAS.md`
 

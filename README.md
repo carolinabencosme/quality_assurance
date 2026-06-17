@@ -30,6 +30,8 @@ Spring Boot 3 · Java 21 · Next.js 15 · PostgreSQL 16 · Keycloak · Flyway ·
 - [Preguntas técnicas — resumen](docs/defensa-preguntas-tecnicas.md)
 - [Preguntas técnicas — Avance V3](docs/defensa/preguntas-tecnicas-avance-v3.md)
 
+**Tests completos:** `.\scripts\run-all-tests.ps1` (ver sección 10 del doc de defensa)
+
 ## Estructura
 
 ```
