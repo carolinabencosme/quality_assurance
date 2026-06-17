@@ -2440,3 +2440,38 @@ button {
     transform: none !important;
   }
 }
+
+/* OIDC callback */
+.auth-callback-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: var(--canvas);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.auth-callback-card {
+  max-width: 420px;
+  padding: 2rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-callback-card h1 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+
+.auth-callback-error {
+  margin: 0 0 1.25rem;
+  color: var(--danger);
+  font-size: 0.9rem;
+}

@@ -7,6 +7,10 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('inventory_access')?.value;
   const { pathname } = request.nextUrl;
 
+  if (pathname.startsWith('/auth/callback')) {
+    return NextResponse.next();
+  }
+
   const isProtected = PROTECTED.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const isLogin = pathname === '/';
 
@@ -25,5 +29,13 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/dashboard/:path*', '/products/:path*', '/audit/:path*', '/reports/:path*', '/stock/:path*'],
+  matcher: [
+    '/',
+    '/auth/callback',
+    '/dashboard/:path*',
+    '/products/:path*',
+    '/audit/:path*',
+    '/reports/:path*',
+    '/stock/:path*',
+  ],
 };
