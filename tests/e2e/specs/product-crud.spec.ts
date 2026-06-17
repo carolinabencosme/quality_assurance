@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { loginViaKeycloak } from '../helpers/keycloak-login';
 
 /**
  * CRUD producto vía UI (requiere usuario con product:manage — realm warehouse-manager).
@@ -10,11 +11,7 @@ test.describe('Productos — CRUD (warehouse)', () => {
   const productName = `Playwright E2E ${Date.now()}`;
 
   test('login warehouse y crear producto', async ({ page }) => {
-    await page.goto('/');
-    await page.getByLabel('Usuario').fill('warehouse');
-    await page.getByLabel('Contraseña').fill('warehouse123');
-    await page.getByRole('button', { name: /entrar/i }).click();
-    await expect(page).toHaveURL(/\/dashboard/);
+    await loginViaKeycloak(page, 'warehouse', 'warehouse123');
 
     await page.goto('/products/new');
     await expect(page.getByRole('heading', { name: 'Nuevo producto' })).toBeVisible();
@@ -34,11 +31,7 @@ test.describe('Productos — CRUD (warehouse)', () => {
   });
 
   test('editar nombre y guardar', async ({ page }) => {
-    await page.goto('/');
-    await page.getByLabel('Usuario').fill('warehouse');
-    await page.getByLabel('Contraseña').fill('warehouse123');
-    await page.getByRole('button', { name: /entrar/i }).click();
-    await expect(page).toHaveURL(/\/dashboard/);
+    await loginViaKeycloak(page, 'warehouse', 'warehouse123');
 
     await page.goto('/products');
     const row = page.locator('tr', { hasText: sku });
@@ -52,11 +45,7 @@ test.describe('Productos — CRUD (warehouse)', () => {
   });
 
   test('inactivar producto (soft delete)', async ({ page }) => {
-    await page.goto('/');
-    await page.getByLabel('Usuario').fill('warehouse');
-    await page.getByLabel('Contraseña').fill('warehouse123');
-    await page.getByRole('button', { name: /entrar/i }).click();
-    await expect(page).toHaveURL(/\/dashboard/);
+    await loginViaKeycloak(page, 'warehouse', 'warehouse123');
 
     await page.goto('/products');
     const row = page.locator('tr', { hasText: sku });

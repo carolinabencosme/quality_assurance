@@ -29,7 +29,7 @@ Separar **autenticación** (quién eres) de **autorización** (qué puedes hacer
 | **Permisos** | Constantes `product:view`, `stock:manage`, `audit:view`… | `Permission.java` |
 | **Autorización** | `@PreAuthorize("hasAuthority('...')")` por endpoint | controladores `*Controller.java` |
 | **Claims JWT** | Roles desde `realm_access` y `resource_access` | `KeycloakJwtAuthoritiesConverter.java` |
-| **Frontend** | Login password grant / sesión, token en requests Axios | `LoginForm.tsx`, `lib/axiosClient.ts` |
+| **Frontend** | Authorization Code + PKCE (redirect a Keycloak), tokens en cookie, Axios Bearer | `LoginForm.tsx`, `lib/auth.ts`, `lib/oidc-config.ts`, `/auth/callback` |
 
 ### Usuarios de prueba
 

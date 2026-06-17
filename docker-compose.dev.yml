@@ -104,6 +104,7 @@ services:
       NEXT_PUBLIC_KEYCLOAK_URL: ${NEXT_PUBLIC_KEYCLOAK_URL:-/keycloak}
       NEXT_PUBLIC_KEYCLOAK_REALM: ${NEXT_PUBLIC_KEYCLOAK_REALM:-inventory-realm}
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:-inventory-frontend}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
       API_PROXY_TARGET: http://backend:8080
       # Tokens con iss localhost:8081 (mismo issuer que valida el backend)
       KEYCLOAK_PROXY_TARGET: http://host.docker.internal:8081

@@ -1,16 +1,27 @@
-const keycloakBase = (process.env.NEXT_PUBLIC_KEYCLOAK_URL ?? '/keycloak').replace(/\/$/, '');
-const realm = process.env.NEXT_PUBLIC_KEYCLOAK_REALM ?? 'inventory-realm';
-const clientId = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? 'inventory-frontend';
+import {
+  OIDC,
+  oidcAuthUrl,
+  oidcLogoutUrl,
+  oidcRedirectUri,
+  oidcTokenUrl,
+} from '@/lib/oidc-config';
+import { generateRandomString, sha256Base64Url } from '@/lib/pkce';
 
 const ACCESS_COOKIE = 'inventory_access';
 const REFRESH_KEY = 'inventory_refresh';
 const EXPIRES_KEY = 'inventory_expires_at';
+const ID_TOKEN_KEY = 'inventory_id_token';
 const SKEW_MS = 30_000;
+
+const PKCE_VERIFIER_KEY = 'oidc_code_verifier';
+const PKCE_STATE_KEY = 'oidc_state';
+const PKCE_RETURN_KEY = 'oidc_return_to';
 
 export type TokenResponse = {
   access_token: string;
   refresh_token?: string;
   expires_in?: number;
+  id_token?: string;
 };
 
 export class AuthError extends Error {
@@ -23,14 +34,16 @@ export class AuthError extends Error {
   }
 }
 
-function tokenUrl() {
-  return `${keycloakBase}/realms/${realm}/protocol/openid-connect/token`;
-}
-
 function setCookie(accessToken: string, maxAgeSec: number) {
   if (typeof document === 'undefined') return;
-  // JWT ya es URL-safe; encodeURIComponent rompe algunos parsers de cookie/middleware
   document.cookie = `${ACCESS_COOKIE}=${accessToken}; path=/; max-age=${maxAgeSec}; SameSite=Lax`;
+}
+
+function clearPkceSession() {
+  if (typeof sessionStorage === 'undefined') return;
+  sessionStorage.removeItem(PKCE_VERIFIER_KEY);
+  sessionStorage.removeItem(PKCE_STATE_KEY);
+  sessionStorage.removeItem(PKCE_RETURN_KEY);
 }
 
 export function clearSession() {
@@ -38,15 +51,22 @@ export function clearSession() {
     document.cookie = `${ACCESS_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
     localStorage.removeItem(REFRESH_KEY);
     localStorage.removeItem(EXPIRES_KEY);
+    localStorage.removeItem(ID_TOKEN_KEY);
   }
+  clearPkceSession();
 }
 
 export function persistSession(tokens: TokenResponse) {
   const expiresIn = tokens.expires_in ?? 3600;
   setCookie(tokens.access_token, expiresIn);
-  if (typeof localStorage !== 'undefined' && tokens.refresh_token) {
-    localStorage.setItem(REFRESH_KEY, tokens.refresh_token);
-    localStorage.setItem(EXPIRES_KEY, String(Date.now() + expiresIn * 1000));
+  if (typeof localStorage !== 'undefined') {
+    if (tokens.refresh_token) {
+      localStorage.setItem(REFRESH_KEY, tokens.refresh_token);
+      localStorage.setItem(EXPIRES_KEY, String(Date.now() + expiresIn * 1000));
+    }
+    if (tokens.id_token) {
+      localStorage.setItem(ID_TOKEN_KEY, tokens.id_token);
+    }
   }
 }
 
@@ -59,6 +79,11 @@ function getExpiresAt(): number | null {
 function getRefreshToken(): string | null {
   if (typeof localStorage === 'undefined') return null;
   return localStorage.getItem(REFRESH_KEY);
+}
+
+function getIdToken(): string | null {
+  if (typeof localStorage === 'undefined') return null;
+  return localStorage.getItem(ID_TOKEN_KEY);
 }
 
 export function getAccessToken(): string | null {
@@ -83,7 +108,7 @@ function readAccessFromCookie(): string | null {
 async function requestToken(body: URLSearchParams): Promise<TokenResponse> {
   let response: Response;
   try {
-    response = await fetch(tokenUrl(), {
+    response = await fetch(oidcTokenUrl(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body,
@@ -99,8 +124,7 @@ async function requestToken(body: URLSearchParams): Promise<TokenResponse> {
       detail = err.error_description ?? err.error ?? detail;
     } catch {
       if (response.status >= 500) {
-        detail =
-          'Keycloak no disponible. Si usas Docker, reinicia con docker compose up --build.';
+        detail = 'Keycloak no disponible. Reinicia Docker Compose si es necesario.';
       }
     }
     throw new AuthError(detail, response.status);
@@ -109,17 +133,60 @@ async function requestToken(body: URLSearchParams): Promise<TokenResponse> {
   return response.json() as Promise<TokenResponse>;
 }
 
-export async function login(username: string, password: string): Promise<string> {
+/**
+ * Inicia Authorization Code + PKCE — redirige a la pantalla de login de Keycloak.
+ */
+export async function startLogin(returnPath = '/dashboard'): Promise<void> {
+  if (typeof window === 'undefined') return;
+
+  const codeVerifier = generateRandomString();
+  const codeChallenge = await sha256Base64Url(codeVerifier);
+  const state = generateRandomString();
+
+  sessionStorage.setItem(PKCE_VERIFIER_KEY, codeVerifier);
+  sessionStorage.setItem(PKCE_STATE_KEY, state);
+  sessionStorage.setItem(PKCE_RETURN_KEY, returnPath);
+
+  const params = new URLSearchParams({
+    client_id: OIDC.clientId,
+    redirect_uri: oidcRedirectUri(),
+    response_type: 'code',
+    scope: OIDC.scopes,
+    state,
+    code_challenge: codeChallenge,
+    code_challenge_method: 'S256',
+  });
+
+  window.location.assign(`${oidcAuthUrl()}?${params.toString()}`);
+}
+
+/**
+ * Intercambia el authorization code por tokens (callback OIDC).
+ */
+export async function completeLoginFromCallback(code: string, state: string): Promise<string> {
+  const expectedState = sessionStorage.getItem(PKCE_STATE_KEY);
+  const codeVerifier = sessionStorage.getItem(PKCE_VERIFIER_KEY);
+  const returnTo = sessionStorage.getItem(PKCE_RETURN_KEY) ?? '/dashboard';
+
+  if (!codeVerifier || !expectedState || state !== expectedState) {
+    clearPkceSession();
+    throw new AuthError('Estado de autenticación inválido. Intenta de nuevo.');
+  }
+
+  clearPkceSession();
+
   const tokens = await requestToken(
     new URLSearchParams({
-      grant_type: 'password',
-      client_id: clientId,
-      username,
-      password,
+      grant_type: 'authorization_code',
+      client_id: OIDC.clientId,
+      code,
+      redirect_uri: oidcRedirectUri(),
+      code_verifier: codeVerifier,
     }),
   );
+
   persistSession(tokens);
-  return tokens.access_token;
+  return returnTo;
 }
 
 export async function refreshAccessToken(): Promise<string | null> {
@@ -130,7 +197,7 @@ export async function refreshAccessToken(): Promise<string | null> {
     const tokens = await requestToken(
       new URLSearchParams({
         grant_type: 'refresh_token',
-        client_id: clientId,
+        client_id: OIDC.clientId,
         refresh_token: refresh,
       }),
     );
@@ -161,9 +228,20 @@ export async function getValidAccessToken(): Promise<string | null> {
   return null;
 }
 
-export function logout() {
+/** Cierra sesión local y en Keycloak (SSO logout). */
+export function logout(): void {
+  const idToken = getIdToken();
   clearSession();
-  if (typeof window !== 'undefined') {
-    window.location.href = '/';
+
+  if (typeof window === 'undefined') return;
+
+  const params = new URLSearchParams({
+    client_id: OIDC.clientId,
+    post_logout_redirect_uri: `${window.location.origin}/`,
+  });
+  if (idToken) {
+    params.set('id_token_hint', idToken);
   }
+
+  window.location.assign(`${oidcLogoutUrl()}?${params.toString()}`);
 }
