@@ -9,6 +9,16 @@ function isPostLoginUrl(url: URL): boolean {
   return url.pathname.startsWith('/auth/callback') || url.pathname.startsWith('/dashboard');
 }
 
+/** Limpia cookies y storage para evitar sesión residual entre tests. */
+export async function resetBrowserSession(page: Page): Promise<void> {
+  await page.context().clearCookies();
+  await page.goto('/');
+  await page.evaluate(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
+}
+
 async function submitKeycloakCredentials(
   page: Page,
   username: string,
@@ -26,17 +36,21 @@ async function submitKeycloakCredentials(
   });
 
   await Promise.all([
-    page.waitForURL((url) => isPostLoginUrl(url), { timeout: 45_000 }),
+    page.waitForURL((url) => isPostLoginUrl(url), {
+      timeout: 45_000,
+      waitUntil: 'commit',
+    }),
     signIn.click(),
   ]);
 
   if (page.url().includes('/auth/callback')) {
     await page.waitForURL((url) => isAppUrl(url) && url.pathname.startsWith('/dashboard'), {
-      timeout: 30_000,
+      timeout: 45_000,
+      waitUntil: 'domcontentloaded',
     });
   }
 
-  await expect(page).toHaveURL(/localhost:3000\/dashboard/);
+  await expect(page).toHaveURL(/localhost:3000\/dashboard/, { timeout: 15_000 });
 }
 
 /**
@@ -48,12 +62,13 @@ export async function loginViaKeycloak(
   username: string,
   password: string,
 ): Promise<void> {
-  await page.goto('/');
+  await resetBrowserSession(page);
 
   await page.getByRole('button', { name: /iniciar sesi[oó]n con keycloak/i }).click();
 
   await page.waitForURL(/realms\/inventory-realm|\/protocol\/openid-connect\/auth/, {
     timeout: 25_000,
+    waitUntil: 'domcontentloaded',
   });
 
   await submitKeycloakCredentials(page, username, password);

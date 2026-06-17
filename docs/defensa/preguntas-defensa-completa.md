@@ -1,20 +1,27 @@
 # Preguntas para la Defensa — Guía completa con rutas de código
 
-Documento para la rama **presentacion**. Cada respuesta incluye **qué decir**, **dónde está en el código** y **cómo demostrarlo en vivo**.
+Documento para la rama **[presentacion](https://github.com/carolinabencosme/quality_assurance/tree/presentacion)**. Cada respuesta incluye **qué decir en voz alta**, **enlace directo al código** y **cómo demostrarlo en vivo**.
+
+> **Cómo usarlo en la defensa:** lee primero la sección [12. Guion oral y novedades](#12-guion-oral-y-novedades-cub-v06). Luego, si el tribunal pregunta por un tema concreto, salta al número de la pregunta. Los enlaces abren el archivo exacto en GitHub (rama `presentacion`).
+
+**Repositorio:** [github.com/carolinabencosme/quality_assurance](https://github.com/carolinabencosme/quality_assurance)
 
 **URLs del demo (stack levantado):**
 
-| Servicio | URL | Credenciales |
-|----------|-----|--------------|
-| App Cub | http://localhost:3000 | `viewer/viewer123`, `admin/admin123`, `warehouse/warehouse123` |
-| Swagger | http://localhost:8080/swagger-ui.html | JWT desde Keycloak |
-| Keycloak Admin | http://localhost:8081 | `admin/admin` |
-| Grafana | http://localhost:3030 | `admin/admin` |
-| Prometheus | http://localhost:9090 | — |
-| Jenkins (staging) | http://localhost:8082 | tras `docker-compose.staging.yml` |
-| SonarQube (staging) | http://localhost:9000 | tras staging |
+
+| Servicio            | URL                                                                            | Credenciales                                                   |
+| ------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| App Cub             | [http://localhost:3000](http://localhost:3000)                                 | `viewer/viewer123`, `admin/admin123`, `warehouse/warehouse123` |
+| Swagger             | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) | JWT desde Keycloak                                             |
+| Keycloak Admin      | [http://localhost:8081](http://localhost:8081)                                 | `admin/admin`                                                  |
+| Grafana             | [http://localhost:3030](http://localhost:3030)                                 | `admin/admin`                                                  |
+| Prometheus          | [http://localhost:9090](http://localhost:9090)                                 | —                                                              |
+| Jenkins (staging)   | [http://localhost:8082](http://localhost:8082)                                 | tras `docker-compose.staging.yml`                              |
+| SonarQube (staging) | [http://localhost:9000](http://localhost:9000)                                 | tras staging                                                   |
+
 
 **Levantar todo:**
+
 ```powershell
 docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up -d --build
 ```
@@ -29,19 +36,25 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up 
 
 **Respuesta:** Arquitectura **en capas** (no microservicios):
 
-- **Backend:** Controller → Service → Repository → Entity (patrón **MVC / layered** de Spring).
-- **Frontend:** **App Router de Next.js** (React) — páginas en `app/`, componentes en `components/`, lógica HTTP en `lib/`. No es MVVM; es **component-based + hooks** con separación presentación / cliente API.
+- **Backend:** Controller → Service → Repository → Entity (patrón **MVC / layered** de Spring). El controller solo recibe HTTP y delega; la lógica vive en el service; JPA accede a Postgres vía repository.
+- **Frontend:** **App Router de Next.js 15** (React 19) — páginas en `app/`, componentes reutilizables en `components/`, lógica HTTP en `lib/`. No es MVVM; es **component-based + hooks** con separación presentación / cliente API.
 
-**Rutas clave:**
+**Qué decir:** *"Tomamos el dominio Product como ejemplo: el usuario ve la tabla en Next.js, la petición llega al ProductController, el ProductService aplica reglas y filtros, y ProductRepository persiste en PostgreSQL."*
 
-| Capa | Ejemplo productos |
-|------|-------------------|
-| Controller | `backend/src/main/java/com/company/inventory/product/controller/ProductController.java` |
-| Service | `backend/.../product/service/ProductService.java` |
-| Repository | `backend/.../product/repository/ProductRepository.java` |
-| Entity | `backend/.../product/entity/Product.java` |
-| Vista UI | `frontend/app/(app)/products/page.tsx` |
-| Cliente HTTP | `frontend/lib/axiosClient.ts`, `frontend/lib/api.ts` |
+**Rutas clave (clic → código en GitHub):**
+
+
+| Capa               | Ejemplo productos                                                                                                                                                                                                                | Qué hace                                                        |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Controller         | `[ProductController.java](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/backend/src/main/java/com/company/inventory/product/controller/ProductController.java)`                                        | REST `/api/v1/products`, `@PreAuthorize`, paginación Spring     |
+| Service            | `[ProductService.java](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/backend/src/main/java/com/company/inventory/product/service/ProductService.java)`                                                 | CRUD, validación SKU único, filtros con `ProductSpecifications` |
+| Repository         | `[ProductRepository.java](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/backend/src/main/java/com/company/inventory/product/repository/ProductRepository.java)`                                        | `JpaRepository` + `JpaSpecificationExecutor`                    |
+| Entity             | `[Product.java](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/backend/src/main/java/com/company/inventory/product/entity/Product.java)`                                                                | `@Entity`, `@Audited` (Envers), relación con `Category`         |
+| DTO respuesta      | `[ProductResponse.java](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/backend/src/main/java/com/company/inventory/product/dto/ProductResponse.java)`                                                   | JSON que ve el frontend (no expone entidad JPA)                 |
+| Vista UI           | `[products/page.tsx](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/app/(app)`/products/page.tsx)                                                                                              | Tabla, filtros, paginación, link Editar                         |
+| Editar / inactivar | `[products/[id]/edit/page.tsx](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/app/(app)`/products/%5Bid%5D/edit/page.tsx)                                                                      | Formulario edición + modal confirmación inactivar               |
+| Cliente HTTP       | `[axiosClient.ts](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/lib/axiosClient.ts)`, `[api.ts](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/lib/api.ts)` | Axios + interceptores JWT                                       |
+
 
 ---
 
@@ -63,17 +76,19 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up 
 
 ### 4. ¿Stack tecnológico?
 
-| Capa | Tecnología | Archivo / evidencia |
-|------|------------|---------------------|
-| API | Java 21, Spring Boot 3.4 | `backend/pom.xml` |
-| Seguridad | Spring Security OAuth2 Resource Server, Keycloak 26 | `SecurityConfig.java`, `keycloak/realm-export.json` |
-| Persistencia | PostgreSQL 16, JPA/Hibernate, Flyway, Envers | `db/migration/V*.sql`, `application.yml` |
-| Frontend | Next.js 15, React, TypeScript, Axios | `frontend/package.json` |
-| Auth UI | OIDC Authorization Code + PKCE | `frontend/lib/auth.ts`, `frontend/lib/oidc-config.ts` |
-| Contenedores | Docker, Docker Compose | `docker-compose.dev.yml` |
-| Tests | JUnit 5, Mockito, Testcontainers, Playwright, Newman, k6 | `backend/src/test/`, `tests/` |
-| CI | GitHub Actions, Jenkins (staging) | `.github/workflows/`, `Jenkinsfile` |
-| Observabilidad | OpenTelemetry, Prometheus, Loki, Tempo, Grafana Alloy | `docker-compose.observability.yml`, `observability/` |
+
+| Capa           | Tecnología                                               | Archivo / evidencia                                   |
+| -------------- | -------------------------------------------------------- | ----------------------------------------------------- |
+| API            | Java 21, Spring Boot 3.4                                 | `backend/pom.xml`                                     |
+| Seguridad      | Spring Security OAuth2 Resource Server, Keycloak 26      | `SecurityConfig.java`, `keycloak/realm-export.json`   |
+| Persistencia   | PostgreSQL 16, JPA/Hibernate, Flyway, Envers             | `db/migration/V*.sql`, `application.yml`              |
+| Frontend       | Next.js 15, React, TypeScript, Axios                     | `frontend/package.json`                               |
+| Auth UI        | OIDC Authorization Code + PKCE                           | `frontend/lib/auth.ts`, `frontend/lib/oidc-config.ts` |
+| Contenedores   | Docker, Docker Compose                                   | `docker-compose.dev.yml`                              |
+| Tests          | JUnit 5, Mockito, Testcontainers, Playwright, Newman, k6 | `backend/src/test/`, `tests/`                         |
+| CI             | GitHub Actions, Jenkins (staging)                        | `.github/workflows/`, `Jenkinsfile`                   |
+| Observabilidad | OpenTelemetry, Prometheus, Loki, Tempo, Grafana Alloy    | `docker-compose.observability.yml`, `observability/`  |
+
 
 ---
 
@@ -91,17 +106,19 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up 
 
 ### 6. ¿Patrones / metodologías en Spring?
 
-| Patrón | Uso | Ruta |
-|--------|-----|------|
-| Dependency Injection | `@Autowired` / constructor | Todos los `@Service`, `@RestController` |
-| Repository | Acceso a datos | `*Repository.java` extends `JpaRepository` |
-| DTO | Entrada/salida API | `*Request.java`, `*Response.java` |
-| Bean Validation | `@Valid` en controllers | `ProductRequest.java` |
-| Method Security | `@PreAuthorize` | `ProductController.java`, `StockController.java` |
-| Resource Server JWT | OAuth2 | `SecurityConfig.java` |
-| Auditoría | Hibernate Envers | entidades `@Audited`, tablas `*_aud` |
-| Migraciones | Flyway | `backend/src/main/resources/db/migration/` |
-| Exception handling | `@ControllerAdvice` | `backend/.../common/exception/` |
+
+| Patrón               | Uso                        | Ruta                                             |
+| -------------------- | -------------------------- | ------------------------------------------------ |
+| Dependency Injection | `@Autowired` / constructor | Todos los `@Service`, `@RestController`          |
+| Repository           | Acceso a datos             | `*Repository.java` extends `JpaRepository`       |
+| DTO                  | Entrada/salida API         | `*Request.java`, `*Response.java`                |
+| Bean Validation      | `@Valid` en controllers    | `ProductRequest.java`                            |
+| Method Security      | `@PreAuthorize`            | `ProductController.java`, `StockController.java` |
+| Resource Server JWT  | OAuth2                     | `SecurityConfig.java`                            |
+| Auditoría            | Hibernate Envers           | entidades `@Audited`, tablas `*_aud`             |
+| Migraciones          | Flyway                     | `backend/src/main/resources/db/migration/`       |
+| Exception handling   | `@ControllerAdvice`        | `backend/.../common/exception/`                  |
+
 
 ---
 
@@ -142,16 +159,19 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up 
 
 **Respuesta:** Orquestación por **overlays**:
 
-| Archivo | Ambiente | Servicios |
-|---------|----------|-----------|
-| `docker-compose.dev.yml` | Desarrollo | postgres, keycloak, backend, frontend |
-| `docker-compose.observability.yml` | Overlay | prometheus, loki, tempo, grafana, alloy, alertmanager |
-| `docker-compose.test.yml` | Tests E2E | override nombres contenedores |
-| `docker-compose.staging.yml` | Staging/CI tools | sonarqube, jenkins, frontend prod |
+
+| Archivo                            | Ambiente         | Servicios                                             |
+| ---------------------------------- | ---------------- | ----------------------------------------------------- |
+| `docker-compose.dev.yml`           | Desarrollo       | postgres, keycloak, backend, frontend                 |
+| `docker-compose.observability.yml` | Overlay          | prometheus, loki, tempo, grafana, alloy, alertmanager |
+| `docker-compose.test.yml`          | Tests E2E        | override nombres contenedores                         |
+| `docker-compose.staging.yml`       | Staging/CI tools | sonarqube, jenkins, frontend prod                     |
+
 
 **Red:** `inventory-net`. **Volúmenes:** datos Postgres, node_modules, Grafana.
 
 **Demo:**
+
 ```powershell
 docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml ps
 ```
@@ -162,13 +182,15 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml ps
 
 **Respuesta:** Configuración por capas Spring + variables de entorno en Compose.
 
-| Archivo | Contenido |
-|---------|-----------|
-| `backend/src/main/resources/application.yml` | JPA, Flyway, app name |
-| `backend/src/main/resources/application-dev.yml` | `issuer-uri` Keycloak |
-| `backend/src/main/resources/application-observability.yml` | OTel, logging JSON |
-| `docker-compose.dev.yml` | `KEYCLOAK_ISSUER_URI`, `DATABASE_URL`, proxies frontend |
-| `.env.example` | Plantilla variables |
+
+| Archivo                                                    | Contenido                                               |
+| ---------------------------------------------------------- | ------------------------------------------------------- |
+| `backend/src/main/resources/application.yml`               | JPA, Flyway, app name                                   |
+| `backend/src/main/resources/application-dev.yml`           | `issuer-uri` Keycloak                                   |
+| `backend/src/main/resources/application-observability.yml` | OTel, logging JSON                                      |
+| `docker-compose.dev.yml`                                   | `KEYCLOAK_ISSUER_URI`, `DATABASE_URL`, proxies frontend |
+| `.env.example`                                             | Plantilla variables                                     |
+
 
 ---
 
@@ -176,12 +198,14 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml ps
 
 **Respuesta:**
 
-| Ambiente | Cómo se modela | Estado |
-|----------|----------------|--------|
-| **Desarrollo** | `docker-compose.dev.yml` | ✅ Completo |
-| **QA / Test** | `docker-compose.dev.yml` + `docker-compose.test.yml` | ✅ E2E, Newman local |
-| **Staging** | + `docker-compose.staging.yml` (Jenkins, SonarQube) | ✅ Definido |
+
+| Ambiente       | Cómo se modela                                                          | Estado                                 |
+| -------------- | ----------------------------------------------------------------------- | -------------------------------------- |
+| **Desarrollo** | `docker-compose.dev.yml`                                                | ✅ Completo                             |
+| **QA / Test**  | `docker-compose.dev.yml` + `docker-compose.test.yml`                    | ✅ E2E, Newman local                    |
+| **Staging**    | + `docker-compose.staging.yml` (Jenkins, SonarQube)                     | ✅ Definido                             |
 | **Producción** | Mismo patrón Compose + `Dockerfile.staging`; sin cloud provider en repo | ⚠️ Documentado, no desplegado en cloud |
+
 
 **Ruta:** `docs/deployment-guide.md`, `docker-compose.staging.yml`.
 
@@ -198,14 +222,17 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml ps
 3. Backend devuelve `Page<ProductResponse>`.
 4. `DataTable` renderiza `products` en tabla.
 
-**Rutas:**
+**Qué decir:** *"La página React construye la query con page, size, sort y filtros; Axios llama al API con el JWT; Spring devuelve un Page JSON; DataTable pinta las filas. Si hay más de 10 productos, paginamos con offset — por eso en E2E buscamos por ID o filtro SKU, no solo la primera página."*
 
-- `frontend/app/(app)/products/page.tsx` — `loadProducts()`, `buildQuery()`
-- `frontend/components/DataTable.tsx`
-- `backend/.../ProductController.java` — `findAll()`
-- `backend/.../ProductService.java` — lógica y filtros
+**Rutas (enlaces directos):**
 
-**Demo:** login `viewer` → http://localhost:3000/products
+- `[products/page.tsx](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/app/(app)`/products/page.tsx) — `loadProducts()`, `buildQuery()`
+- `[DataTable.tsx](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/components/DataTable.tsx)`
+- `[ProductController.java](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/backend/src/main/java/com/company/inventory/product/controller/ProductController.java)` — `findAll()`
+- `[ProductService.java](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/backend/src/main/java/com/company/inventory/product/service/ProductService.java)` — lógica y filtros
+- `[ProductSpecifications.java](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/backend/src/main/java/com/company/inventory/product/repository/ProductSpecifications.java)` — búsqueda LIKE en name/sku/description
+
+**Demo:** login `viewer` → [http://localhost:3000/products](http://localhost:3000/products)
 
 ---
 
@@ -239,7 +266,7 @@ React (page.tsx)
 
 - `frontend/lib/axiosClient.ts` — cliente e interceptores
 - `frontend/lib/api.ts` — `apiGet`, `apiPost`, `apiPut`, `apiDelete`
-- `frontend/next.config.ts` — rewrite `/api/*` → backend:8080
+- `frontend/next.config.ts` — rewrite `/api/`* → backend:8080
 
 **Demo en DevTools:** Network → petición `products?page=0` → header `Authorization`.
 
@@ -265,15 +292,17 @@ React (page.tsx)
 
 **Respuesta:** Versionado con **Flyway** (`V1`–`V7`).
 
-| Migración | Tabla / contenido |
-|-----------|-------------------|
-| V1 | `categories` |
-| V2 | `products` |
-| V3 | `stock_movements` |
-| V4 | `users_profile` |
-| V5 | tablas Envers (`revinfo`, `*_aud`) |
-| V6 | seed catálogo |
-| V7 | índices y constraints |
+
+| Migración | Tabla / contenido                  |
+| --------- | ---------------------------------- |
+| V1        | `categories`                       |
+| V2        | `products`                         |
+| V3        | `stock_movements`                  |
+| V4        | `users_profile`                    |
+| V5        | tablas Envers (`revinfo`, `*_aud`) |
+| V6        | seed catálogo                      |
+| V7        | índices y constraints              |
+
 
 **Rutas:** `backend/src/main/resources/db/migration/V*.sql`
 
@@ -283,7 +312,7 @@ React (page.tsx)
 
 ### 20. ¿Por qué no se versiona la API?
 
-**Respuesta:** **Sí está versionada:** prefijo **`/api/v1/`** en todos los controllers.
+**Respuesta:** **Sí está versionada:** prefijo `**/api/v1/`** en todos los controllers.
 
 **Ruta:** `@RequestMapping("/api/v1/products")` en `ProductController.java`.
 
@@ -297,20 +326,26 @@ Si el profesor pregunta por v2: se podría duplicar controller o usar header `Ac
 
 **Respuesta:** Sí.
 
-| Componente | Integración |
-|------------|-------------|
-| **Frontend** | OIDC Authorization Code + **PKCE** (cliente público SPA) |
+
+| Componente   | Integración                                                              |
+| ------------ | ------------------------------------------------------------------------ |
+| **Frontend** | OIDC Authorization Code + **PKCE** (cliente público SPA)                 |
 | **Keycloak** | Realm `inventory-realm`, clientes `inventory-frontend` y `inventory-api` |
-| **Backend** | OAuth2 **Resource Server** — valida JWT con JWKS de Keycloak |
+| **Backend**  | OAuth2 **Resource Server** — valida JWT con JWKS de Keycloak             |
 
-**Rutas:**
 
-- Realm: `keycloak/realm-export.json`
-- Login UI: `frontend/components/LoginForm.tsx` → `frontend/lib/auth.ts` → `startLogin()`
-- Callback: `frontend/app/auth/callback/page.tsx`
-- Config OIDC: `frontend/lib/oidc-config.ts`
-- Proxy Keycloak: `frontend/next.config.ts` (`/keycloak`, `/resources`, `/realms`)
-- Tema login: `keycloak/themes/cub/`
+**Qué decir:** *"El frontend es un cliente público OIDC: no guarda client_secret. Usamos Authorization Code con PKCE; Keycloak muestra el login con tema Cub oscuro; el callback intercambia el code por tokens; el access token va en cookie y Axios lo envía al API, que lo valida como Resource Server."*
+
+**Rutas (enlaces directos):**
+
+- Realm: `[keycloak/realm-export.json](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/keycloak/realm-export.json)`
+- Login UI: `[LoginForm.tsx](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/components/LoginForm.tsx)` → `[auth.ts](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/lib/auth.ts)` → `startLogin()`
+- PKCE: `[pkce.ts](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/lib/pkce.ts)`
+- Callback: `[AuthCallbackClient.tsx](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/components/AuthCallbackClient.tsx)`
+- Config OIDC: `[oidc-config.ts](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/lib/oidc-config.ts)`
+- Proxy Keycloak (CSS/recursos): `[next.config.ts](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/next.config.ts)`
+- Tema login Cub: `[keycloak/themes/cub/](https://github.com/carolinabencosme/quality_assurance/tree/presentacion/keycloak/themes/cub)`
+- Middleware rutas protegidas: `[middleware.ts](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/middleware.ts)`
 
 ---
 
@@ -398,12 +433,12 @@ El frontend mantiene tokens en cookie/localStorage; Keycloak mantiene su propia 
 
 **Respuesta:** Swagger/OpenAPI está **público** (sin JWT) por configuración de desarrollo/demo:
 
-- Rutas públicas: `PublicApiPaths.OPENAPI` → `/swagger-ui.html`, `/api-docs/**`
+- Rutas públicas: `PublicApiPaths.OPENAPI` → `/swagger-ui.html`, `/api-docs/`**
 - En producción real se **restringiría** quitando esas rutas de `permitAll` o deshabilitando springdoc.
 
 **Rutas:** `PublicApiPaths.java`, `SecurityConfig.java`, redirect `/` → Swagger en `RootRedirectController.java`.
 
-**Demo:** http://localhost:8080/swagger-ui.html → Authorize con Bearer token.
+**Demo:** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) → Authorize con Bearer token.
 
 ---
 
@@ -423,13 +458,15 @@ El frontend mantiene tokens en cookie/localStorage; Keycloak mantiene su propia 
 
 **Rutas:**
 
-| Paso | Archivo |
-|------|---------|
-| Botón login | `frontend/components/LoginForm.tsx` |
-| PKCE | `frontend/lib/pkce.ts` |
-| OIDC | `frontend/lib/auth.ts`, `frontend/lib/oidc-config.ts` |
-| Callback | `frontend/components/AuthCallbackClient.tsx` |
-| Protección rutas | `frontend/middleware.ts` |
+
+| Paso             | Archivo                                               |
+| ---------------- | ----------------------------------------------------- |
+| Botón login      | `frontend/components/LoginForm.tsx`                   |
+| PKCE             | `frontend/lib/pkce.ts`                                |
+| OIDC             | `frontend/lib/auth.ts`, `frontend/lib/oidc-config.ts` |
+| Callback         | `frontend/components/AuthCallbackClient.tsx`          |
+| Protección rutas | `frontend/middleware.ts`                              |
+
 
 ---
 
@@ -451,14 +488,17 @@ El frontend mantiene tokens en cookie/localStorage; Keycloak mantiene su propia 
 
 **Rutas principales:**
 
-| Test | Qué valida |
-|------|------------|
-| `ProductApiIntegrationTest.java` | CRUD, paginación, filtros con Postgres real (Testcontainers) |
-| `StockApiIntegrationTest.java` | Movimientos stock, reglas RF-STK |
-| `ResourceServerSecurityIntegrationTest.java` | 401/403 con JWT |
-| `ReportApiIntegrationTest.java` | Reportes |
+
+| Test                                         | Qué valida                                                   |
+| -------------------------------------------- | ------------------------------------------------------------ |
+| `ProductApiIntegrationTest.java`             | CRUD, paginación, filtros con Postgres real (Testcontainers) |
+| `StockApiIntegrationTest.java`               | Movimientos stock, reglas RF-STK                             |
+| `ResourceServerSecurityIntegrationTest.java` | 401/403 con JWT                                              |
+| `ReportApiIntegrationTest.java`              | Reportes                                                     |
+
 
 **Demo:**
+
 ```powershell
 cd backend
 .\mvnw.cmd test -Dtest=ProductApiIntegrationTest
@@ -468,28 +508,32 @@ cd backend
 
 ### 36–37. Herramientas de testing (todas)
 
-| Tipo | Herramienta | Ubicación |
-|------|-------------|-----------|
-| Unit | JUnit 5, Mockito, AssertJ | `backend/src/test/java/**/service/*Test.java` |
-| Integración API | Spring Boot Test + MockMvc + **Testcontainers** | `backend/src/test/java/**/api/*IntegrationTest.java` |
-| Seguridad MVC | `@WebMvcTest` | `ApiSecurityMvcTest.java` |
-| API externa | **Newman** (Postman) | `tests/api/inventory-qas.postman_collection.json` |
-| E2E UI | **Playwright** | `tests/e2e/specs/` |
-| Performance | **k6** | `tests/performance/k6/smoke.js` |
-| Seguridad smoke | PowerShell | `tests/security/auth-smoke.ps1` |
-| Observabilidad | PowerShell | `tests/observability/smoke.ps1` |
-| Cobertura | **JaCoCo** (≥60% líneas) | `backend/pom.xml`, `target/site/jacoco/` |
+
+| Tipo            | Herramienta                                        | Ubicación                                                                                                                                                                                                                                                |
+| --------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit            | JUnit 5, Mockito, AssertJ                          | `backend/src/test/java/**/service/*Test.java`                                                                                                                                                                                                            |
+| Integración API | Spring Boot Test + MockMvc + **Testcontainers**    | `backend/src/test/java/**/api/*IntegrationTest.java`                                                                                                                                                                                                     |
+| Seguridad MVC   | `@WebMvcTest`                                      | `ApiSecurityMvcTest.java`                                                                                                                                                                                                                                |
+| API externa     | **Newman** (Postman)                               | `tests/api/inventory-qas.postman_collection.json`                                                                                                                                                                                                        |
+| E2E UI          | **Playwright** (9 escenarios, login Keycloak real) | `[tests/e2e/specs/](https://github.com/carolinabencosme/quality_assurance/tree/presentacion/tests/e2e/specs)`, helper `[keycloak-login.ts](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/tests/e2e/helpers/keycloak-login.ts)` |
+| Performance     | **k6**                                             | `tests/performance/k6/smoke.js`                                                                                                                                                                                                                          |
+| Seguridad smoke | PowerShell                                         | `tests/security/auth-smoke.ps1`                                                                                                                                                                                                                          |
+| Observabilidad  | PowerShell                                         | `tests/observability/smoke.ps1`                                                                                                                                                                                                                          |
+| Cobertura       | **JaCoCo** (≥60% líneas)                           | `backend/pom.xml`, `target/site/jacoco/`                                                                                                                                                                                                                 |
+
 
 ---
 
 ### 38. ¿Qué se modifica en BD vs código en tests?
 
-| Ámbito | Qué pasa |
-|--------|----------|
+
+| Ámbito             | Qué pasa                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------ |
 | **BD integración** | Testcontainers levanta Postgres **efímero**; Flyway aplica migraciones; `@Transactional` revierte cambios por test |
-| **Código** | No se modifica producción; solo se ejecutan tests |
-| **Newman/E2E** | Usan stack Docker dev/test; pueden crear productos de prueba (SKU único) |
-| **Unit tests** | Mockito — sin BD |
+| **Código**         | No se modifica producción; solo se ejecutan tests                                                                  |
+| **Newman/E2E**     | Usan stack Docker dev/test; pueden crear productos de prueba (SKU único)                                           |
+| **Unit tests**     | Mockito — sin BD                                                                                                   |
+
 
 **Ruta Testcontainers:** `ProductApiIntegrationTest.java` — `@Container PostgreSQLContainer`, `@ServiceConnection`.
 
@@ -497,19 +541,32 @@ cd backend
 
 ### 39. Para qué sirve cada tipo de test
 
-| Tipo | Sirve para |
-|------|------------|
-| Unit | Lógica de negocio aislada (reglas, validaciones) |
-| Integration | Contrato HTTP + BD real (repositorios, SQL, Flyway) |
-| API Newman | Escenarios REST completos con Keycloak real (CI) |
+
+| Tipo           | Sirve para                                            |
+| -------------- | ----------------------------------------------------- |
+| Unit           | Lógica de negocio aislada (reglas, validaciones)      |
+| Integration    | Contrato HTTP + BD real (repositorios, SQL, Flyway)   |
+| API Newman     | Escenarios REST completos con Keycloak real (CI)      |
 | E2E Playwright | Flujo usuario en navegador (login → dashboard → CRUD) |
-| k6 | Carga / smoke performance |
-| auth-smoke | Verificar 401/403 en caliente |
-| JaCoCo | Métricas cobertura para evidencia académica |
+| k6             | Carga / smoke performance                             |
+| auth-smoke     | Verificar 401/403 en caliente                         |
+| JaCoCo         | Métricas cobertura para evidencia académica           |
+
 
 ---
 
 ### 40. Mostrar ejecución de tests
+
+**Qué decir:** *"Tenemos pirámide de pruebas: unitarias con Mockito, integración con Testcontainers y Postgres real, Newman contra el stack Docker, Playwright simulando login OIDC real en Chromium, y smokes de seguridad/observabilidad. El script `run-all-tests.ps1` ejecuta los cinco bloques en orden desde la raíz del monorepo."*
+
+**E2E estabilizados (v0.6):**
+
+| Problema | Solución en código |
+| -------- | ------------------ |
+| Login Keycloak intermitente | [`resetBrowserSession()`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/tests/e2e/helpers/keycloak-login.ts) limpia cookies/storage; `waitUntil: 'commit'` en callback |
+| Producto no en página 1 del listado | CRUD E2E guarda `productId` y navega directo a `/products/{id}/edit` |
+| Inactivar no redirige | Modal React (no `window.confirm`) — test confirma en [`product-crud.spec.ts`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/tests/e2e/specs/product-crud.spec.ts) |
+| Suite completa | [`scripts/run-all-tests.ps1`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/scripts/run-all-tests.ps1) → esperado **9/9 Playwright PASS** |
 
 ```powershell
 # Backend completo + cobertura
@@ -539,13 +596,16 @@ npm test
 ### 41. Provocar falla y ver reacción
 
 **Ejemplo 1 — test unitario:**
+
 ```powershell
 cd backend
 .\mvnw.cmd test -Dtest=ProductServiceTest#createProduct_duplicateSkuThrows
 ```
+
 Modificar temporalmente assertion → test en rojo → revertir.
 
 **Ejemplo 2 — API sin token:**
+
 ```powershell
 curl.exe -s -o NUL -w "%{http_code}" http://localhost:8080/api/v1/products
 # Esperado: 401
@@ -571,11 +631,13 @@ curl.exe -s -o NUL -w "%{http_code}" http://localhost:8080/api/v1/products
 
 ### 43–44. Workflows y explicación
 
-| Workflow | Trigger | Jobs |
-|----------|---------|------|
-| `ci.yml` | push/PR main, develop | backend test+JaCoCo, frontend build, sonar (opcional) |
-| `api-postman.yml` | push main/develop (paths api/keycloak) | Docker postgres+keycloak+backend → Newman |
-| `deploy-staging.yml` | manual / push develop | staging compose |
+
+| Workflow             | Trigger                                | Jobs                                                  |
+| -------------------- | -------------------------------------- | ----------------------------------------------------- |
+| `ci.yml`             | push/PR main, develop                  | backend test+JaCoCo, frontend build, sonar (opcional) |
+| `api-postman.yml`    | push main/develop (paths api/keycloak) | Docker postgres+keycloak+backend → Newman             |
+| `deploy-staging.yml` | manual / push develop                  | staging compose                                       |
+
 
 ---
 
@@ -684,7 +746,7 @@ Combinar secciones 31 + 26 + demo viewer (lectura) vs warehouse (crear producto)
 
 ### 56. Demo login y seguridad
 
-1. http://localhost:3000 → login Keycloak tema Cub
+1. [http://localhost:3000](http://localhost:3000) → login Keycloak tema Cub
 2. `viewer` → dashboard sin botón "Nuevo producto"
 3. Logout → login `warehouse` → crear producto
 4. Swagger sin token → 401
@@ -722,6 +784,7 @@ static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-
 **Entorno nuevo:** al arrancar backend, Flyway crea `flyway_schema_history` y aplica `V1`…`V7` en orden.
 
 **Demo:**
+
 ```powershell
 docker compose -f docker-compose.dev.yml up -d postgres backend
 docker exec inventory-postgres-dev psql -U inventory_user -d inventory -c "\dt"
@@ -801,12 +864,14 @@ cd tests\e2e; npx playwright test specs/capture-evidence.spec.ts --workers=1; cd
 
 ### E. URLs demo
 
-| Servicio | URL | Login |
-|----------|-----|-------|
-| Cub | http://localhost:3000 | viewer/viewer123 |
-| Swagger | http://localhost:8080/swagger-ui.html | JWT |
-| Keycloak | http://localhost:8081 | admin/admin |
-| Grafana | http://localhost:3030 | admin/admin |
+
+| Servicio | URL                                                                            | Login            |
+| -------- | ------------------------------------------------------------------------------ | ---------------- |
+| Cub      | [http://localhost:3000](http://localhost:3000)                                 | viewer/viewer123 |
+| Swagger  | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) | JWT              |
+| Keycloak | [http://localhost:8081](http://localhost:8081)                                 | admin/admin      |
+| Grafana  | [http://localhost:3030](http://localhost:3030)                                 | admin/admin      |
+
 
 **Checklist capturas:** `docs/qa-evidence/CHECKLIST-CAPTURAS.md`
 
@@ -814,23 +879,57 @@ cd tests\e2e; npx playwright test specs/capture-evidence.spec.ts --workers=1; cd
 
 ## 11. Índice de archivos más citados
 
+
 | Tema | Archivo |
-|------|---------|
-| Seguridad API | `backend/.../security/SecurityConfig.java` |
-| Permisos JWT | `backend/.../security/KeycloakJwtAuthoritiesConverter.java` |
-| Login OIDC | `frontend/lib/auth.ts` |
-| Cliente HTTP | `frontend/lib/axiosClient.ts` |
-| Lista productos UI | `frontend/app/(app)/products/page.tsx` |
-| API productos | `backend/.../product/controller/ProductController.java` |
-| Realm Keycloak | `keycloak/realm-export.json` |
-| Tema login | `keycloak/themes/cub/` |
-| Docker dev | `docker-compose.dev.yml` |
-| Migraciones | `backend/src/main/resources/db/migration/` |
-| CI GitHub | `.github/workflows/ci.yml` |
-| Jenkins | `Jenkinsfile` |
-| Tests E2E | `tests/e2e/specs/login-dashboard.spec.ts` |
-| Newman | `tests/api/inventory-qas.postman_collection.json` |
+| ---- | ------- |
+| Seguridad API | [`SecurityConfig.java`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/backend/src/main/java/com/company/inventory/security/SecurityConfig.java) |
+| Permisos JWT | [`KeycloakJwtAuthoritiesConverter.java`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/backend/src/main/java/com/company/inventory/security/KeycloakJwtAuthoritiesConverter.java) |
+| Login OIDC + PKCE | [`auth.ts`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/lib/auth.ts), [`pkce.ts`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/lib/pkce.ts) |
+| Cliente HTTP | [`axiosClient.ts`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/lib/axiosClient.ts) |
+| Lista productos UI | [`products/page.tsx`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/app/(app)/products/page.tsx) |
+| API productos | [`ProductController.java`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/backend/src/main/java/com/company/inventory/product/controller/ProductController.java) |
+| Realm Keycloak | [`realm-export.json`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/keycloak/realm-export.json) |
+| Tema login Cub | [`keycloak/themes/cub/`](https://github.com/carolinabencosme/quality_assurance/tree/presentacion/keycloak/themes/cub) |
+| Docker dev | [`docker-compose.dev.yml`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/docker-compose.dev.yml) |
+| Observabilidad | [`docker-compose.observability.yml`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/docker-compose.observability.yml) |
+| Migraciones | [`db/migration/`](https://github.com/carolinabencosme/quality_assurance/tree/presentacion/backend/src/main/resources/db/migration) |
+| CI GitHub | [`ci.yml`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/.github/workflows/ci.yml) |
+| Jenkins | [`Jenkinsfile`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/Jenkinsfile) |
+| Tests E2E | [`login-dashboard.spec.ts`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/tests/e2e/specs/login-dashboard.spec.ts), [`product-crud.spec.ts`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/tests/e2e/specs/product-crud.spec.ts) |
+| Newman | [`inventory-qas.postman_collection.json`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/tests/api/inventory-qas.postman_collection.json) |
+| Run all tests | [`run-all-tests.ps1`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/scripts/run-all-tests.ps1) |
 
 ---
 
-*Última sincronización: rama `presentacion` con `main` (OIDC+PKCE, tema Cub, Grafana 3030, proxy Keycloak).*
+## 12. Guion oral y novedades (Cub v0.6)
+
+### Apertura (30 segundos)
+
+> *"Cub es un monorepo de inventario: Spring Boot 3.4 + Next.js 15, autenticación OIDC con Keycloak, PostgreSQL con Flyway y Envers, observabilidad con Prometheus/Grafana/Loki/Tempo, y una pirámide de pruebas automatizadas. Lo levantamos con Docker Compose y lo demostramos en localhost:3000."*
+
+### Novedades que suelen preguntar
+
+| Tema | Respuesta corta | Dónde demostrar |
+| ---- | --------------- | --------------- |
+| **Marca Cub + UI oscura** | Landing, dashboard y login unificados; login Keycloak con tema custom | [localhost:3000](http://localhost:3000), [`themes/cub`](https://github.com/carolinabencosme/quality_assurance/tree/presentacion/keycloak/themes/cub) |
+| **OIDC + PKCE (no password grant)** | Cliente público SPA; más seguro para frontend | [`auth.ts`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/lib/auth.ts), flujo sección 31 |
+| **Grafana en puerto 3030** | Evita conflicto con otros frontends en 3001 | [`docker-compose.observability.yml`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/docker-compose.observability.yml) |
+| **Soft delete productos** | DELETE lógico (status INACTIVE); modal de confirmación en UI | [`edit/page.tsx`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/frontend/app/(app)/products/%5Bid%5D/edit/page.tsx) |
+| **Tests E2E 9/9** | Login real Keycloak + CRUD warehouse + capturas evidencia | `.\scripts\run-all-tests.ps1` |
+| **Testcontainers Windows** | `.testcontainers.properties` + variable `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE`; si falla, TCP 2375 | [`run-all-tests.ps1`](https://github.com/carolinabencosme/quality_assurance/blob/presentacion/scripts/run-all-tests.ps1) sección [10.A](#a-preparar-entorno-una-vez-por-terminal) |
+
+### Si preguntan "¿cómo probaste que funciona?"
+
+1. **Backend:** `mvn verify` + JaCoCo ≥ 60 % (unit + integración; integración con Testcontainers si Docker OK).
+2. **API:** Newman 14 requests / 29 assertions — token Keycloak, CRUD, 401/403/409.
+3. **UI:** Playwright 9 tests — OIDC, dashboard, productos, CRUD, capturas.
+4. **Seguridad:** `auth-smoke.ps1` — 401 sin token, 403 viewer en audit.
+5. **Observabilidad:** `smoke.ps1` — Prometheus, Grafana, Loki (Tempo puede tardar al arrancar).
+
+### Cierre defensa
+
+> *"La seguridad no depende del frontend: el JWT se valida en cada request en Spring. Keycloak centraliza identidad; Envers audita cambios; Grafana nos da visibilidad operativa. Todo está versionado en Git, probado en CI y documentado en este repositorio."*
+
+---
+
+*Última sincronización: rama `presentacion` — OIDC+PKCE, tema Cub, Grafana 3030, E2E 9/9 estabilizados, enlaces GitHub en guía defensa.*

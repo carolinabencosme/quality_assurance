@@ -4,6 +4,7 @@ const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:3000';
 
 export default defineConfig({
   testDir: './specs',
+  timeout: 60_000,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 1,

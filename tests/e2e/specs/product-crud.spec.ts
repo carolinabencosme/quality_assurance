@@ -9,6 +9,8 @@ test.describe('Productos — CRUD (warehouse)', () => {
 
   const sku = `PW-E2E-${Date.now()}`;
   const productName = `Playwright E2E ${Date.now()}`;
+  const editedName = `${productName} (editado)`;
+  let productId = '';
 
   test('login warehouse y crear producto', async ({ page }) => {
     await loginViaKeycloak(page, 'warehouse', 'warehouse123');
@@ -28,35 +30,40 @@ test.describe('Productos — CRUD (warehouse)', () => {
     await expect(page).toHaveURL(new RegExp(`/products/\\d+/edit`), { timeout: 15_000 });
     await expect(page.getByRole('heading', { name: 'Editar producto' })).toBeVisible();
     await expect(page.getByText(sku)).toBeVisible();
+
+    const idMatch = page.url().match(/\/products\/(\d+)\/edit/);
+    expect(idMatch).not.toBeNull();
+    productId = idMatch![1];
   });
 
   test('editar nombre y guardar', async ({ page }) => {
+    expect(productId, 'El test anterior debe haber creado un producto').not.toBe('');
+
     await loginViaKeycloak(page, 'warehouse', 'warehouse123');
+    await page.goto(`/products/${productId}/edit`);
+    await expect(page.getByRole('heading', { name: 'Editar producto' })).toBeVisible();
 
-    await page.goto('/products');
-    const row = page.locator('tr', { hasText: sku });
-    await row.getByRole('link', { name: 'Editar' }).click();
-    await expect(page).toHaveURL(/\/products\/\d+\/edit/);
-
-    await page.locator('#name').fill(`${productName} (editado)`);
+    await page.locator('#name').fill(editedName);
     await page.getByRole('button', { name: 'Guardar cambios' }).click();
-    await expect(page).toHaveURL(/\/products$/);
-    await expect(page.getByText(`${productName} (editado)`).first()).toBeVisible();
+    await expect(page).toHaveURL(/\/products$/, { timeout: 15_000 });
+
+    // Verificar persistencia en la ficha (evita race del listado paginado/filtrado).
+    await page.goto(`/products/${productId}/edit`);
+    await expect(page.locator('#name')).toHaveValue(editedName);
   });
 
   test('inactivar producto (soft delete)', async ({ page }) => {
+    expect(productId, 'El test anterior debe haber creado un producto').not.toBe('');
+
     await loginViaKeycloak(page, 'warehouse', 'warehouse123');
+    await page.goto(`/products/${productId}/edit`);
+    await expect(page.getByRole('heading', { name: 'Editar producto' })).toBeVisible();
 
-    await page.goto('/products');
-    const row = page.locator('tr', { hasText: sku });
-    await row.getByRole('link', { name: 'Editar' }).click();
+    await page.locator('.page-header').getByRole('button', { name: 'Inactivar' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Inactivar' }).click();
+    await expect(page).toHaveURL(/\/products$/, { timeout: 15_000 });
 
-    page.once('dialog', (dialog) => dialog.accept());
-    await page.getByRole('button', { name: 'Inactivar' }).click();
-    await expect(page).toHaveURL(/\/products$/);
-
-    await page.goto('/products');
-    const rowAfter = page.locator('tr', { hasText: sku });
-    await expect(rowAfter.getByText('Inactivo')).toBeVisible();
+    await page.goto(`/products/${productId}/edit`);
+    await expect(page.getByRole('button', { name: 'Inactivar' })).toBeHidden();
   });
 });

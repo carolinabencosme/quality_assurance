@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test';
 import * as path from 'path';
-import { loginViaKeycloak, completeKeycloakLogin, dockLink } from '../helpers/keycloak-login';
+import { loginViaKeycloak, completeKeycloakLogin, resetBrowserSession, dockLink } from '../helpers/keycloak-login';
 
 const evidenceDir =
   process.env.EVIDENCE_DIR ?? path.join(__dirname, '../../../docs/qa-evidence/screenshots');
 
 test.describe('Capturas evidencia Avance V3', () => {
   test('01 login viewer', async ({ page }) => {
-    await page.goto('/');
+    await resetBrowserSession(page);
     await page.getByRole('button', { name: /iniciar sesi[oó]n con keycloak/i }).click();
     await page.waitForURL(/realms\/inventory-realm|\/protocol\/openid-connect\/auth/);
     await page.screenshot({ path: path.join(evidenceDir, '01-keycloak-login.png'), fullPage: true });
