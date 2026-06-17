@@ -17,6 +17,15 @@ const nextConfig: NextConfig = {
         source: '/keycloak/:path*',
         destination: `${keycloakTarget}/:path*`,
       },
+      // Keycloak login sirve CSS/JS en rutas absolutas /resources/... y formularios en /realms/...
+      {
+        source: '/resources/:path*',
+        destination: `${keycloakTarget}/resources/:path*`,
+      },
+      {
+        source: '/realms/:path*',
+        destination: `${keycloakTarget}/realms/:path*`,
+      },
     ];
   },
 };

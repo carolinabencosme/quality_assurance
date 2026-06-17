@@ -77,7 +77,8 @@ services:
       GF_USERS_DEFAULT_THEME: dark
       GF_AUTH_ANONYMOUS_ENABLED: "false"
     ports:
-      - "3001:3000"
+      # 3001 suele estar ocupado en dev (p. ej. otros frontends); Grafana en 3030
+      - "3030:3000"
     volumes:
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana_data:/var/lib/grafana

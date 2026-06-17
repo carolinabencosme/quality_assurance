@@ -92,7 +92,7 @@ Invoke-RestMethod http://localhost:8080/actuator/health
 
 | Servicio | URL |
 |----------|-----|
-| Grafana | http://localhost:3001 (admin / admin) |
+| Grafana | http://localhost:3030 (admin / admin) |
 | Prometheus | http://localhost:9090 |
 | Alertmanager | http://localhost:9093 |
 
