@@ -26,6 +26,7 @@ Spring Boot 3 · Java 21 · Next.js 15 · PostgreSQL 16 · Keycloak · Flyway ·
 
 ## Documentación de defensa
 
+- **[Guion presentación mañana](docs/defensa/guion-presentacion-manana.md)** — orden del profesor, qué decir y qué mostrar
 - [Preguntas defensa — guía completa (58+ preguntas)](docs/defensa/preguntas-defensa-completa.md)
 - [Preguntas técnicas — resumen](docs/defensa-preguntas-tecnicas.md)
 - [Preguntas técnicas — Avance V3](docs/defensa/preguntas-tecnicas-avance-v3.md)

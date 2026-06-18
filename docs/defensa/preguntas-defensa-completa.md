@@ -2,7 +2,7 @@
 
 Documento para la rama **[presentacion](https://github.com/carolinabencosme/quality_assurance/tree/presentacion)**. Cada respuesta incluye **qué decir en voz alta**, **enlace directo al código** y **cómo demostrarlo en vivo**.
 
-> **Cómo usarlo en la defensa:** lee primero la sección [12. Guion oral y novedades](#12-guion-oral-y-novedades-cub-v06). Luego, si el tribunal pregunta por un tema concreto, salta al número de la pregunta. Los enlaces abren el archivo exacto en GitHub (rama `presentacion`).
+> **Cómo usarlo en la defensa:** para la presentación oral en el orden del profesor, abre primero **[guion-presentacion-manana.md](guion-presentacion-manana.md)**. Para preguntas técnicas puntuales, usa la sección [12. Guion oral y novedades](#12-guion-oral-y-novedades-cub-v06) o el número de pregunta.
 
 **Repositorio:** [github.com/carolinabencosme/quality_assurance](https://github.com/carolinabencosme/quality_assurance)
 
