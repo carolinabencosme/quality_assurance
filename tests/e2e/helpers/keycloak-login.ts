@@ -35,13 +35,24 @@ async function submitKeycloakCredentials(
     name: /sign in|iniciar sesi[oó]n|entrar/i,
   });
 
-  await Promise.all([
-    page.waitForURL((url) => isPostLoginUrl(url), {
-      timeout: 45_000,
-      waitUntil: 'commit',
-    }),
-    signIn.click(),
-  ]);
+  try {
+    await Promise.all([
+      page.waitForURL((url) => isPostLoginUrl(url), {
+        timeout: 45_000,
+        waitUntil: 'commit',
+      }),
+      signIn.click(),
+    ]);
+  } catch (error) {
+    const url = page.url();
+    if (url.includes('localhost:8080/realms/')) {
+      throw new Error(
+        'Keycloak redirigió al puerto 8080 (API backend). ' +
+          'Usa NEXT_PUBLIC_KEYCLOAK_URL=http://localhost:8081 y recrea frontend/keycloak.',
+      );
+    }
+    throw error;
+  }
 
   if (page.url().includes('/auth/callback')) {
     await page.waitForURL((url) => isAppUrl(url) && url.pathname.startsWith('/dashboard'), {

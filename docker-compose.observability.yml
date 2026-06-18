@@ -51,6 +51,12 @@ services:
     volumes:
       - ./observability/loki/loki.yaml:/etc/loki/loki.yaml:ro
       - loki_data:/loki
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3100/ready | grep -q ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
     networks:
       - inventory-net
 
@@ -64,6 +70,12 @@ services:
     volumes:
       - ./observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
       - tempo_data:/var/tempo
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3200/ready | grep -q ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
     networks:
       - inventory-net
 
@@ -83,9 +95,12 @@ services:
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana_data:/var/lib/grafana
     depends_on:
-      - prometheus
-      - loki
-      - tempo
+      prometheus:
+        condition: service_started
+      loki:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
     networks:
       - inventory-net
 
