@@ -26,7 +26,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: dev
       KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/inventory-realm
-      KEYCLOAK_JWKS_URI: http://host.docker.internal:8081/realms/inventory-realm/protocol/openid-connect/certs
+      KEYCLOAK_JWKS_URI: http://keycloak:8080/realms/inventory-realm/protocol/openid-connect/certs
 
   frontend:
     container_name: inventory-frontend-test

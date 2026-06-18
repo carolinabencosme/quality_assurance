@@ -72,9 +72,10 @@ services:
       DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://postgres:5432/inventory}
       DATABASE_USERNAME: ${DATABASE_USERNAME:-inventory_user}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-inventory_password}
-      # iss del JWT = http://localhost:8081/... (debe coincidir exactamente)
+      # iss del JWT = http://localhost:8081/... (debe coincidir con el token del navegador/Newman)
       KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/inventory-realm
-      KEYCLOAK_JWKS_URI: http://host.docker.internal:8081/realms/inventory-realm/protocol/openid-connect/certs
+      # JWKS: red interna Docker (host.docker.internal:8081 falla en algunos Windows → 401 en API)
+      KEYCLOAK_JWKS_URI: http://keycloak:8080/realms/inventory-realm/protocol/openid-connect/certs
       OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-inventory-api}
     extra_hosts:
       - "host.docker.internal:host-gateway"
