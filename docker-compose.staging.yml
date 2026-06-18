@@ -42,7 +42,7 @@ services:
     environment:
       NODE_ENV: production
       API_PROXY_TARGET: http://backend:8080
-      KEYCLOAK_PROXY_TARGET: http://host.docker.internal:8081
+      KEYCLOAK_PROXY_TARGET: http://keycloak:8080
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

@@ -71,6 +71,14 @@ export async function loginViaKeycloak(
     waitUntil: 'domcontentloaded',
   });
 
+  const bodyPreview = await page.locator('body').innerText();
+  if (/\"detail\"\s*:\s*\"Not Found\"/.test(bodyPreview) || bodyPreview.trim() === '{"detail":"Not Found"}') {
+    throw new Error(
+      `Proxy Keycloak devolvió 404 (${page.url()}). ` +
+        'Recrea frontend: KEYCLOAK_PROXY_TARGET=http://keycloak:8080 en docker-compose.dev.yml',
+    );
+  }
+
   await submitKeycloakCredentials(page, username, password);
 }
 
