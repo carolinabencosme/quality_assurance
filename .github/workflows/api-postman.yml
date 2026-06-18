@@ -4,27 +4,9 @@ name: API — Newman (stack real)
 on:
   workflow_dispatch:
   push:
-    branches: [presentacion]
-  push:
-    branches: [main, develop, 'feature/**', 'fix/**']
-    paths:
-      - 'tests/api/**'
-      - 'keycloak/**'
-      - 'docker-compose.dev.yml'
-      - 'docker-compose.test.yml'
-      - 'backend/**'
-      - '.env.example'
-      - '.github/workflows/api-postman.yml'
+    branches: [main, develop, presentacion, 'feature/**', 'fix/**']
   pull_request:
     branches: [main, develop, presentacion]
-    paths:
-      - 'tests/api/**'
-      - 'keycloak/**'
-      - 'docker-compose.dev.yml'
-      - 'docker-compose.test.yml'
-      - 'backend/**'
-      - '.env.example'
-      - '.github/workflows/api-postman.yml'
 
 concurrency:
   group: api-newman-${{ github.ref }}

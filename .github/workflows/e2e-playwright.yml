@@ -3,25 +3,9 @@ name: E2E — Playwright (stack real)
 on:
   workflow_dispatch:
   push:
-    branches: [presentacion]
-  push:
-    branches: [main, develop, 'feature/**', 'fix/**']
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - 'keycloak/**'
-      - 'tests/e2e/**'
-      - 'docker-compose*.yml'
-      - '.github/workflows/e2e-playwright.yml'
+    branches: [main, develop, presentacion, 'feature/**', 'fix/**']
   pull_request:
     branches: [main, develop, presentacion]
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - 'keycloak/**'
-      - 'tests/e2e/**'
-      - 'docker-compose*.yml'
-      - '.github/workflows/e2e-playwright.yml'
 
 concurrency:
   group: e2e-playwright-${{ github.ref }}
