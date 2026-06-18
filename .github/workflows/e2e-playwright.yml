@@ -1,0 +1,121 @@
+name: E2E — Playwright (stack real)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [presentacion]
+  push:
+    branches: [main, develop, 'feature/**', 'fix/**']
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'keycloak/**'
+      - 'tests/e2e/**'
+      - 'docker-compose*.yml'
+      - '.github/workflows/e2e-playwright.yml'
+  pull_request:
+    branches: [main, develop, presentacion]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'keycloak/**'
+      - 'tests/e2e/**'
+      - 'docker-compose*.yml'
+      - '.github/workflows/e2e-playwright.yml'
+
+concurrency:
+  group: e2e-playwright-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Postgres, Keycloak, backend, frontend
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml up -d --build postgres keycloak backend frontend
+
+      - name: Wait for Keycloak realm
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 120); do
+            if curl -fsS "http://localhost:8081/realms/inventory-realm/.well-known/openid-configuration" >/dev/null; then
+              echo "Keycloak OK"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Timeout waiting for Keycloak"
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs keycloak --tail 120 || true
+          exit 1
+
+      - name: Wait for backend health
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 90); do
+            if curl -fsS "http://localhost:8080/actuator/health" | jq -e '.status == "UP"' >/dev/null 2>&1; then
+              echo "Backend UP"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Timeout waiting for backend"
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs backend --tail 200 || true
+          exit 1
+
+      - name: Wait for frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            if curl -fsS "http://localhost:3000/" >/dev/null 2>&1; then
+              echo "Frontend OK"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Timeout waiting for frontend"
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs frontend --tail 200 || true
+          exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install Playwright
+        working-directory: tests/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        working-directory: tests/e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+        run: npm test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: docs/qa-evidence/playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Docker compose logs (on failure)
+        if: failure()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs --tail 150
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml down -v
