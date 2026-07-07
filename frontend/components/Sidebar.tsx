@@ -2,11 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import BrandMark from '@/components/BrandMark';
 import { APP_NAV, isNavActive } from '@/lib/navigation';
+import { hasPermission } from '@/lib/permissions';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [items, setItems] = useState(() => APP_NAV.filter((item) => !item.requiredPermission));
+
+  useEffect(() => {
+    setItems(APP_NAV.filter((item) => !item.requiredPermission || hasPermission(item.requiredPermission)));
+  }, []);
 
   return (
     <aside className="sidebar">
@@ -16,7 +23,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="sidebar-nav" aria-label="Principal">
-        {APP_NAV.map((item) => (
+        {items.map((item) => (
           <Link
             key={item.href}
             href={item.href}

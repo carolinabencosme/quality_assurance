@@ -4,7 +4,7 @@ import { loginViaKeycloak } from '../helpers/keycloak-login';
 /**
  * CRUD producto vía UI (requiere usuario con product:manage — realm warehouse-manager).
  */
-test.describe('Productos — CRUD (warehouse)', () => {
+test.describe('Productos - CRUD (warehouse)', () => {
   test.describe.configure({ mode: 'serial' });
 
   const sku = `PW-E2E-${Date.now()}`;

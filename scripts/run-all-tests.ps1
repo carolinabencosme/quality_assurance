@@ -1,9 +1,9 @@
-# Ejecuta la batería de tests desde la raíz del repo (rutas correctas).
+# Ejecuta la bateria de tests desde la raiz del repo (rutas correctas).
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-Write-Host "=== Raíz: $root ===" -ForegroundColor Cyan
+Write-Host "=== Raiz: $root ===" -ForegroundColor Cyan
 
 # Testcontainers en Windows: Maven/Java no usa el mismo socket que `docker compose`.
 $env:TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE = '//./pipe/docker_engine'
@@ -34,7 +34,14 @@ Pop-Location
 Write-Host "`n[4/5] Security smoke..." -ForegroundColor Cyan
 & "$root\tests\security\auth-smoke.ps1"
 
-Write-Host "`n[5/5] Observability smoke..." -ForegroundColor Cyan
+Write-Host "`n[5/6] Observability smoke..." -ForegroundColor Cyan
 & "$root\tests\observability\smoke.ps1"
+
+Write-Host "`n[6/6] k6 performance smoke (optional)..." -ForegroundColor Cyan
+if ($env:RUN_K6_SMOKE -eq 'true') {
+    & "$root\scripts\run-k6.ps1"
+} else {
+    Write-Host "SKIP: set RUN_K6_SMOKE=true to execute k6." -ForegroundColor Yellow
+}
 
 Write-Host "`n=== TODOS LOS TESTS OK ===" -ForegroundColor Green

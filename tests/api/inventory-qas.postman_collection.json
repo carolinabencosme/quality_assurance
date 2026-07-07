@@ -10,6 +10,7 @@
     { "key": "sku", "value": "" },
     { "key": "token", "value": "" },
     { "key": "tokenViewer", "value": "" },
+    { "key": "tokenAdmin", "value": "" },
     { "key": "productId", "value": "" }
   ],
   "item": [
@@ -347,6 +348,228 @@
         "method": "GET",
         "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
         "url": "{{baseUrl}}/api/v1/demo/errors/not-found"
+      }
+    },
+    {
+      "name": "15 Token (admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const d = pm.response.json();",
+              "pm.collectionVariables.set('tokenAdmin', d.access_token);",
+              "pm.test('HTTP 200 admin token', () => pm.response.to.have.status(200));",
+              "pm.test('admin access_token present', () => pm.expect(d.access_token).to.be.a('string').and.not.empty);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+        "body": {
+          "mode": "raw",
+          "raw": "grant_type=password&client_id=inventory-frontend&username=admin&password=admin123"
+        },
+        "url": "{{keycloakUrl}}/realms/inventory-realm/protocol/openid-connect/token"
+      }
+    },
+    {
+      "name": "16 Dashboard viewer incluye topSoldProducts",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 200 dashboard', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('contiene topSoldProducts', () => pm.expect(j).to.have.property('topSoldProducts'));",
+              "pm.test('topSoldProducts es array', () => pm.expect(j.topSoldProducts).to.be.an('array'));",
+              "pm.test('contiene KPIs', () => pm.expect(j.kpis).to.be.an('object'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{tokenViewer}}" }],
+        "url": "{{baseUrl}}/api/v1/reports/dashboard"
+      }
+    },
+    {
+      "name": "17 Stock IN warehouse",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 201 stock IN', () => pm.response.to.have.status(201));",
+              "const j = pm.response.json();",
+              "pm.test('tipo IN', () => pm.expect(j.type).to.eql('IN'));",
+              "pm.test('delta positivo', () => pm.expect(j.delta).to.be.above(0));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1,\n  \"type\": \"IN\",\n  \"quantity\": 1,\n  \"observations\": \"Newman stock IN\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/stock/movements"
+      }
+    },
+    {
+      "name": "18 Stock OUT warehouse",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 201 stock OUT', () => pm.response.to.have.status(201));",
+              "const j = pm.response.json();",
+              "pm.test('tipo OUT', () => pm.expect(j.type).to.eql('OUT'));",
+              "pm.test('delta negativo', () => pm.expect(j.delta).to.be.below(0));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1,\n  \"type\": \"OUT\",\n  \"quantity\": 1,\n  \"observations\": \"Newman stock OUT\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/stock/movements"
+      }
+    },
+    {
+      "name": "19 Historial stock paginado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 200 stock movements page', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('content array', () => pm.expect(j.content).to.be.an('array'));",
+              "pm.test('totalElements number', () => pm.expect(j.totalElements).to.be.a('number'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/v1/stock/movements?page=0&size=5"
+      }
+    },
+    {
+      "name": "20 Audit viewer sin permiso",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.test('HTTP 403 audit viewer', () => pm.response.to.have.status(403));"],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{tokenViewer}}" }],
+        "url": "{{baseUrl}}/api/v1/audit?page=0&size=5"
+      }
+    },
+    {
+      "name": "21 Audit admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 200 audit admin', () => pm.response.to.have.status(200));",
+              "pm.test('audit page content', () => pm.expect(pm.response.json()).to.have.property('content'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+        "url": "{{baseUrl}}/api/v1/audit?page=0&size=5"
+      }
+    },
+    {
+      "name": "22 Permissions matrix admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('HTTP 200 permissions admin', () => pm.response.to.have.status(200));",
+              "const j = pm.response.json();",
+              "pm.test('roles array', () => pm.expect(j.roles).to.be.an('array'));",
+              "pm.test('descriptions array', () => pm.expect(j.permissionDescriptions).to.be.an('array'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{tokenAdmin}}" }],
+        "url": "{{baseUrl}}/api/v1/security/permissions-matrix"
+      }
+    },
+    {
+      "name": "23 Permissions matrix viewer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.test('HTTP 403 permissions viewer', () => pm.response.to.have.status(403));"],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{tokenViewer}}" }],
+        "url": "{{baseUrl}}/api/v1/security/permissions-matrix"
+      }
+    },
+    {
+      "name": "24 Dashboard sin JWT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.test('HTTP 401 dashboard sin JWT', () => pm.response.to.have.status(401));"],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/reports/dashboard"
       }
     }
   ]

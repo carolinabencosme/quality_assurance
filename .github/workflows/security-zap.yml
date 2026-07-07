@@ -1,0 +1,56 @@
+name: Security ZAP
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, develop, presentacion]
+
+permissions:
+  contents: read
+
+jobs:
+  zap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start application stack
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml up -d --build postgres keycloak backend frontend
+
+      - name: Wait for frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 90); do
+            if curl -fsS http://localhost:3000/ >/dev/null 2>&1; then
+              echo "Frontend OK"
+              exit 0
+            fi
+            sleep 3
+          done
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs --tail 150
+          exit 1
+
+      - name: Run ZAP baseline
+        env:
+          ZAP_TARGET: http://localhost:3000
+        run: |
+          chmod +x scripts/run-zap-baseline.sh
+          ./scripts/run-zap-baseline.sh
+
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-report
+          path: docs/qa-evidence/zap-report.html
+          if-no-files-found: ignore
+
+      - name: Docker logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs --tail 150
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml down -v

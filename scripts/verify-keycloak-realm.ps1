@@ -1,4 +1,4 @@
-# Valida estructura mínima de keycloak/realm-export.json (QA-29)
+# Valida estructura minima de keycloak/realm-export.json (QA-29)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $exportPath = Join-Path $root 'keycloak\realm-export.json'
@@ -60,7 +60,7 @@ foreach ($r in $compositeRoles) {
 }
 
 if (-not (Test-Path $versionPath)) {
-  Write-Error "Falta archivo de versión: $versionPath"
+  Write-Error "Falta archivo de version: $versionPath"
 }
 
 $version = (Get-Content $versionPath -Raw).Trim()

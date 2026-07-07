@@ -1,0 +1,57 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "401 Unauthorized rate",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=\"401\"}[5m])) by (uri)", "legendFormat": "{{uri}}" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "title": "403 Forbidden rate",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=\"403\"}[5m])) by (uri)", "legendFormat": "{{uri}}" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 3,
+      "title": "Protected endpoint 5xx",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=~\"/api/v1/.*\",status=~\"5..\"}[5m])) by (uri)", "legendFormat": "{{uri}}" }
+      ]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 8 },
+      "id": 4,
+      "title": "Access denied logs",
+      "type": "logs",
+      "targets": [
+        { "expr": "{container=~\"inventory-.*\"} |= \"Access denied\"", "refId": "A" }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["inventory-qas", "security"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Inventory Security",
+  "uid": "inventory-security",
+  "version": 1
+}

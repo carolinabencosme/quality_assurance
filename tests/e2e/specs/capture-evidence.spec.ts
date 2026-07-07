@@ -26,6 +26,7 @@ test.describe('Capturas evidencia Avance V3', () => {
   test('04 dashboard criticos', async ({ page }) => {
     await loginViaKeycloak(page, 'viewer', 'viewer123');
     await expect(page.getByText('Productos activos')).toBeVisible();
+    await expect(page.getByText('Productos mas vendidos')).toBeVisible();
     await page.screenshot({ path: path.join(evidenceDir, '04-critical-stock.png'), fullPage: true });
   });
 
@@ -34,5 +35,19 @@ test.describe('Capturas evidencia Avance V3', () => {
     await dockLink(page, 'Auditoria').click();
     await expect(page).toHaveURL(/\/audit/);
     await page.screenshot({ path: path.join(evidenceDir, '05-audit-envers.png'), fullPage: true });
+  });
+
+  test('06 admin permissions matrix', async ({ page }) => {
+    await loginViaKeycloak(page, 'admin', 'admin123');
+    await dockLink(page, 'Permisos').click();
+    await expect(page).toHaveURL(/\/admin\/permissions/);
+    await page.screenshot({ path: path.join(evidenceDir, '06-admin-permissions.png'), fullPage: true });
+  });
+
+  test('07 stock movements', async ({ page }) => {
+    await loginViaKeycloak(page, 'warehouse', 'warehouse123');
+    await dockLink(page, 'Stock').click();
+    await expect(page.getByRole('heading', { name: 'Movimientos de stock' })).toBeVisible();
+    await page.screenshot({ path: path.join(evidenceDir, '07-stock-movements.png'), fullPage: true });
   });
 });

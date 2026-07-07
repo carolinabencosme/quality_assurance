@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { loginViaKeycloak, dockLink } from '../helpers/keycloak-login';
 
-test.describe('Inventory QAS — flujo principal', () => {
+test.describe('Inventory QAS - flujo principal', () => {
   test('login viewer y dashboard carga KPIs', async ({ page }) => {
     await loginViaKeycloak(page, 'viewer', 'viewer123');
 
@@ -9,7 +9,7 @@ test.describe('Inventory QAS — flujo principal', () => {
     await expect(page.getByText('Productos activos')).toBeVisible();
   });
 
-  test('navegación a productos', async ({ page }) => {
+  test('navegacion a productos', async ({ page }) => {
     await loginViaKeycloak(page, 'viewer', 'viewer123');
 
     await dockLink(page, 'Productos').click();

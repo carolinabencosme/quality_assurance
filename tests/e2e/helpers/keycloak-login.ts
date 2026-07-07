@@ -47,7 +47,7 @@ async function submitKeycloakCredentials(
     const url = page.url();
     if (url.includes('localhost:8080/realms/')) {
       throw new Error(
-        'Keycloak redirigió al puerto 8080 (API backend). ' +
+        'Keycloak redirigio al puerto 8080 (API backend). ' +
           'Usa NEXT_PUBLIC_KEYCLOAK_URL=http://localhost:8081 y recrea frontend/keycloak.',
       );
     }
@@ -85,7 +85,7 @@ export async function loginViaKeycloak(
   const bodyPreview = await page.locator('body').innerText();
   if (/\"detail\"\s*:\s*\"Not Found\"/.test(bodyPreview) || bodyPreview.trim() === '{"detail":"Not Found"}') {
     throw new Error(
-      `Proxy Keycloak devolvió 404 (${page.url()}). ` +
+      `Proxy Keycloak devolvio 404 (${page.url()}). ` +
         'Recrea frontend: KEYCLOAK_PROXY_TARGET=http://keycloak:8080 en docker-compose.dev.yml',
     );
   }

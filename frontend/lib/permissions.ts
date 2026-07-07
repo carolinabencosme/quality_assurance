@@ -71,6 +71,14 @@ export function canManageProducts(): boolean {
   return hasPermission('product:manage');
 }
 
+export function canManageUsers(): boolean {
+  return hasPermission('user:manage');
+}
+
+export function canViewAudit(): boolean {
+  return hasPermission('audit:view');
+}
+
 export function canManageStock(): boolean {
   return hasPermission('stock:manage');
 }

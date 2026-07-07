@@ -27,9 +27,9 @@ if (Test-Path $surefireDir) {
         [xml]$doc = Get-Content $xml.FullName
         $tests = $doc.testsuite
         @"
-# Resumen de pruebas — $(Get-Date -Format 'yyyy-MM-dd HH:mm')
+# Resumen de pruebas - $(Get-Date -Format 'yyyy-MM-dd HH:mm')
 
-| Métrica | Valor |
+| Metrica | Valor |
 |---------|-------|
 | Tests ejecutados | $($tests.tests) |
 | Fallos | $($tests.failures) |
@@ -39,7 +39,7 @@ if (Test-Path $surefireDir) {
 
 Comando: ``cd backend && .\mvnw.cmd verify``
 Reporte JaCoCo: ``backend/target/site/jacoco/index.html``
-Umbral mínimo: **60% líneas** (``jacoco-check`` en pom.xml)
+Umbral minimo: **60% lineas** (``jacoco-check`` en pom.xml)
 "@ | Set-Content "$outDir/test-execution-summary.md" -Encoding UTF8
     }
 }

@@ -1,4 +1,4 @@
-# Deploy staging — Inventory QAS (QA-8)
+# Deploy staging - Inventory QAS (QA-8)
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $Root

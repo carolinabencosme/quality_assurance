@@ -22,6 +22,13 @@ type Dashboard = {
     quantity: number;
     minStock: number;
   }>;
+  topSoldProducts: Array<{
+    productId: number;
+    sku: string;
+    name: string;
+    totalOutQty: number;
+    movementCount: number;
+  }>;
   recentMovements: Array<{
     movementId: number;
     productSku: string;
@@ -231,36 +238,93 @@ export default function DashboardPage() {
               <section className="panel panel--hover">
                 <div className="panel-head">
                   <div>
-                    <h2>Movimientos recientes</h2>
-                    <p>Ultimas entradas, salidas y ajustes.</p>
+                    <h2>Productos mas vendidos</h2>
+                    <p>Proxy por salidas OUT acumuladas en los ultimos 30 dias.</p>
                   </div>
+                  <span>{data.topSoldProducts.length}</span>
                 </div>
-                {data.recentMovements.length === 0 ? (
-                  <EmptyPanel title="Sin movimientos" copy="Cuando se registre stock, aparecera aqui." />
+                {data.topSoldProducts.length === 0 ? (
+                  <EmptyPanel
+                    title="Sin salidas recientes"
+                    copy="No hay salidas registradas en los ultimos 30 dias."
+                  />
                 ) : (
-                  <div className="timeline-list">
-                    {data.recentMovements.map((movement) => (
-                      <div key={movement.movementId} className="timeline-item">
-                        <span className="timeline-dot" aria-hidden />
-                        <div>
-                          <strong>{movement.productName}</strong>
-                          <div className="row-meta">
-                            <span className={movementClass(movement.type)}>{movementLabel(movement.type)}</span>{' '}
-                            {movement.productSku}
-                          </div>
-                        </div>
-                        <span className={movement.delta >= 0 ? 'delta-pos delta-with-icon' : 'delta-neg delta-with-icon'}>
-                          <Icon name={movement.delta >= 0 ? 'arrowUp' : 'arrowDown'} size={14} />
-                          {movement.delta > 0 ? '+' : ''}
-                          {movement.delta} a {movement.newQty}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="data-table-wrap">
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th>SKU</th>
+                          <th>Producto</th>
+                          <th>Unidades</th>
+                          <th>Movimientos</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.topSoldProducts.map((product) => (
+                          <tr key={product.productId}>
+                            <td>{product.sku}</td>
+                            <td><strong>{product.name}</strong></td>
+                            <td>{numberFormat.format(product.totalOutQty)}</td>
+                            <td>{numberFormat.format(product.movementCount)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </section>
             </Reveal>
           </div>
+
+          <Reveal delay={260}>
+            <section className="panel panel--hover">
+              <div className="panel-head">
+                <div>
+                  <h2>Movimientos recientes</h2>
+                  <p>Ultimas entradas, salidas y ajustes.</p>
+                </div>
+              </div>
+              {data.recentMovements.length === 0 ? (
+                <EmptyPanel title="Sin movimientos" copy="Cuando se registre stock, aparecera aqui." />
+              ) : (
+                <div className="timeline-list">
+                  {data.recentMovements.map((movement) => (
+                    <div key={movement.movementId} className="timeline-item">
+                      <span className="timeline-dot" aria-hidden />
+                      <div>
+                        <strong>{movement.productName}</strong>
+                        <div className="row-meta">
+                          <span className={movementClass(movement.type)}>{movementLabel(movement.type)}</span>{' '}
+                          {movement.productSku}
+                        </div>
+                      </div>
+                      <span className={movement.delta >= 0 ? 'delta-pos delta-with-icon' : 'delta-neg delta-with-icon'}>
+                        <Icon name={movement.delta >= 0 ? 'arrowUp' : 'arrowDown'} size={14} />
+                        {movement.delta > 0 ? '+' : ''}
+                        {movement.delta} a {movement.newQty}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </Reveal>
+
+          <Reveal delay={320}>
+            <section className="panel panel--hover">
+              <div className="panel-head">
+                <div>
+                  <h2>Metricas del sistema</h2>
+                  <p>CPU, JVM, latencia, throughput, errores y trazas se consultan en Grafana.</p>
+                </div>
+                <span>Observabilidad</span>
+              </div>
+              <p className="text-muted">
+                Para defensa tecnica, usar los dashboards Grafana de aplicacion, infraestructura,
+                negocio y seguridad documentados en la guia de observabilidad.
+              </p>
+            </section>
+          </Reveal>
         </>
       )}
     </>

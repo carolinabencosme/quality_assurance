@@ -11,14 +11,14 @@ permissions:
 jobs:
   deploy-and-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
-      - name: Start core stack (Docker Compose)
+      - name: Start staging stack with observability
         run: |
-          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml up -d --build postgres keycloak backend frontend
-          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml ps
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml up -d --build postgres keycloak backend frontend prometheus loki tempo grafana alertmanager alloy
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml ps
 
       - name: Wait for backend health
         run: |
@@ -49,11 +49,27 @@ jobs:
 
       - name: Post-deploy smoke
         env:
-          RUN_OBSERVABILITY_SMOKE: 'false'
+          RUN_OBSERVABILITY_SMOKE: 'true'
         run: |
           chmod +x scripts/post-deploy-smoke.sh
           ./scripts/post-deploy-smoke.sh
 
       - name: Dump logs on failure
         if: failure()
-        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs --tail 100
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml logs --tail 150
+
+      - name: Upload logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml logs --no-color > staging-compose.log
+
+      - name: Archive staging logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-compose-logs
+          path: staging-compose.log
+          if-no-files-found: ignore
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml down -v

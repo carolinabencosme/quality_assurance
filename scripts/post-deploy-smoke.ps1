@@ -1,4 +1,4 @@
-# Post-deploy smoke — Fase 6 (QA-8) — Windows
+# Post-deploy smoke - Fase 6 (QA-8) - Windows
 $ErrorActionPreference = 'Stop'
 $Api = if ($env:API_BASE) { $env:API_BASE } else { 'http://localhost:8080' }
 $Keycloak = if ($env:KEYCLOAK_BASE) { $env:KEYCLOAK_BASE } else { 'http://localhost:8081' }
