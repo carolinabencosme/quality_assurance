@@ -60,6 +60,46 @@
       "targets": [
         { "expr": "process_uptime_seconds{job=\"inventory-api\"}", "legendFormat": "uptime" }
       ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
+      "id": 6,
+      "title": "Hikari pool idle",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "hikaricp_connections_idle{job=\"inventory-api\"}", "legendFormat": "idle" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
+      "id": 7,
+      "title": "Hikari pool pending",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "hikaricp_connections_pending{job=\"inventory-api\"}", "legendFormat": "pending" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
+      "id": 8,
+      "title": "Hikari pool max",
+      "type": "stat",
+      "targets": [
+        { "expr": "hikaricp_connections_max{job=\"inventory-api\"}", "legendFormat": "max" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+      "id": 9,
+      "title": "Hikari timeouts",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "increase(hikaricp_connections_timeout_total{job=\"inventory-api\"}[5m])", "legendFormat": "timeouts" }
+      ]
     }
   ],
   "schemaVersion": 39,

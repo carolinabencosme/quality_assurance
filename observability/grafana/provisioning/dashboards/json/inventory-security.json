@@ -45,6 +45,36 @@
       "targets": [
         { "expr": "{container=~\"inventory-.*\"} |= \"Access denied\"", "refId": "A" }
       ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 18 },
+      "id": 5,
+      "title": "API auth failures last hour",
+      "type": "stat",
+      "targets": [
+        { "expr": "sum(increase(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"401|403\"}[1h]))", "legendFormat": "401/403" }
+      ]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 18 },
+      "id": 6,
+      "title": "API logs with user and endpoint",
+      "type": "logs",
+      "targets": [
+        { "expr": "{container=~\"inventory-.*backend.*|inventory-api.*\"} |= \"user=\" |= \"endpoint=\"", "refId": "A" }
+      ]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 18 },
+      "id": 7,
+      "title": "Keycloak login logs",
+      "type": "logs",
+      "targets": [
+        { "expr": "{container=~\".*keycloak.*\"} |= \"LOGIN\"", "refId": "A" }
+      ]
     }
   ],
   "schemaVersion": 39,

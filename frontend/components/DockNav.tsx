@@ -13,6 +13,7 @@ const NAV_ICONS: Record<string, IconName> = {
   Stock: 'stock',
   Reportes: 'reports',
   Auditoria: 'audit',
+  Usuarios: 'key',
   Permisos: 'shield',
 };
 

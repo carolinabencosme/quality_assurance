@@ -51,3 +51,9 @@ inventory:
     enabled: true
   cors:
     allowed-origins: ${INVENTORY_CORS_ORIGINS:http://localhost:3000,http://127.0.0.1:3000}
+  keycloak:
+    admin:
+      server-url: ${KEYCLOAK_ADMIN_URL:http://keycloak:8080}
+      realm: ${KEYCLOAK_REALM:inventory-realm}
+      client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:inventory-admin-api}
+      client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}

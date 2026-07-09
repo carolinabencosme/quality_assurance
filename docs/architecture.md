@@ -64,6 +64,45 @@ sequenceDiagram
   B-->>F: response
 ```
 
+## Authorization: Scopes + Policies
+
+Keycloak exports seven business scopes:
+
+`product:view`, `product:manage`, `stock:view`, `stock:manage`, `report:view`, `user:manage`, `audit:view`.
+
+`inventory-api` has Authorization Services enabled with resources for Products, Stock, Reports, Users and Audit. Role policies map `inventory-admin`, `warehouse-manager`, `inventory-clerk` and `inventory-viewer` to allowed scopes.
+
+Spring Resource Server remains the enforcement point for API requests. `KeycloakJwtAuthoritiesConverter` reads:
+
+- realm roles, expanded through local role-to-permission mapping
+- `resource_access.inventory-api.roles`
+- `scope` claim as string or array
+
+When role claims are present, scope aliases are added only for permissions already backed by roles. This prevents optional requested scopes from over-granting lower-privilege users while still exposing `SCOPE_product:view` style evidence.
+
+```mermaid
+flowchart LR
+  Token[Keycloak JWT] --> Converter[JWT authorities converter]
+  Converter --> Roles[realm/resource roles]
+  Converter --> Scopes[scope claim]
+  Roles --> Authorities[product:view and SCOPE_product:view]
+  Scopes --> Authorities
+  Authorities --> PreAuth[@PreAuthorize]
+```
+
+## User Management Flow
+
+```mermaid
+sequenceDiagram
+  participant A as Admin UI
+  participant B as Backend /api/v1/users
+  participant K as Keycloak Admin API
+  A->>B: user:manage JWT
+  B->>K: client_credentials inventory-admin-api
+  K-->>B: users and role mappings
+  B-->>A: users, enabled state, managed roles
+```
+
 ## Stock Movement Flow
 
 ```mermaid
@@ -136,7 +175,7 @@ flowchart LR
 |---|---|
 | ADR-01 | Spring Boot + PostgreSQL for transactional inventory |
 | ADR-02 | Keycloak + PKCE for enterprise auth |
-| ADR-03 | Authorization by authority, not role name |
+| ADR-03 | Authorization by effective authority from roles and scopes |
 | ADR-04 | Soft delete + Envers for traceability |
 | ADR-05 | Testcontainers for integration database tests |
 | ADR-06 | OpenTelemetry stack for metrics, logs and traces |
@@ -144,7 +183,7 @@ flowchart LR
 
 ## Known Limitations
 
-Local production is demonstrable, not cloud-hardened. PostgreSQL exporter is not included, so database infrastructure alerts are documented as a limitation. k6 and security scans can be heavy and may run manually in CI.
+Local production is demonstrable, not cloud-hardened. PostgreSQL exporter is not included, so database infrastructure alerts are documented as a limitation. k6, JMeter, Snyk and security scans can be heavy and may run manually in CI.
 
 ## Basic Maintenance
 

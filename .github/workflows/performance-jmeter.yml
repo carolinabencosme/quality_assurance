@@ -1,0 +1,50 @@
+name: Performance JMeter
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  jmeter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start backend stack
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml up -d --build postgres keycloak backend
+
+      - name: Wait for backend
+        shell: bash
+        run: |
+          for i in $(seq 1 90); do
+            if curl -fsS http://localhost:8080/actuator/health >/dev/null 2>&1; then
+              echo "Backend OK"
+              exit 0
+            fi
+            sleep 3
+          done
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs backend --tail 150
+          exit 1
+
+      - name: Run JMeter
+        env:
+          BASE_URL: http://host.docker.internal:8080
+          KEYCLOAK_URL: http://host.docker.internal:8081
+          JMETER_USERNAME: viewer
+          JMETER_PASSWORD: viewer123
+        run: bash scripts/run-jmeter.sh
+
+      - name: Upload JMeter evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-evidence
+          path: docs/qa-evidence/jmeter/**
+          if-no-files-found: ignore
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml down -v

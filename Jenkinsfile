@@ -9,6 +9,7 @@ pipeline {
 
     parameters {
         booleanParam(name: 'DEPLOY_STAGING', defaultValue: false, description: 'Deploy local staging stack with Docker Compose')
+        booleanParam(name: 'DEPLOY_PRODUCTION', defaultValue: false, description: 'Deploy local production stack with Docker Compose')
         booleanParam(name: 'RUN_E2E', defaultValue: true, description: 'Run Playwright E2E tests')
         booleanParam(name: 'RUN_ZAP', defaultValue: false, description: 'Run OWASP ZAP baseline scan')
         booleanParam(name: 'RUN_K6', defaultValue: false, description: 'Run k6 performance test')
@@ -18,6 +19,7 @@ pipeline {
 
     environment {
         COMPOSE_FILES = '-f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml'
+        PROD_COMPOSE_FILES = '-f docker-compose.prod.yml -f docker-compose.observability.yml --env-file .env.prod'
         SONAR_HOST_URL = "${env.SONAR_HOST_URL ?: 'http://localhost:9000'}"
     }
 
@@ -181,6 +183,18 @@ pipeline {
             }
         }
 
+        stage('Deploy Production Local') {
+            when {
+                expression { return params.DEPLOY_PRODUCTION }
+            }
+            steps {
+                sh 'cp .env.prod.example .env.prod'
+                sh "docker compose ${PROD_COMPOSE_FILES} up -d --build"
+                sh 'sleep 120'
+                sh 'RUN_OBSERVABILITY_SMOKE=true ./scripts/post-deploy-smoke.sh'
+            }
+        }
+
         stage('Archive Artifacts') {
             steps {
                 archiveArtifacts artifacts: 'backend/target/site/jacoco/**, backend/target/dependency-check-report.*, docs/qa-evidence/**', allowEmptyArchive: true
@@ -192,6 +206,7 @@ pipeline {
         always {
             junit allowEmptyResults: true, testResults: 'backend/target/surefire-reports/*.xml'
             sh "docker compose ${COMPOSE_FILES} down -v || true"
+            sh "docker compose ${PROD_COMPOSE_FILES} down -v || true"
         }
     }
 }

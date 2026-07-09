@@ -5,5 +5,6 @@ public enum ErrorCode {
     NOT_FOUND,
     CONFLICT,
     BUSINESS_RULE,
+    EXTERNAL_SERVICE,
     INTERNAL_ERROR
 }

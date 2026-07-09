@@ -31,13 +31,17 @@ Demo users: `viewer/viewer123`, `warehouse/warehouse123`, `admin/admin123`.
 - Product CRUD with pagination, search, filters and soft delete.
 - Stock IN, OUT and ADJUSTMENT with movement history.
 - Dashboard with KPIs, critical products, top sold products by OUT movements and recent movements.
+- Dashboard system metrics from `/api/v1/observability/system-metrics`.
 - Envers audit protected by `audit:view`.
+- Keycloak user management protected by `user:manage`.
 - Read-only permissions matrix protected by `user:manage`.
 - Swagger/OpenAPI at `/swagger-ui.html`.
 
 ## Security
 
 Keycloak is the identity provider. The frontend uses Authorization Code + PKCE and refresh tokens. The backend validates JWTs and protects endpoints with authorities such as `product:view`, `stock:manage`, `report:view`, `audit:view` and `user:manage`.
+
+The realm exports business OAuth2 scopes and Authorization Services policies for Products, Stock, Reports, Users and Audit. Spring enforces the effective JWT authorities from role claims and scope claims.
 
 ## Testing
 
@@ -64,6 +68,8 @@ cd ..\..
 .\scripts\run-zap-baseline.ps1
 .\scripts\run-schemathesis.ps1
 .\scripts\run-k6.ps1
+.\scripts\run-k6-stress.ps1
+.\scripts\run-jmeter.ps1
 ```
 
 Evidence index: `docs/qa-evidence.md`.
@@ -81,15 +87,16 @@ Guide: `docs/observability-guide.md`.
 
 ## CI/CD
 
-GitHub Actions: CI, Newman, Playwright, deploy staging, ZAP, Dependency Check, Schemathesis, k6 and Full QA Pipeline.
+GitHub Actions: CI, Newman, Playwright, deploy staging, deploy production, ZAP, Dependency Check, Snyk, Schemathesis, k6, JMeter and Full QA Pipeline.
 
 Jenkins: `Jenkinsfile` includes build, tests, Docker build, staging, Newman, Playwright, ZAP, Dependency Check, k6, Sonar and artifact stages.
 
 ## Local Production Demo
 
 ```powershell
-docker compose -f docker-compose.prod.yml config
-docker compose -f docker-compose.prod.yml up -d --build
+copy .env.prod.example .env.prod
+.\scripts\up-prod.ps1
+.\scripts\post-deploy-smoke.ps1
 ```
 
 This is local production for academic demonstration, not a hardened cloud deployment. Change placeholder passwords before any real use.
@@ -97,6 +104,8 @@ This is local production for academic demonstration, not a hardened cloud deploy
 ## Documentation
 
 - `docs/requirements.md`
+- `docs/installation.md`
+- `docs/maintenance.md`
 - `docs/architecture.md`
 - `docs/testing-guide.md`
 - `docs/observability-guide.md`

@@ -31,6 +31,16 @@ groups:
         annotations:
           summary: p95 latency above 1s in inventory-api
 
+      - alert: HighCpuUsage
+        expr: |
+          (process_cpu_usage{job="inventory-api"} > 0.85)
+          or (system_cpu_usage{job="inventory-api"} > 0.90)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU usage on inventory-api
+
       - alert: HighAuthFailureRate
         expr: |
           sum(rate(http_server_requests_seconds_count{job="inventory-api",status=~"401|403"}[5m])) > 0.2

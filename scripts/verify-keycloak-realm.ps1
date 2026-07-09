@@ -31,8 +31,15 @@ foreach ($perm in $requiredPermissions) {
   }
 }
 
+$clientScopes = $realm.clientScopes | ForEach-Object { $_.name }
+foreach ($scope in $requiredPermissions) {
+  if ($clientScopes -notcontains $scope) {
+    Write-Error "Falta client scope OAuth2: $scope"
+  }
+}
+
 $clientIds = $realm.clients | ForEach-Object { $_.clientId }
-foreach ($expected in @('inventory-frontend', 'inventory-api')) {
+foreach ($expected in @('inventory-frontend', 'inventory-api', 'inventory-admin-api')) {
   if ($clientIds -notcontains $expected) {
     Write-Error "Falta cliente: $expected"
   }
@@ -50,6 +57,20 @@ $apiClient = $realm.clients | Where-Object { $_.clientId -eq 'inventory-api' } |
 if (-not $apiClient.bearerOnly) {
   Write-Error "inventory-api debe ser bearerOnly (resource server)"
 }
+if (-not $apiClient.authorizationServicesEnabled) {
+  Write-Error "inventory-api debe tener Authorization Services habilitado"
+}
+if (-not $apiClient.authorizationSettings) {
+  Write-Error "inventory-api debe exportar authorizationSettings"
+}
+
+$adminClient = $realm.clients | Where-Object { $_.clientId -eq 'inventory-admin-api' } | Select-Object -First 1
+if (-not $adminClient.serviceAccountsEnabled) {
+  Write-Error "inventory-admin-api debe tener service account habilitado"
+}
+if ($adminClient.secret -ne '${KEYCLOAK_ADMIN_CLIENT_SECRET}') {
+  Write-Error "inventory-admin-api debe usar placeholder de secret"
+}
 
 $compositeRoles = @('inventory-admin', 'warehouse-manager', 'inventory-clerk', 'inventory-viewer')
 $realmRoleNames = $realm.roles.realm | ForEach-Object { $_.name }
@@ -64,4 +85,4 @@ if (-not (Test-Path $versionPath)) {
 }
 
 $version = (Get-Content $versionPath -Raw).Trim()
-Write-Host "OK realm-export.json v$version - realm inventory-realm, clientes y permisos validados."
+Write-Host "OK realm-export.json v$version - realm inventory-realm, clients, scopes and policies validated."

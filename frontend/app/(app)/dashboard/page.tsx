@@ -39,6 +39,29 @@ type Dashboard = {
   }>;
 };
 
+type SystemMetrics = {
+  jvm: {
+    heapUsedMb: number;
+    heapMaxMb: number;
+    threads: number;
+  };
+  process: {
+    cpuUsage: number;
+    uptimeSeconds: number;
+  };
+  http: {
+    requestsLast5m: number;
+    errorRate5m: number;
+    p95Ms: number;
+  };
+  datasource: {
+    active: number;
+    idle: number;
+    max: number;
+    pending: number;
+  };
+};
+
 const numberFormat = new Intl.NumberFormat('es-DO');
 const currencyFormat = new Intl.NumberFormat('es-DO', {
   style: 'currency',
@@ -64,6 +87,14 @@ function formatInventoryValue(value: number) {
     return `US$${numberFormat.format(Math.round(value / 1000))}K`;
   }
   return currencyFormat.format(value);
+}
+
+function formatPercent(value: number) {
+  return `${Math.round(value * 100)}%`;
+}
+
+function formatMs(value: number) {
+  return `${Math.round(value)} ms`;
 }
 
 function DashboardSkeleton() {
@@ -118,12 +149,19 @@ function EmptyPanel({ title, copy }: { title: string; copy: string }) {
 
 export default function DashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);
+  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiGet<Dashboard>('/reports/dashboard')
-      .then(setData)
+    Promise.all([
+      apiGet<Dashboard>('/reports/dashboard'),
+      apiGet<SystemMetrics>('/observability/system-metrics'),
+    ])
+      .then(([dashboard, metrics]) => {
+        setData(dashboard);
+        setSystemMetrics(metrics);
+      })
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
@@ -310,21 +348,67 @@ export default function DashboardPage() {
             </section>
           </Reveal>
 
-          <Reveal delay={320}>
-            <section className="panel panel--hover">
-              <div className="panel-head">
-                <div>
-                  <h2>Metricas del sistema</h2>
-                  <p>CPU, JVM, latencia, throughput, errores y trazas se consultan en Grafana.</p>
+          {systemMetrics && (
+            <Reveal delay={320}>
+              <section className="panel panel--hover">
+                <div className="panel-head">
+                  <div>
+                    <h2>Metricas del sistema</h2>
+                    <p>CPU, JVM, HTTP y pool de base de datos desde Micrometer.</p>
+                  </div>
+                  <a className="link-action" href="http://localhost:3030" target="_blank" rel="noreferrer">
+                    Ver Grafana
+                  </a>
                 </div>
-                <span>Observabilidad</span>
-              </div>
-              <p className="text-muted">
-                Para defensa tecnica, usar los dashboards Grafana de aplicacion, infraestructura,
-                negocio y seguridad documentados en la guia de observabilidad.
-              </p>
-            </section>
-          </Reveal>
+                <div className="kpi-grid" aria-label="Metricas tecnicas">
+                  <article className="kpi">
+                    <span className="kpi-label">CPU</span>
+                    <strong className="kpi-value">
+                      <AnimatedNumber value={systemMetrics.process.cpuUsage} format={formatPercent} />
+                    </strong>
+                  </article>
+                  <article className="kpi">
+                    <span className="kpi-label">Heap JVM</span>
+                    <strong className="kpi-value">
+                      <AnimatedNumber
+                        value={systemMetrics.jvm.heapUsedMb}
+                        format={(n) => `${Math.round(n)} / ${Math.round(systemMetrics.jvm.heapMaxMb)} MB`}
+                      />
+                    </strong>
+                  </article>
+                  <article className="kpi">
+                    <span className="kpi-label">Threads</span>
+                    <strong className="kpi-value">
+                      <AnimatedNumber value={systemMetrics.jvm.threads} format={(n) => numberFormat.format(n)} />
+                    </strong>
+                  </article>
+                  <article className="kpi">
+                    <span className="kpi-label">Pool DB</span>
+                    <strong className="kpi-value">
+                      {systemMetrics.datasource.active}/{systemMetrics.datasource.max}
+                    </strong>
+                    <div className="row-meta">
+                      Idle {systemMetrics.datasource.idle} / Pending {systemMetrics.datasource.pending}
+                    </div>
+                  </article>
+                  <article className="kpi">
+                    <span className="kpi-label">Requests</span>
+                    <strong className="kpi-value">
+                      <AnimatedNumber
+                        value={systemMetrics.http.requestsLast5m}
+                        format={(n) => numberFormat.format(n)}
+                      />
+                    </strong>
+                  </article>
+                  <article className="kpi">
+                    <span className="kpi-label">p95 / errores</span>
+                    <strong className="kpi-value">{formatMs(systemMetrics.http.p95Ms)}</strong>
+                    <div className="row-meta">Error rate {formatPercent(systemMetrics.http.errorRate5m)}</div>
+                  </article>
+                </div>
+              </section>
+            </Reveal>
+          )}
         </>
       )}
     </>

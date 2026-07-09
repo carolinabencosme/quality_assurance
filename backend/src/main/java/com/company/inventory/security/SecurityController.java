@@ -32,7 +32,7 @@ public class SecurityController {
     }
 
     @GetMapping("/permissions-matrix")
-    @PreAuthorize("hasAuthority('" + Permission.USER_MANAGE + "')")
+    @PreAuthorize("hasAuthority('" + Permission.USER_MANAGE + "') or hasAuthority('SCOPE_" + Permission.USER_MANAGE + "')")
     @Operation(summary = "Permission matrix", description = "Read-only role to permission matrix aligned with Keycloak.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Permission matrix"),

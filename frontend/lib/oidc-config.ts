@@ -1,5 +1,7 @@
 /** Configuración OIDC — Authorization Code + PKCE (cliente público SPA). */
 
+import { BUSINESS_SCOPES } from './permissions';
+
 const keycloakBase = (process.env.NEXT_PUBLIC_KEYCLOAK_URL ?? '/keycloak').replace(/\/$/, '');
 const realm = process.env.NEXT_PUBLIC_KEYCLOAK_REALM ?? 'inventory-realm';
 const clientId = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? 'inventory-frontend';
@@ -12,7 +14,7 @@ export const OIDC = {
   clientId,
   appOrigin,
   callbackPath: '/auth/callback',
-  scopes: 'openid profile email',
+  scopes: ['openid', 'profile', 'email', ...BUSINESS_SCOPES].join(' '),
 } as const;
 
 export function oidcRedirectUri(): string {

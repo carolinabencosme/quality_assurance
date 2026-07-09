@@ -12,7 +12,8 @@ export const APP_NAV: NavItem[] = [
   { href: '/stock/movements', label: 'Stock', requiredPermission: 'stock:view', activePrefix: '/stock' },
   { href: '/reports', label: 'Reportes', requiredPermission: 'report:view' },
   { href: '/audit', label: 'Auditoria', requiredPermission: 'audit:view' },
-  { href: '/admin/permissions', label: 'Permisos', requiredPermission: 'user:manage', activePrefix: '/admin' },
+  { href: '/admin/users', label: 'Usuarios', requiredPermission: 'user:manage' },
+  { href: '/admin/permissions', label: 'Permisos', requiredPermission: 'user:manage' },
 ];
 
 export function isNavActive(pathname: string, item: NavItem): boolean {

@@ -10,6 +10,12 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 1,
   workers: 1,
   reporter: [['list'], ['html', { open: 'never', outputFolder: '../../docs/qa-evidence/playwright-report' }]],
+  expect: {
+    toHaveScreenshot: {
+      animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
+    },
+  },
   use: {
     baseURL,
     trace: 'on-first-retry',

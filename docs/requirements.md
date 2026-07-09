@@ -32,6 +32,9 @@ The system covers inventory CRUD, stock IN/OUT/ADJUSTMENT, dashboard KPIs, audit
 | RF-18 | OpenAPI / Swagger | Done | `/swagger-ui.html`, `/v3/api-docs` |
 | RF-19 | Granular security | Done | `@PreAuthorize` by authority |
 | RF-20 | `user:manage` matrix | Done | `/api/v1/security/permissions-matrix`, UI `/admin/permissions` |
+| RF-21 | OAuth2 business scopes | Done | Keycloak client scopes, JWT converter, OIDC scope request |
+| RF-22 | Real user management | Done | `/api/v1/users`, UI `/admin/users`, Keycloak Admin API |
+| RF-23 | System metrics dashboard | Done | `/api/v1/observability/system-metrics`, dashboard UI |
 
 ## Soft Delete
 
@@ -45,14 +48,14 @@ The product delete requirement is implemented as logical deletion. `DELETE /api/
 | RNF-02 | Granular authorization | Done | authorities and UI navigation filtering |
 | RNF-03 | Observability | Done | Prometheus, Loki, Tempo, Alloy, Grafana |
 | RNF-04 | Traceability | Done | Envers, stock history, correlation id |
-| RNF-05 | Performance | Implemented | k6 scripts and workflow |
-| RNF-06 | CI/CD | Implemented | GitHub Actions and Jenkinsfile |
+| RNF-05 | Performance | Implemented | k6 load/stress and JMeter scripts/workflows |
+| RNF-06 | CI/CD | Implemented | GitHub Actions deploy staging/production and Jenkinsfile |
 | RNF-07 | Code quality | Done | Maven verify, JaCoCo 60 percent gate |
 | RNF-08 | Maintainability | Done | layered backend, typed frontend |
 | RNF-09 | Dockerization | Done | dev, test, observability, staging, prod compose |
 | RNF-10 | Versioned migrations | Done | Flyway migrations |
 | RNF-11 | Audit | Done | Hibernate Envers |
-| RNF-12 | Automated testing | Expanded | JUnit, Newman, Playwright, ZAP, Dependency Check, Schemathesis, k6 |
+| RNF-12 | Automated testing | Expanded | JUnit, Newman, Playwright, ZAP, Dependency Check, Snyk, Schemathesis, k6, JMeter |
 
 ## Permissions Matrix
 
@@ -64,7 +67,7 @@ The product delete requirement is implemented as logical deletion. `DELETE /api/
 | Stock | `stock:manage` | Register stock movements | admin, warehouse-manager, clerk |
 | Reports | `report:view` | View dashboard and reports | admin, warehouse-manager, viewer |
 | Audit | `audit:view` | View Envers audit events | admin |
-| Users | `user:manage` | View permission matrix | admin |
+| Users | `user:manage` | Manage Keycloak users and view permission matrix | admin |
 
 ## Main Use Cases
 
@@ -85,8 +88,9 @@ Billing, real sales module, purchasing/procurement, multi-tenant support and rea
 | Stock movements | Done | `backend/stock`, UI stock page | IN/OUT/ADJUSTMENT |
 | Dashboard | Done | `ReportService`, dashboard UI | Includes KPIs, critical, recent, top sold |
 | Security roles | Done | Keycloak realm, `Permission` | Authority based |
-| User management | Done minimal | `/admin/permissions` | Read-only matrix, Keycloak remains source of truth |
+| User management | Done | `/api/v1/users`, `/admin/users` | Keycloak remains source of truth |
 | Audit | Done | Envers migrations and `/audit` | Protected by `audit:view` |
 | Testing | Expanded | `docs/qa-evidence.md` | Full stack testing |
 | Observability | Expanded | `docs/observability-guide.md` | Grafana dashboards and alerts |
-| DevSecOps | Expanded | `.github/workflows`, `Jenkinsfile` | ZAP, Dependency Check, Schemathesis, k6 |
+| OAuth scopes and policies | Done | `keycloak/realm-export.json`, converter tests | Scopes in JWT plus Keycloak Authorization Services metadata |
+| DevSecOps | Expanded | `.github/workflows`, `Jenkinsfile` | ZAP, Dependency Check, Snyk, Schemathesis, k6, JMeter |

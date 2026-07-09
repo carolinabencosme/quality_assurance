@@ -5,8 +5,10 @@
 # --- Secretos y entorno local ---
 .env
 .env.local
+.env.prod
 .env.*.local
 !.env.example
+!.env.prod.example
 *.pem
 *.key
 *.p12

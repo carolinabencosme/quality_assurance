@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
  */
 @Configuration
 @Profile("test")
-@ConditionalOnProperty(name = "inventory.security.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "inventory.test.jwt-decoder.enabled", havingValue = "true", matchIfMissing = true)
 public class TestJwtDecoderAutoConfiguration {
 
     @Bean

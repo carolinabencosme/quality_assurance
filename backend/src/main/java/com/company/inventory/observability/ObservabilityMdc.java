@@ -10,6 +10,8 @@ public final class ObservabilityMdc {
     public static final String CORRELATION_ID = "correlationId";
     public static final String TRACE_ID = "traceId";
     public static final String SPAN_ID = "spanId";
+    public static final String USER = "user";
+    public static final String ENDPOINT = "endpoint";
 
     private ObservabilityMdc() {
     }
@@ -29,10 +31,24 @@ public final class ObservabilityMdc {
         }
     }
 
+    public static void putUser(String user) {
+        if (user != null && !user.isBlank()) {
+            MDC.put(USER, user);
+        }
+    }
+
+    public static void putEndpoint(String endpoint) {
+        if (endpoint != null && !endpoint.isBlank()) {
+            MDC.put(ENDPOINT, endpoint);
+        }
+    }
+
     public static void clear() {
         MDC.remove(CORRELATION_ID);
         MDC.remove(TRACE_ID);
         MDC.remove(SPAN_ID);
+        MDC.remove(USER);
+        MDC.remove(ENDPOINT);
     }
 
     public static String correlationIdOrUnknown() {
