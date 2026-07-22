@@ -75,6 +75,11 @@ services:
       KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/inventory-realm
       # JWKS: red interna Docker (host.docker.internal:8081 falla en algunos Windows → 401 en API)
       KEYCLOAK_JWKS_URI: http://keycloak:8080/realms/inventory-realm/protocol/openid-connect/certs
+      # Valor academico/dev importado por realm-export.json. Produccion lo rota post-import.
+      KEYCLOAK_ADMIN_URL: http://keycloak:8080
+      KEYCLOAK_REALM: inventory-realm
+      KEYCLOAK_ADMIN_CLIENT_ID: inventory-admin-api
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-inventory-admin-secret-change-me}
       OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-inventory-api}
     extra_hosts:
       - "host.docker.internal:host-gateway"

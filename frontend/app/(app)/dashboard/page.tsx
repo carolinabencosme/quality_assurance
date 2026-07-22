@@ -287,7 +287,12 @@ export default function DashboardPage() {
                     copy="No hay salidas registradas en los ultimos 30 dias."
                   />
                 ) : (
-                  <div className="data-table-wrap">
+                  <div
+                    className="data-table-wrap"
+                    role="region"
+                    aria-label="Productos mas vendidos"
+                    tabIndex={0}
+                  >
                     <table className="data-table">
                       <thead>
                         <tr>

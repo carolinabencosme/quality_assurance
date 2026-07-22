@@ -120,6 +120,8 @@ services:
   backend:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev,observability}
+      # Garantiza el perfil aun cuando un .env local fija SPRING_PROFILES_ACTIVE=dev.
+      SPRING_PROFILES_INCLUDE: observability
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://alloy:4318/v1/traces}
       OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:-http://alloy:4318/v1/metrics}
       OTEL_TRACES_SAMPLER_PROBABILITY: ${OTEL_TRACES_SAMPLER_PROBABILITY:-1.0}

@@ -100,7 +100,12 @@ export default function AdminUsersPage() {
             <p>No se encontraron usuarios en Keycloak.</p>
           </div>
         ) : (
-          <div className="data-table-wrap">
+          <div
+            className="data-table-wrap"
+            role="region"
+            aria-label="Usuarios Keycloak"
+            tabIndex={0}
+          >
             <table className="data-table">
               <thead>
                 <tr>

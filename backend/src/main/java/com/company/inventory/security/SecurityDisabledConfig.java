@@ -15,6 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityDisabledConfig {
 
     @Bean
+    @SuppressWarnings("java:S4502") // Test-only permit-all chain; enabled explicitly when inventory.security.enabled=false.
     SecurityFilterChain permitAllFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)

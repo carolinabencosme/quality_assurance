@@ -23,5 +23,16 @@ Puerto host: **8081** → contenedor **8080**.
 .\scripts\verify-keycloak-realm.ps1
 ```
 
+## Secret del cliente administrativo
+
+El export contiene exclusivamente el valor academico de dev/test `inventory-admin-secret-change-me`; Keycloak no interpola variables de entorno dentro del JSON importado. Produccion debe definir `KEYCLOAK_ADMIN_CLIENT_SECRET` y rotarlo despues del import con:
+
+```powershell
+$env:KEYCLOAK_ADMIN_CLIENT_SECRET = '<secret-real-no-versionado>'
+.\scripts\set-keycloak-admin-secret.ps1
+```
+
+El script no imprime ni guarda el secret.
+
 Documentación completa: [`docs/keycloak-realm.md`](../docs/keycloak-realm.md)  
 Usuarios y roles: [`docs/security-model.md`](../docs/security-model.md)

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import BrandMark from '@/components/BrandMark';
 import { AuthError, completeLoginFromCallback } from '@/lib/auth';
@@ -54,9 +55,9 @@ export default function AuthCallbackClient() {
           <BrandMark size="md" showLabel />
           <h1>No se pudo iniciar sesión</h1>
           <p className="auth-callback-error">{error}</p>
-          <a href="/" className="btn btn-gradient">
+          <Link href="/" className="btn btn-gradient">
             Volver al inicio
-          </a>
+          </Link>
         </div>
       </div>
     );

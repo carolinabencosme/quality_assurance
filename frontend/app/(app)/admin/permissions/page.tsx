@@ -36,7 +36,10 @@ export default function PermissionsMatrixPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const permissions = data?.permissionDescriptions ?? [];
+  const permissions = useMemo(
+    () => data?.permissionDescriptions ?? [],
+    [data?.permissionDescriptions],
+  );
   const descriptions = useMemo(
     () => new Map(permissions.map((permission) => [permission.permission, permission.description])),
     [permissions],
