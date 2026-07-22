@@ -73,36 +73,44 @@ rate(inventory_movements_total{job="inventory-api"}[5m])
 Backend logs:
 
 ```logql
-{container=~"inventory-backend.*"}
+{service_name="backend"}
 ```
 
 Errors:
 
 ```logql
-{container=~"inventory-.*"} |= "ERROR"
+{compose_project="inventory-qas"} |= "ERROR"
 ```
 
 Access denied:
 
 ```logql
-{container=~"inventory-.*"} |= "Access denied"
+{compose_project="inventory-qas"} |= "Access denied"
 ```
 
 Authenticated API request logs:
 
 ```logql
-{container=~"inventory-.*backend.*|inventory-api.*"} |= "user=" |= "endpoint="
+{service_name="backend"} | json | user != "" | endpoint != ""
 ```
 
 Keycloak login audit:
 
 ```logql
-{container=~".*keycloak.*"} |= "LOGIN"
+{service_name="keycloak"} |= "LOGIN"
 ```
 
 ## Tempo
 
-Use Grafana Explore with the Tempo datasource. Start from a trace id in logs or inspect recent traces emitted through Alloy.
+Use Grafana Explore with the Tempo datasource. Start from a `traceId` in the parsed Loki result. A product request must contain the HTTP/security spans and JDBC spans such as `SELECT inventory.products`, `INSERT inventory.products` or `UPDATE inventory.products`.
+
+The live verifier creates and deactivates a disposable product, checks the required Loki fields, retrieves the same trace from Tempo and fails if no database span exists:
+
+```powershell
+.\scripts\verify-observability-evidence.ps1
+```
+
+Its non-secret result is stored in `docs/qa-evidence/observability-live-summary.md`.
 
 ## Alerts
 

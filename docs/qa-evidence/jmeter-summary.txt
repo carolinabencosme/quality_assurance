@@ -1,0 +1,7 @@
+﻿JMeter 5.6.3 live summary
+Generated at: 2026-07-22T04:40:53Z
+Samples: 301
+Failures: 0
+Average response time: 27.24 ms
+Maximum response time: 230 ms
+Raw HTML report (local/CI artifact, not committed): docs/qa-evidence/jmeter/report/index.html

@@ -4,7 +4,7 @@ Cub is a full stack inventory system built for final defense: product CRUD, stoc
 
 ## Stack
 
-Spring Boot 3.4, Java 21, PostgreSQL, Flyway, Hibernate Envers, Next.js 15, React 19, Keycloak 26, Docker Compose, Prometheus, Loki, Tempo, Alloy, Grafana, Alertmanager, GitHub Actions and Jenkins.
+Spring Boot 3.4, Java 21, PostgreSQL, Flyway, Hibernate Envers, Next.js 16, React 19, Keycloak 26, Docker Compose, Prometheus, Loki, Tempo, Alloy, Grafana, Alertmanager, GitHub Actions and Jenkins.
 
 ## Quick Start
 
@@ -70,9 +70,14 @@ cd ..\..
 .\scripts\run-k6.ps1
 .\scripts\run-k6-stress.ps1
 .\scripts\run-jmeter.ps1
+.\scripts\verify-observability-evidence.ps1
 ```
 
 Evidence index: `docs/qa-evidence.md`.
+
+Visual baselines and accessibility checks are part of the Playwright suite. The latest sealed local results, including the real Sonar gate, are indexed under `docs/qa-evidence/`.
+
+The frontend uses ESLint with the Next.js Core Web Vitals and TypeScript rule sets. The sealed dependency audit reports zero known npm vulnerabilities.
 
 ## Observability
 
@@ -88,6 +93,8 @@ Guide: `docs/observability-guide.md`.
 ## CI/CD
 
 GitHub Actions: CI, Newman, Playwright, deploy staging, deploy production, ZAP, Dependency Check, Snyk, Schemathesis, k6, JMeter and Full QA Pipeline.
+
+The staging workflow tests the already deployed stack with visual regression, Newman, Playwright/axe, authorization smoke and Schemathesis. Recommended repository rules are documented in `docs/branch-protection.md`.
 
 Jenkins: `Jenkinsfile` includes build, tests, Docker build, staging, Newman, Playwright, ZAP, Dependency Check, k6, Sonar and artifact stages.
 
@@ -111,6 +118,9 @@ This is local production for academic demonstration, not a hardened cloud deploy
 - `docs/observability-guide.md`
 - `docs/qa-evidence.md`
 - `docs/qa-evidence/FINAL-CHECKLIST.md`
+- `docs/branch-protection.md`
+- `docs/defensa/guion-sellado-v3.md`
+- `CONTRIBUTING.md`
 
 ## Troubleshooting
 

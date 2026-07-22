@@ -1,38 +1,47 @@
-# Local Run Summary - 2026-07-07 (final verde)
+# Local Run Summary - 2026-07-22 (sellado V3)
 
 ## Passed
 
 | Command | Result |
 |---|---|
-| `cmd /c mvnw.cmd verify` in `backend` | Passed: 77 tests, 0 failures, 38 Testcontainers skips (Windows), JaCoCo gate met |
-| `npm test` in `tests/api` | Passed: 24 requests, 0 failed assertions |
-| `npm test` in `tests/e2e` | Passed: 16/16 Playwright tests |
-| `tests/security/auth-smoke.ps1` | Passed: 401/403/200 including permissions-matrix admin |
+| `mvnw.cmd verify` in `backend` | Passed: 28 suites, 108 tests, 0 failures/errors/skips; real PostgreSQL and Keycloak containers |
+| `scripts/verify-keycloak-it-report.ps1` | Passed: 7 Keycloak integration tests, 0 skips |
+| `npm test` in `tests/api` | Passed: 29 requests, 61 assertions, 0 failures |
+| `RUN_VISUAL_SNAPSHOTS=true npm test` in `tests/e2e` | Passed: 21 functional/responsive/evidence/axe/visual tests; 4 deterministic baselines compared |
+| `tests/security/auth-smoke.ps1` | Passed: admin business scopes and `/security/me`; viewer users/audit 403; admin users 200 |
 | `tests/observability/smoke.ps1` | Passed: Prometheus, Grafana, Loki, Tempo, Alloy, Alertmanager, actuator |
-| `npx tsc --noEmit` in `frontend` | Passed |
+| `scripts/verify-observability-evidence.ps1` | Passed: Loki user/endpoint/correlation and Tempo request-to-JDBC spans |
+| `npm run lint` in `frontend` | Passed: ESLint Core Web Vitals + TypeScript |
 | `npm run build` in `frontend` | Passed |
+| `npm audit --audit-level=moderate` in `frontend` | Passed: 0 vulnerabilities |
 | `docker compose -f docker-compose.prod.yml config` | Passed |
 | `.\scripts\run-all-tests.ps1` | **TODOS LOS TESTS OK** |
 
-## Optional / CI
+## Extended live evidence
 
 | Command | Result |
 |---|---|
-| `RUN_K6_SMOKE=true .\scripts\run-k6.ps1` | Optional; skipped by default in run-all-tests |
-| `run-zap-baseline.ps1` | Run manually or via GitHub Actions `security-zap.yml` |
-| `run-schemathesis.ps1` | Run manually or via GitHub Actions `api-schemathesis.yml` |
-| Dependency Check Maven | Run via GitHub Actions `security-deps.yml` (heavy, 10+ min) |
+| `scripts/run-schemathesis.ps1` | Passed: 19 operations, 1,264 generated cases, 0 failures |
+| `scripts/run-k6.ps1` | Passed thresholds; summary archived |
+| `scripts/run-k6-stress.ps1` | Passed through 200 VUs; 99.99% checks, p95 about 198 ms |
+| `scripts/run-jmeter.ps1` | Passed: 301 samples, 0 failures, 27.24 ms average, 230 ms max |
+| `scripts/run-zap-baseline.ps1` | Passed baseline gate with 0 FAIL findings; HTML and summary archived |
+| `scripts/run-sonar-local.ps1` | Quality Gate OK: 79.8% coverage, 0 bugs, 0 vulnerabilities, 0.9% duplication |
 
 ## Environment notes
 
-- If backend exits with Flyway checksum mismatch after changing SQL migrations, run:
-  `.\scripts\repair-flyway-checksums.ps1`
-  then `docker compose ... up -d backend frontend`.
-- DEF-007 (500 on permissions-matrix) resolved after rebuild + flyway repair on clean runtime.
+- Live evidence used Docker Desktop on Windows with `TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=//./pipe/docker_engine`.
+- The academic passwords belong only to the imported dev/test realm. No production secret is present in a report.
+- Sonar used local port 9001 because an unrelated user container already owned port 9000; the compose default remains 9000 and is configurable through `SONAR_PORT`.
 
 ## Evidence paths
 
 - JaCoCo: `backend/target/site/jacoco/index.html`
+- Aggregated tests: `docs/qa-evidence/test-execution-summary.md`
+- Keycloak IT: `docs/qa-evidence/keycloak-it-summary.md`
+- Sonar: `docs/qa-evidence/sonar-summary.md`
+- Loki/Tempo: `docs/qa-evidence/observability-live-summary.md`
+- Contract/performance/security summaries: `docs/qa-evidence/*summary*` and `zap-report.html`
 - Playwright HTML: `docs/qa-evidence/playwright-report/index.html`
 - Screenshots: `docs/qa-evidence/screenshots/`
 - Checklist: `docs/qa-evidence/FINAL-CHECKLIST.md`

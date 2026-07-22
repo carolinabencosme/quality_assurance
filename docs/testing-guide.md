@@ -7,8 +7,9 @@
 | Unit | JUnit 5 + Mockito | `backend/src/test/java` | services, mappers, entities, security converter |
 | Integration | Spring Boot + Testcontainers | `backend/src/test/java/**/*IntegrationTest.java` | API, repositories, reports, stock, Keycloak real tokens |
 | Coverage | JaCoCo | `backend/pom.xml` | 60 percent line gate |
-| API | Newman/Postman | `tests/api` | 24 scenarios |
-| E2E | Playwright | `tests/e2e/specs` | responsive, stock, permissions, user admin, optional visual snapshots |
+| API | Newman/Postman | `tests/api` | 29 requests, including scopes, users and system metrics |
+| E2E | Playwright | `tests/e2e/specs` | responsive, stock, permissions, user admin and visual baselines |
+| Accessibility | Playwright + axe | `tests/e2e/specs/a11y-smoke.spec.ts` | zero critical/serious violations on dashboard and products |
 | Security smoke | PowerShell | `tests/security/auth-smoke.ps1` | 401, 403, 200, invalid token |
 | ZAP | OWASP ZAP | `scripts/run-zap-baseline.*` | baseline scan and HTML report |
 | Dependency scan | OWASP Dependency Check + Snyk | `backend/pom.xml`, `.github/workflows/security-snyk.yml` | CVSS 9 gate and manual Snyk scan |
@@ -24,7 +25,7 @@ cd backend
 .\mvnw.cmd verify
 ```
 
-If Docker is unavailable, Testcontainers tests can be skipped by JUnit. This is documented as a Windows/local risk, not a CI target.
+Docker is required for the sealed run. `scripts/verify-keycloak-it-report.ps1` rejects missing reports, skips, failures and errors; CI therefore cannot claim a green Keycloak integration test without a real container.
 
 `KeycloakContainerIntegrationTest` imports `keycloak/realm-export.json`, obtains real Keycloak tokens and calls protected endpoints without `SecurityMockMvcRequestPostProcessors.jwt()`.
 
@@ -58,6 +59,21 @@ $env:RUN_VISUAL_SNAPSHOTS = "true"
 npm test -- visual-snapshots.spec.ts
 ```
 
+Compare with committed baselines by running the same command normally. Regenerate after an intentional UI change with:
+
+```powershell
+$env:RUN_VISUAL_SNAPSHOTS = "true"
+npx playwright test specs/visual-snapshots.spec.ts --update-snapshots=all
+```
+
+The configuration fixes the Chromium viewport at 1280x720, disables animations and uses platform-neutral snapshot names. The visual spec intercepts its four screen APIs with fixed fixtures, so accumulated local database state cannot alter a baseline. CI always enables this suite.
+
+Accessibility runs with the normal suite:
+
+```powershell
+npx playwright test specs/a11y-smoke.spec.ts
+```
+
 ## Security
 
 ```powershell
@@ -87,7 +103,7 @@ $env:K6_PASSWORD = "viewer123"
 .\scripts\run-jmeter.ps1
 ```
 
-The k6 load script runs without authenticated endpoints when credentials are not set. Stress and JMeter are manual/destructive style tests and should run against disposable data.
+The k6 and JMeter scripts authenticate against Keycloak and should run only against disposable data. JMeter authenticates once in a setup thread group, then loads the business endpoints; both runners fail when any JTL sample fails.
 
 ## Full Local Battery
 
@@ -96,6 +112,26 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up 
 .\scripts\run-all-tests.ps1
 ```
 
+Frontend static and dependency gates:
+
+```powershell
+cd frontend
+npm run lint
+npm run build
+npm audit --audit-level=moderate
+```
+
 ## CI
 
-CI now includes backend/frontend, Newman, Playwright, staging smoke, ZAP, Dependency Check, Schemathesis, k6 and a manual Full QA pipeline. Additional manual workflows cover production deploy, Snyk and JMeter.
+CI includes backend/frontend, Newman, Playwright, ZAP, Dependency Check, Schemathesis, k6 and a manual Full QA pipeline. `deploy-staging.yml` first starts the complete application and then, against that deployed stack, runs smoke, visual regression, Newman, Playwright/axe, authorization smoke and Schemathesis. Failure artifacts include Playwright and contract reports plus compose logs.
+
+## Sonar Quality Gate
+
+Start the Sonar service from the staging compose, create a local analysis token and run:
+
+```powershell
+$env:SONAR_TOKEN = '<temporary-analysis-token>'
+.\scripts\run-sonar-local.ps1 -SonarHostUrl 'http://localhost:9000'
+```
+
+The scanner uses `sonar.qualitygate.wait=true`, fails on a red gate and writes only non-secret metrics to `docs/qa-evidence/sonar-summary.md`.

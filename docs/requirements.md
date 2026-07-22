@@ -48,14 +48,16 @@ The product delete requirement is implemented as logical deletion. `DELETE /api/
 | RNF-02 | Granular authorization | Done | authorities and UI navigation filtering |
 | RNF-03 | Observability | Done | Prometheus, Loki, Tempo, Alloy, Grafana |
 | RNF-04 | Traceability | Done | Envers, stock history, correlation id |
-| RNF-05 | Performance | Implemented | k6 load/stress and JMeter scripts/workflows |
-| RNF-06 | CI/CD | Implemented | GitHub Actions deploy staging/production and Jenkinsfile |
-| RNF-07 | Code quality | Done | Maven verify, JaCoCo 60 percent gate |
+| RNF-05 | Performance | Implemented and live sealed | k6 load/stress and JMeter zero-failure summaries |
+| RNF-06 | CI/CD | PDF-compliant staging flow | Post-deploy Newman, Playwright/a11y, auth smoke and Schemathesis |
+| RNF-07 | Code quality | Live sealed | JaCoCo 60 percent gate plus real Sonar Quality Gate |
 | RNF-08 | Maintainability | Done | layered backend, typed frontend |
 | RNF-09 | Dockerization | Done | dev, test, observability, staging, prod compose |
 | RNF-10 | Versioned migrations | Done | Flyway migrations |
 | RNF-11 | Audit | Done | Hibernate Envers |
-| RNF-12 | Automated testing | Expanded | JUnit, Newman, Playwright, ZAP, Dependency Check, Snyk, Schemathesis, k6, JMeter |
+| RNF-12 | Automated testing | Live sealed | JUnit/Testcontainers, Newman, Playwright snapshots/axe, ZAP, Dependency Check, Snyk, Schemathesis, k6, JMeter |
+| RNF-13 | Accessibility | Done | axe smoke rejects critical/serious violations |
+| RNF-14 | Correlated observability | Live sealed | Loki user/endpoint/correlation plus Tempo HTTP and JDBC spans |
 
 ## Permissions Matrix
 
@@ -94,3 +96,7 @@ Billing, real sales module, purchasing/procurement, multi-tenant support and rea
 | Observability | Expanded | `docs/observability-guide.md` | Grafana dashboards and alerts |
 | OAuth scopes and policies | Done | `keycloak/realm-export.json`, converter tests | Scopes in JWT plus Keycloak Authorization Services metadata |
 | DevSecOps | Expanded | `.github/workflows`, `Jenkinsfile` | ZAP, Dependency Check, Snyk, Schemathesis, k6, JMeter |
+| Staging post-deploy testing | Done | `.github/workflows/deploy-staging.yml` | Tests execute after the stack is healthy |
+| Accessibility | Done | `tests/e2e/specs/a11y-smoke.spec.ts` | Critical/serious gate |
+| Sonar quality | Live sealed | `docs/qa-evidence/sonar-summary.md` | Gate OK with recorded metrics |
+| Logs and DB traces | Live sealed | `docs/qa-evidence/observability-live-summary.md` | Loki-to-Tempo correlation with JDBC spans |

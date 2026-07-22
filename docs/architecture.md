@@ -8,7 +8,7 @@ Cub uses a Spring Boot API, Next.js frontend, PostgreSQL persistence, Keycloak i
 
 Backend: Spring Boot 3.4, Java 21, Maven, PostgreSQL, Flyway, Hibernate Envers, Micrometer, OpenTelemetry.
 
-Frontend: Next.js 15, React 19, TypeScript, Axios, App Router.
+Frontend: Next.js 16, React 19, TypeScript, Axios, App Router.
 
 Security: Keycloak 26, OAuth2 Authorization Code + PKCE, JWT resource server, authorities.
 
