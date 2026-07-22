@@ -3,7 +3,7 @@ name: Deploy Staging
 on:
   workflow_dispatch:
   push:
-    branches: [develop, presentacion]
+    branches: [develop, presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
 
 permissions:
   contents: read
@@ -54,6 +54,51 @@ jobs:
           chmod +x scripts/post-deploy-smoke.sh
           ./scripts/post-deploy-smoke.sh
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            tests/api/package-lock.json
+            tests/e2e/package-lock.json
+
+      - name: Install Playwright dependencies
+        working-directory: tests/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Visual regression against deployed staging
+        working-directory: tests/e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+          RUN_VISUAL_SNAPSHOTS: 'true'
+        run: npx playwright test specs/visual-snapshots.spec.ts
+
+      - name: Newman against deployed staging
+        working-directory: tests/api
+        run: |
+          npm ci
+          npm test -- --env-var "baseUrl=http://localhost:8080" --env-var "keycloakUrl=http://localhost:8081" --env-var "sku=STG-${{ github.run_id }}-${{ github.run_attempt }}"
+
+      - name: Playwright E2E and accessibility against deployed staging
+        working-directory: tests/e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+          RUN_VISUAL_SNAPSHOTS: 'true'
+        run: npm test
+
+      - name: Authorization smoke against deployed staging
+        shell: pwsh
+        run: ./tests/security/auth-smoke.ps1
+
+      - name: Schemathesis contract tests against deployed staging
+        env:
+          SCHEMATHESIS_SCHEMA_URL: http://host.docker.internal:8080/v3/api-docs
+        run: |
+          chmod +x scripts/run-schemathesis.sh
+          ./scripts/run-schemathesis.sh
+
       - name: Dump logs on failure
         if: failure()
         run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml logs --tail 150
@@ -62,12 +107,15 @@ jobs:
         if: failure()
         run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml logs --no-color > staging-compose.log
 
-      - name: Archive staging logs
-        if: failure()
+      - name: Archive staging evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: staging-compose-logs
-          path: staging-compose.log
+          name: staging-post-deploy-evidence-${{ github.run_id }}
+          path: |
+            staging-compose.log
+            docs/qa-evidence/playwright-report/
+            docs/qa-evidence/schemathesis-report.txt
           if-no-files-found: ignore
 
       - name: Tear down

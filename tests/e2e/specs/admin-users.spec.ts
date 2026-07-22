@@ -9,7 +9,7 @@ test.describe('Admin users', () => {
     await dockLink(page, 'Usuarios').click();
 
     await expect(page).toHaveURL(/\/admin\/users/);
-    await expect(page.getByRole('heading', { name: 'Usuarios' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Usuarios', exact: true })).toBeVisible();
     await expect(page.getByText('Usuarios Keycloak')).toBeVisible();
   });
 

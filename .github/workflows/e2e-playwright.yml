@@ -3,9 +3,9 @@ name: E2E — Playwright (stack real)
 on:
   workflow_dispatch:
   push:
-    branches: [main, develop, presentacion, 'feature/**', 'fix/**']
+    branches: [main, develop, presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**', 'feature/**', 'fix/**']
   pull_request:
-    branches: [main, develop, presentacion]
+    branches: [main, develop, presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
 
 concurrency:
   group: e2e-playwright-${{ github.ref }}
@@ -81,10 +81,18 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
 
+      - name: Run approved visual snapshots
+        working-directory: tests/e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+          RUN_VISUAL_SNAPSHOTS: 'true'
+        run: npx playwright test specs/visual-snapshots.spec.ts
+
       - name: Run E2E tests
         working-directory: tests/e2e
         env:
           E2E_BASE_URL: http://localhost:3000
+          RUN_VISUAL_SNAPSHOTS: 'true'
         run: npm test
 
       - name: Upload Playwright report

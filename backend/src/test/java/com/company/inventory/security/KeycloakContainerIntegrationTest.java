@@ -27,9 +27,6 @@ import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.MountableFile;
-
-import java.nio.file.Path;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,10 +61,7 @@ class KeycloakContainerIntegrationTest {
     static KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.0.7")
             .withAdminUsername("admin")
             .withAdminPassword("admin")
-            .withCopyFileToContainer(
-                    MountableFile.forHostPath(Path.of("..", "keycloak", "realm-export.json").toAbsolutePath()),
-                    "/opt/keycloak/data/import/realm-export.json")
-            .withCommand("start-dev", "--import-realm", "--http-enabled=true", "--hostname-strict=false");
+            .withRealmImportFile("keycloak/realm-export.json");
 
     @Autowired
     private MockMvc mockMvc;
@@ -81,6 +75,10 @@ class KeycloakContainerIntegrationTest {
         registry.add("spring.security.oauth2.resourceserver.jwt.jwk-set-uri",
                 () -> keycloak.getAuthServerUrl() + "/realms/" + REALM
                         + "/protocol/openid-connect/certs");
+        registry.add("inventory.keycloak.admin.server-url", keycloak::getAuthServerUrl);
+        registry.add("inventory.keycloak.admin.realm", () -> REALM);
+        registry.add("inventory.keycloak.admin.client-id", () -> "inventory-admin-api");
+        registry.add("inventory.keycloak.admin.client-secret", () -> "inventory-admin-secret-change-me");
     }
 
     @Test
@@ -117,6 +115,40 @@ class KeycloakContainerIntegrationTest {
         mockMvc.perform(get("/api/v1/security/permissions-matrix")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void realToken_exposesBusinessScopesAndAuthorities() throws Exception {
+        String token = obtainToken("admin", "admin123",
+                "openid profile email product:view product:manage stock:view stock:manage report:view user:manage audit:view");
+
+        mockMvc.perform(get("/api/v1/security/me")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.authorities")
+                        .value(org.hamcrest.Matchers.hasItems("product:view", "SCOPE_product:view", "user:manage")));
+    }
+
+    @Test
+    void viewerToken_cannotListUsers() throws Exception {
+        String token = obtainToken("viewer", "viewer123",
+                "openid profile email product:view stock:view report:view");
+
+        mockMvc.perform(get("/api/v1/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adminToken_canListRealKeycloakUsers() throws Exception {
+        String token = obtainToken("admin", "admin123",
+                "openid profile email product:view product:manage stock:view stock:manage report:view user:manage audit:view");
+
+        mockMvc.perform(get("/api/v1/users")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$[*].username")
+                        .value(org.hamcrest.Matchers.hasItem("admin")));
     }
 
     private String obtainToken(String username, String password, String scopes) {

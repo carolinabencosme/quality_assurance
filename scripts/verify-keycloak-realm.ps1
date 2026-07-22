@@ -32,9 +32,9 @@ foreach ($perm in $requiredPermissions) {
 }
 
 $clientScopes = $realm.clientScopes | ForEach-Object { $_.name }
-foreach ($scope in $requiredPermissions) {
+foreach ($scope in @('web-origins', 'acr', 'roles', 'profile', 'email') + $requiredPermissions) {
   if ($clientScopes -notcontains $scope) {
-    Write-Error "Falta client scope OAuth2: $scope"
+    Write-Error "Falta client scope OIDC/OAuth2: $scope"
   }
 }
 
@@ -63,13 +63,27 @@ if (-not $apiClient.authorizationServicesEnabled) {
 if (-not $apiClient.authorizationSettings) {
   Write-Error "inventory-api debe exportar authorizationSettings"
 }
+$permissionPolicies = $apiClient.authorizationSettings.policies | Where-Object { $_.type -in @('scope', 'resource') }
+if (@($permissionPolicies).Count -lt 1) {
+  Write-Error "Authorization Services debe exportar permisos dentro de policies"
+}
+if ($apiClient.authorizationSettings.PSObject.Properties.Name -contains 'permissions') {
+  Write-Error "Keycloak 26 no acepta authorizationSettings.permissions; usar policies"
+}
 
 $adminClient = $realm.clients | Where-Object { $_.clientId -eq 'inventory-admin-api' } | Select-Object -First 1
 if (-not $adminClient.serviceAccountsEnabled) {
   Write-Error "inventory-admin-api debe tener service account habilitado"
 }
-if ($adminClient.secret -ne '${KEYCLOAK_ADMIN_CLIENT_SECRET}') {
-  Write-Error "inventory-admin-api debe usar placeholder de secret"
+if ($adminClient.secret -ne 'inventory-admin-secret-change-me') {
+  Write-Error "inventory-admin-api debe usar el secret reproducible de dev/test"
+}
+$serviceAccount = $realm.users | Where-Object { $_.serviceAccountClientId -eq 'inventory-admin-api' } | Select-Object -First 1
+$serviceRoles = @($serviceAccount.clientRoles.'realm-management')
+foreach ($role in @('query-users', 'view-users', 'manage-users', 'view-realm', 'manage-realm')) {
+  if ($serviceRoles -notcontains $role) {
+    Write-Error "Falta rol realm-management en service account: $role"
+  }
 }
 
 $compositeRoles = @('inventory-admin', 'warehouse-manager', 'inventory-clerk', 'inventory-viewer')

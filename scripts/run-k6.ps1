@@ -30,7 +30,10 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Running k6 with Docker"
 $baseUrl = if ([string]::IsNullOrWhiteSpace($env:BASE_URL)) { "http://host.docker.internal:8080" } else { $env:BASE_URL }
 $keycloakUrl = if ([string]::IsNullOrWhiteSpace($env:KEYCLOAK_URL)) { "http://host.docker.internal:8081" } else { $env:KEYCLOAK_URL }
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
 docker run --rm `
+    --add-host=host.docker.internal:host-gateway `
     -e BASE_URL=$baseUrl `
     -e KEYCLOAK_URL=$keycloakUrl `
     -e K6_USERNAME=${env:K6_USERNAME} `
@@ -39,5 +42,7 @@ docker run --rm `
     -w /work `
     grafana/k6:0.54.0 run $ScriptPath 2>&1 |
     Tee-Object -FilePath $summaryFullPath
+$dockerExitCode = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorActionPreference
 
-exit $LASTEXITCODE
+exit $dockerExitCode

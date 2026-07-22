@@ -18,31 +18,12 @@ $jacocoHtml = "target/site/jacoco/index.html"
 $jacocoReport = "$outDir/jacoco-report-path.txt"
 "JaCoCo HTML: backend/$jacocoHtml`nGenerado: $(Get-Date -Format o)" | Set-Content $jacocoReport -Encoding UTF8
 Pop-Location
+& "$root\scripts\generate-jacoco-summary.ps1"
+& "$root\scripts\generate-surefire-summary.ps1"
+& "$root\scripts\verify-keycloak-it-report.ps1"
 
 # Resumen de tests Surefire
-$surefireDir = "backend/target/surefire-reports"
-if (Test-Path $surefireDir) {
-    $xml = Get-ChildItem $surefireDir -Filter "TEST-*.xml" | Select-Object -First 1
-    if ($xml) {
-        [xml]$doc = Get-Content $xml.FullName
-        $tests = $doc.testsuite
-        @"
-# Resumen de pruebas - $(Get-Date -Format 'yyyy-MM-dd HH:mm')
-
-| Metrica | Valor |
-|---------|-------|
-| Tests ejecutados | $($tests.tests) |
-| Fallos | $($tests.failures) |
-| Errores | $($tests.errors) |
-| Omitidos | $($tests.skipped) |
-| Tiempo (s) | $($tests.time) |
-
-Comando: ``cd backend && .\mvnw.cmd verify``
-Reporte JaCoCo: ``backend/target/site/jacoco/index.html``
-Umbral minimo: **60% lineas** (``jacoco-check`` en pom.xml)
-"@ | Set-Content "$outDir/test-execution-summary.md" -Encoding UTF8
-    }
-}
+# The aggregate summary above reads every TEST-*.xml file and rejects skips.
 
 # Capturas E2E (requiere stack en localhost:3000)
 if (Test-Path tests/e2e/package.json) {
@@ -61,4 +42,5 @@ if (Test-Path tests/e2e/package.json) {
 Write-Host "Listo. Revisar:" -ForegroundColor Green
 Write-Host "  - $outDir/test-execution-summary.md"
 Write-Host "  - $outDir/jacoco-report-path.txt"
+Write-Host "  - $outDir/jacoco-summary.md"
 Write-Host "  - $shotDir/"

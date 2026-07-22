@@ -3,7 +3,7 @@ name: Dependency Check
 on:
   workflow_dispatch:
   push:
-    branches: [main, develop, presentacion]
+    branches: [main, develop, presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
 
 permissions:
   contents: read

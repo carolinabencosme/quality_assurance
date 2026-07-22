@@ -15,6 +15,7 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,6 +60,17 @@ class UserServiceTest {
         UserService service = new UserService(mock(KeycloakAdminClientFactory.class));
 
         assertThatThrownBy(() -> service.setRealmRoles("user-1", Set.of("realm-admin")))
+                .isInstanceOf(ApiException.class)
+                .hasMessageContaining("Unsupported realm role");
+    }
+
+    @Test
+    void setRealmRoles_rejectsNullRoleWithoutInternalError() {
+        UserService service = new UserService(mock(KeycloakAdminClientFactory.class));
+        Set<String> roles = new HashSet<>();
+        roles.add(null);
+
+        assertThatThrownBy(() -> service.setRealmRoles("user-1", roles))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining("Unsupported realm role");
     }

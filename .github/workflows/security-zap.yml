@@ -3,7 +3,7 @@ name: Security ZAP
 on:
   workflow_dispatch:
   push:
-    branches: [main, develop, presentacion]
+    branches: [main, develop, presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
 
 permissions:
   contents: read
@@ -34,7 +34,7 @@ jobs:
 
       - name: Run ZAP baseline
         env:
-          ZAP_TARGET: http://localhost:3000
+          ZAP_TARGET: http://host.docker.internal:3000
         run: |
           chmod +x scripts/run-zap-baseline.sh
           ./scripts/run-zap-baseline.sh

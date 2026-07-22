@@ -3,7 +3,7 @@ name: API Schemathesis
 on:
   workflow_dispatch:
   push:
-    branches: [main, develop, presentacion]
+    branches: [main, develop, presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
 
 permissions:
   contents: read
@@ -34,7 +34,7 @@ jobs:
 
       - name: Run Schemathesis
         env:
-          SCHEMATHESIS_SCHEMA_URL: http://localhost:8080/v3/api-docs
+          SCHEMATHESIS_SCHEMA_URL: http://host.docker.internal:8080/v3/api-docs
         run: |
           chmod +x scripts/run-schemathesis.sh
           ./scripts/run-schemathesis.sh

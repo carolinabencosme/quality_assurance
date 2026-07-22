@@ -2,7 +2,7 @@
 
 ## Newman
 
-The Postman collection contains 24 scenarios covering health, auth, validation, product CRUD, duplicate SKU, dashboard `topSoldProducts`, stock IN/OUT, stock movement paging, audit permissions and `user:manage` permissions matrix.
+The Postman collection contains 29 scenarios covering health, auth, validation, product CRUD, duplicate SKU, dashboard `topSoldProducts`, stock IN/OUT, stock movement paging, audit permissions, OAuth2 business scopes, `/security/me`, `/observability/system-metrics`, and real Keycloak `/users` authorization for admin/viewer.
 
 ```powershell
 cd tests/api

@@ -21,6 +21,7 @@ fi
 
 echo "Running k6 with Docker"
 docker run --rm \
+  --add-host=host.docker.internal:host-gateway \
   -e BASE_URL="${BASE_URL:-http://host.docker.internal:8080}" \
   -e KEYCLOAK_URL="${KEYCLOAK_URL:-http://host.docker.internal:8081}" \
   -e K6_USERNAME="${K6_USERNAME:-}" \

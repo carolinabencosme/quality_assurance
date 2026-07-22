@@ -12,7 +12,7 @@ on:
         type: boolean
         default: true
   push:
-    branches: [presentacion]
+    branches: [presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
 
 permissions:
   contents: read
@@ -37,6 +37,9 @@ jobs:
       - name: Backend build, tests and JaCoCo
         working-directory: backend
         run: mvn -B verify
+
+      - name: Require real Keycloak integration test
+        run: pwsh scripts/verify-keycloak-it-report.ps1
 
       - name: Frontend install and build
         working-directory: frontend
@@ -68,27 +71,39 @@ jobs:
             done
           done
 
+      - name: Playwright visual baselines
+        working-directory: tests/e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+          RUN_VISUAL_SNAPSHOTS: 'true'
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npx playwright test specs/visual-snapshots.spec.ts
+
       - name: Newman API
         working-directory: tests/api
         run: |
           npm ci
           npm test -- --env-var "baseUrl=http://localhost:8080" --env-var "keycloakUrl=http://localhost:8081" --env-var "sku=QA-${{ github.run_id }}-${{ github.run_attempt }}"
 
-      - name: Playwright E2E
+      - name: Playwright E2E and accessibility
         working-directory: tests/e2e
         env:
           E2E_BASE_URL: http://localhost:3000
         run: |
-          npm ci
-          npx playwright install --with-deps chromium
           npm test
 
       - name: Schemathesis
         env:
-          SCHEMATHESIS_SCHEMA_URL: http://localhost:8080/v3/api-docs
+          SCHEMATHESIS_SCHEMA_URL: http://host.docker.internal:8080/v3/api-docs
         run: |
           chmod +x scripts/run-schemathesis.sh
           ./scripts/run-schemathesis.sh
+
+      - name: Authorization smoke
+        shell: pwsh
+        run: ./tests/security/auth-smoke.ps1
 
       - name: Dependency Check
         if: github.event_name != 'workflow_dispatch' || inputs.run_security_scans
@@ -98,7 +113,7 @@ jobs:
       - name: ZAP baseline
         if: github.event_name != 'workflow_dispatch' || inputs.run_security_scans
         env:
-          ZAP_TARGET: http://localhost:3000
+          ZAP_TARGET: http://host.docker.internal:3000
         run: |
           chmod +x scripts/run-zap-baseline.sh
           ./scripts/run-zap-baseline.sh
@@ -106,8 +121,8 @@ jobs:
       - name: k6 load test
         if: github.event_name != 'workflow_dispatch' || inputs.run_k6
         env:
-          BASE_URL: http://localhost:8080
-          KEYCLOAK_URL: http://localhost:8081
+          BASE_URL: http://host.docker.internal:8080
+          KEYCLOAK_URL: http://host.docker.internal:8081
           K6_USERNAME: ${{ vars.K6_USERNAME || 'viewer' }}
           K6_PASSWORD: ${{ secrets.K6_PASSWORD || 'viewer123' }}
         run: |

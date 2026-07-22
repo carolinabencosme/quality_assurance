@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TARGET="${ZAP_TARGET:-http://localhost:3000}"
+TARGET="${ZAP_TARGET:-http://host.docker.internal:3000}"
 REPORT_PATH="${ZAP_REPORT_PATH:-docs/qa-evidence/zap-report.html}"
 REPORT_FULL_PATH="${ROOT}/${REPORT_PATH}"
 REPORT_DIR="$(dirname "${REPORT_FULL_PATH}")"
@@ -16,6 +16,7 @@ fi
 mkdir -p "${REPORT_DIR}"
 echo "Running OWASP ZAP baseline against ${TARGET}"
 docker run --rm \
+  --add-host=host.docker.internal:host-gateway \
   -v "${REPORT_DIR}:/zap/wrk" \
   ghcr.io/zaproxy/zaproxy:stable \
   zap-baseline.py -t "${TARGET}" -r "${REPORT_NAME}" -I

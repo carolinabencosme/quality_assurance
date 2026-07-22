@@ -9,7 +9,7 @@ test.describe('Responsive dashboard', () => {
     await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
     await expect(page.getByText('Productos activos')).toBeVisible();
     await expect(page.getByText('Productos mas vendidos')).toBeVisible();
-    await expect(page.getByText('CPU')).toBeVisible();
+    await expect(page.getByText('CPU', { exact: true })).toBeVisible();
     await expect(page.getByText('Heap JVM')).toBeVisible();
 
     const hasCriticalOverflow = await page.evaluate(

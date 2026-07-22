@@ -14,6 +14,6 @@ test.describe('Inventory QAS - flujo principal', () => {
 
     await dockLink(page, 'Productos').click();
     await expect(page).toHaveURL(/\/products/);
-    await expect(page.getByRole('heading', { name: 'Productos' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Productos', exact: true })).toBeVisible();
   });
 });

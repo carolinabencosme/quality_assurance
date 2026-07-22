@@ -28,13 +28,19 @@ $reportName = Split-Path -Leaf $reportFullPath
 New-Item -ItemType Directory -Force -Path $reportDir | Out-Null
 
 Write-Host "Running OWASP ZAP baseline against $Target"
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
 docker run --rm `
+    --add-host=host.docker.internal:host-gateway `
     -v "${reportDir}:/zap/wrk" `
     ghcr.io/zaproxy/zaproxy:stable `
-    zap-baseline.py -t $Target -r $reportName -I
+    zap-baseline.py -t $Target -r $reportName -I 2>&1 |
+    Tee-Object -FilePath (Join-Path $reportDir 'zap-summary.txt')
+$dockerExitCode = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorActionPreference
 
-if ($LASTEXITCODE -ne 0) {
-    exit $LASTEXITCODE
+if ($dockerExitCode -ne 0) {
+    exit $dockerExitCode
 }
 
 Write-Host "ZAP report generated at $ReportPath"

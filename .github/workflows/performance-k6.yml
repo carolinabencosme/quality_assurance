@@ -3,7 +3,7 @@ name: Performance k6
 on:
   workflow_dispatch:
   push:
-    branches: [presentacion]
+    branches: [presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
 
 permissions:
   contents: read
@@ -34,8 +34,8 @@ jobs:
 
       - name: Run k6 load test
         env:
-          BASE_URL: http://localhost:8080
-          KEYCLOAK_URL: http://localhost:8081
+          BASE_URL: http://host.docker.internal:8080
+          KEYCLOAK_URL: http://host.docker.internal:8081
           K6_USERNAME: ${{ vars.K6_USERNAME || 'viewer' }}
           K6_PASSWORD: ${{ secrets.K6_PASSWORD || 'viewer123' }}
         run: |

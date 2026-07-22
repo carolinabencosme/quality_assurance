@@ -2,6 +2,8 @@ name: Security Snyk
 
 on:
   workflow_dispatch:
+  push:
+    branches: [cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
   schedule:
     - cron: '0 8 * * 1'
 
