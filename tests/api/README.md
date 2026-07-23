@@ -1,23 +1,8 @@
-# Pruebas de API (Postman / Newman)
+# API Tests - Newman and Schemathesis
 
-Colección con **12+ escenarios** sobre el API REST: salud, **401** sin token, **400** validación, **403** permisos (viewer vs `product:manage`), **404** (sonda dev), **409** conflicto SKU, **201 / 200 / 204** CRUD producto.
+## Newman
 
-## Requisitos
-
-- Backend y Keycloak en marcha (por ejemplo `docker compose -f docker-compose.dev.yml up -d`).
-- `baseUrl` por defecto `http://localhost:8080`.
-- `keycloakUrl` por defecto `http://localhost:8081`.
-
-## Ejecución rápida
-
-```bash
-cd tests/api
-npm install
-export SKU="NM-$(date +%s)"
-npm test -- --env-var "baseUrl=http://localhost:8080" --env-var "keycloakUrl=http://localhost:8081" --env-var "sku=$SKU"
-```
-
-En Windows (PowerShell):
+The Postman collection contains 29 scenarios covering health, auth, validation, product CRUD, duplicate SKU, dashboard `topSoldProducts`, stock IN/OUT, stock movement paging, audit permissions, OAuth2 business scopes, `/security/me`, `/observability/system-metrics`, and real Keycloak `/users` authorization for admin/viewer.
 
 ```powershell
 cd tests/api
@@ -26,17 +11,19 @@ $sku = "NM-$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())"
 npm test -- --env-var "baseUrl=http://localhost:8080" --env-var "keycloakUrl=http://localhost:8081" --env-var "sku=$sku"
 ```
 
-La colección **obtiene tokens** vía *password grant* (`inventory-frontend`) para `warehouse` y `viewer`; no hace falta pasar `token` manualmente salvo que quieras sobrescribirlo.
+Tokens are obtained from Keycloak for `warehouse`, `viewer` and `admin` demo users.
 
-## Informe HTML (evidencia, opcional)
+## Schemathesis
 
-Instala un reporter extra, por ejemplo:
-
-```bash
-npm install -D newman-reporter-htmlextra
-npx newman run inventory-qas.postman_collection.json -r cli,htmlextra --reporter-htmlextra-export newman-report.html
+```powershell
+.\scripts\run-schemathesis.ps1
 ```
+
+Default schema URL: `http://host.docker.internal:8080/v3/api-docs`.
+
+Report: `docs/qa-evidence/schemathesis-report.txt`.
 
 ## CI
 
-El workflow `.github/workflows/api-postman.yml` levanta Postgres + Keycloak + backend y ejecuta Newman (puede tardar varios minutos en el primer arranque).
+- `.github/workflows/api-postman.yml`
+- `.github/workflows/api-schemathesis.yml`

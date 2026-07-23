@@ -1,4 +1,4 @@
-# Valida migraciones Flyway V1-V7 contra PostgreSQL efímero (QA-17).
+# Valida migraciones Flyway V1-V7 contra PostgreSQL efimero (QA-17).
 # Requiere: Docker Desktop
 # Uso: .\scripts\validate-flyway-migrations.ps1
 

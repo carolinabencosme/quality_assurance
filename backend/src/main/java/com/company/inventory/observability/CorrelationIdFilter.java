@@ -40,6 +40,7 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String correlationId = resolveCorrelationId(request);
         ObservabilityMdc.putCorrelationId(correlationId);
+        ObservabilityMdc.putEndpoint(request.getMethod() + " " + request.getRequestURI());
         enrichMdcFromTracer();
 
         response.setHeader(HEADER, correlationId);

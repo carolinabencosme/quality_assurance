@@ -1,21 +1,40 @@
-# Pruebas de seguridad — Fase 4 (QA-6)
+# Security Tests
 
-## Script rápido
-
-Con el stack en marcha (`docker compose -f docker-compose.dev.yml up -d`):
+## Auth Smoke
 
 ```powershell
 .\tests\security\auth-smoke.ps1
 ```
 
-Valida:
+Validates:
 
-- Endpoints protegidos sin JWT → **401**
-- `viewer` con token → dashboard **200**
-- `viewer` sin `audit:view` → **/audit** **403**
+- Protected endpoint without JWT returns 401.
+- Invalid token returns 401.
+- Viewer token can access dashboard with `report:view`.
+- Viewer cannot access audit with missing `audit:view`.
+- Viewer cannot access permissions matrix with missing `user:manage`.
+- Admin can access permissions matrix.
 
-## Evidencia manual recomendada
+## ZAP Baseline
 
-- Captura de Keycloak (roles `inventory-api`)
-- Respuesta 403 en Swagger con usuario sin permiso
-- (Opcional) OWASP ZAP baseline contra `http://localhost:3000`
+```powershell
+.\scripts\run-zap-baseline.ps1
+```
+
+Default target: `http://host.docker.internal:3000`. Override with `ZAP_TARGET`.
+
+Report: `docs/qa-evidence/zap-report.html`.
+
+## Dependency Check
+
+```powershell
+cd backend
+mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=9
+```
+
+Reports:
+
+- `backend/target/dependency-check-report.html`
+- `backend/target/dependency-check-report.json`
+
+ZAP and Dependency Check are separated from normal `mvn verify` because they download images/databases and can be slow. CI uploads reports as artifacts.

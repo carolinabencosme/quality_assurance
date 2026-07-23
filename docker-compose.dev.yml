@@ -37,9 +37,8 @@ services:
     environment:
       KC_HTTP_PORT: 8080
       KC_HEALTH_ENABLED: "true"
-      # Tokens con issuer http://localhost:8081 (mismo que usa el navegador)
-      KC_HOSTNAME: localhost
-      KC_HOSTNAME_PORT: 8081
+      # URL pública del IdP (navegador). No usar /keycloak proxy: Keycloak genera URLs en :8080 interno.
+      KC_HOSTNAME: http://localhost:8081
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "false"
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
@@ -72,9 +71,15 @@ services:
       DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://postgres:5432/inventory}
       DATABASE_USERNAME: ${DATABASE_USERNAME:-inventory_user}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-inventory_password}
-      # iss del JWT = http://localhost:8081/... (debe coincidir exactamente)
+      # iss del JWT = http://localhost:8081/... (debe coincidir con el token del navegador/Newman)
       KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/inventory-realm
-      KEYCLOAK_JWKS_URI: http://host.docker.internal:8081/realms/inventory-realm/protocol/openid-connect/certs
+      # JWKS: red interna Docker (host.docker.internal:8081 falla en algunos Windows → 401 en API)
+      KEYCLOAK_JWKS_URI: http://keycloak:8080/realms/inventory-realm/protocol/openid-connect/certs
+      # Valor academico/dev importado por realm-export.json. Produccion lo rota post-import.
+      KEYCLOAK_ADMIN_URL: http://keycloak:8080
+      KEYCLOAK_REALM: inventory-realm
+      KEYCLOAK_ADMIN_CLIENT_ID: inventory-admin-api
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-inventory-admin-secret-change-me}
       OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-inventory-api}
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -102,13 +107,13 @@ services:
       - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
-      NEXT_PUBLIC_KEYCLOAK_URL: ${NEXT_PUBLIC_KEYCLOAK_URL:-/keycloak}
+      NEXT_PUBLIC_KEYCLOAK_URL: ${NEXT_PUBLIC_KEYCLOAK_URL:-http://localhost:8081}
       NEXT_PUBLIC_KEYCLOAK_REALM: ${NEXT_PUBLIC_KEYCLOAK_REALM:-inventory-realm}
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:-inventory-frontend}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
       API_PROXY_TARGET: http://backend:8080
-      # Tokens con iss localhost:8081 (mismo issuer que valida el backend)
-      KEYCLOAK_PROXY_TARGET: http://host.docker.internal:8081
+      # Proxy OIDC: red interna Docker (host.docker.internal:8081 → 404 en Windows)
+      KEYCLOAK_PROXY_TARGET: http://keycloak:8080
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:

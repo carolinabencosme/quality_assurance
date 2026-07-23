@@ -4,12 +4,9 @@ name: API — Newman (stack real)
 on:
   workflow_dispatch:
   push:
-    branches: [main, develop]
-    paths:
-      - 'tests/api/**'
-      - 'keycloak/**'
-      - 'docker-compose.dev.yml'
-      - 'backend/**'
+    branches: [main, develop, presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**', 'feature/**', 'fix/**']
+  pull_request:
+    branches: [main, develop, presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
 
 concurrency:
   group: api-newman-${{ github.ref }}
@@ -26,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Start Postgres, Keycloak, backend
-        run: docker compose -f docker-compose.dev.yml up -d --build postgres keycloak backend
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml up -d --build postgres keycloak backend
 
       - name: Wait for Keycloak realm
         shell: bash
@@ -54,7 +51,7 @@ jobs:
             sleep 2
           done
           echo "Timeout waiting for backend"
-          docker logs inventory-backend-dev --tail 200 || true
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs backend --tail 200 || true
           exit 1
 
       - uses: actions/setup-node@v4
@@ -77,8 +74,8 @@ jobs:
 
       - name: Docker compose logs (on failure)
         if: failure()
-        run: docker compose -f docker-compose.dev.yml logs --tail 120
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs --tail 120
 
       - name: Tear down
         if: always()
-        run: docker compose -f docker-compose.dev.yml down -v
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml down -v

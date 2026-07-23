@@ -1,4 +1,4 @@
-# Verifica que el monorepo cumple la estructura del plan técnico (QA-10).
+# Verifica que el monorepo cumple la estructura del plan tecnico (QA-10).
 # Uso: .\scripts\verify-monorepo-structure.ps1
 # Exit 0 = OK, 1 = faltan rutas
 

@@ -1,0 +1,87 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "401 Unauthorized rate",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=\"401\"}[5m])) by (uri)", "legendFormat": "{{uri}}" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "title": "403 Forbidden rate",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=\"403\"}[5m])) by (uri)", "legendFormat": "{{uri}}" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 3,
+      "title": "Protected endpoint 5xx",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=~\"/api/v1/.*\",status=~\"5..\"}[5m])) by (uri)", "legendFormat": "{{uri}}" }
+      ]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 8 },
+      "id": 4,
+      "title": "Access denied logs",
+      "type": "logs",
+      "targets": [
+        { "expr": "{container=~\"inventory-.*\"} |= \"Access denied\"", "refId": "A" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 18 },
+      "id": 5,
+      "title": "API auth failures last hour",
+      "type": "stat",
+      "targets": [
+        { "expr": "sum(increase(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"401|403\"}[1h]))", "legendFormat": "401/403" }
+      ]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 18 },
+      "id": 6,
+      "title": "API logs with user and endpoint",
+      "type": "logs",
+      "targets": [
+        { "expr": "{container=~\"inventory-.*backend.*|inventory-api.*\"} |= \"user=\" |= \"endpoint=\"", "refId": "A" }
+      ]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 18 },
+      "id": 7,
+      "title": "Keycloak login logs",
+      "type": "logs",
+      "targets": [
+        { "expr": "{container=~\".*keycloak.*\"} |= \"LOGIN\"", "refId": "A" }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["inventory-qas", "security"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Inventory Security",
+  "uid": "inventory-security",
+  "version": 1
+}

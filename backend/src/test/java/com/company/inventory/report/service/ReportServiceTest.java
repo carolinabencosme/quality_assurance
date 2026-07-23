@@ -5,6 +5,8 @@ import com.company.inventory.product.entity.Product;
 import com.company.inventory.product.entity.ProductStatus;
 import com.company.inventory.product.repository.CategoryRepository;
 import com.company.inventory.product.repository.ProductRepository;
+import com.company.inventory.report.dto.TopMovedProductSummary;
+import com.company.inventory.stock.entity.StockMovementType;
 import com.company.inventory.stock.repository.StockMovementRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +20,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +43,8 @@ class ReportServiceTest {
         when(categoryRepository.count()).thenReturn(3L);
         when(stockMovementRepository.countByCreatedAtAfter(any())).thenReturn(4L);
         when(stockMovementRepository.findTop5ByOrderByCreatedAtDesc()).thenReturn(List.of());
+        when(stockMovementRepository.findTopMovedProducts(eq(StockMovementType.OUT), any(), any()))
+                .thenReturn(List.of(new TopMovedProductSummary(1L, "SKU-T", "Test Product", 12L, 2L)));
 
         Category category = new Category();
         category.setId(1L);
@@ -61,5 +66,7 @@ class ReportServiceTest {
         assertThat(dashboard.kpis().totalActiveProducts()).isEqualTo(3);
         assertThat(dashboard.kpis().criticalProductsCount()).isEqualTo(1);
         assertThat(dashboard.kpis().categoriesCount()).isEqualTo(3);
+        assertThat(dashboard.topSoldProducts()).hasSize(1);
+        assertThat(dashboard.topSoldProducts().getFirst().totalOutQty()).isEqualTo(12);
     }
 }

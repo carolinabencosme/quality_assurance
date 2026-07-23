@@ -20,7 +20,7 @@
   --pink: #d946ef;
   --blue: #1b9af7;
   --blue-soft: #ecf7ff;
-  --warning: #b86b04;
+  --warning: #855000;
   --warning-soft: #fff8e8;
   --danger: #c92828;
   --danger-soft: #fff0f0;
@@ -1891,6 +1891,11 @@ button {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface);
+}
+
+.data-table-wrap:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
 }
 
 .data-table {

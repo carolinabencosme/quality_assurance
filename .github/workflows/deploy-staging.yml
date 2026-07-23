@@ -3,7 +3,7 @@ name: Deploy Staging
 on:
   workflow_dispatch:
   push:
-    branches: [develop]
+    branches: [develop, presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
 
 permissions:
   contents: read
@@ -11,14 +11,14 @@ permissions:
 jobs:
   deploy-and-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
-      - name: Start core stack (Docker Compose)
+      - name: Start staging stack with observability
         run: |
-          docker compose -f docker-compose.dev.yml up -d --build postgres keycloak backend frontend
-          docker compose -f docker-compose.dev.yml ps
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml up -d --build postgres keycloak backend frontend prometheus loki tempo grafana alertmanager alloy
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml ps
 
       - name: Wait for backend health
         run: |
@@ -31,16 +31,93 @@ jobs:
             sleep 10
           done
           echo "Backend did not become healthy in time"
-          docker compose -f docker-compose.dev.yml logs backend --tail 80
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs backend --tail 80
+          exit 1
+
+      - name: Wait for Keycloak realm
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8081/realms/inventory-realm/.well-known/openid-configuration; then
+              echo "Keycloak ready"
+              exit 0
+            fi
+            echo "Waiting for Keycloak... ($i/60)"
+            sleep 5
+          done
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs keycloak --tail 80
           exit 1
 
       - name: Post-deploy smoke
         env:
-          RUN_OBSERVABILITY_SMOKE: 'false'
+          RUN_OBSERVABILITY_SMOKE: 'true'
         run: |
           chmod +x scripts/post-deploy-smoke.sh
           ./scripts/post-deploy-smoke.sh
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            tests/api/package-lock.json
+            tests/e2e/package-lock.json
+
+      - name: Install Playwright dependencies
+        working-directory: tests/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Visual regression against deployed staging
+        working-directory: tests/e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+          RUN_VISUAL_SNAPSHOTS: 'true'
+        run: npx playwright test specs/visual-snapshots.spec.ts
+
+      - name: Newman against deployed staging
+        working-directory: tests/api
+        run: |
+          npm ci
+          npm test -- --env-var "baseUrl=http://localhost:8080" --env-var "keycloakUrl=http://localhost:8081" --env-var "sku=STG-${{ github.run_id }}-${{ github.run_attempt }}"
+
+      - name: Playwright E2E and accessibility against deployed staging
+        working-directory: tests/e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+          RUN_VISUAL_SNAPSHOTS: 'true'
+        run: npm test
+
+      - name: Authorization smoke against deployed staging
+        shell: pwsh
+        run: ./tests/security/auth-smoke.ps1
+
+      - name: Schemathesis contract tests against deployed staging
+        env:
+          SCHEMATHESIS_SCHEMA_URL: http://host.docker.internal:8080/v3/api-docs
+        run: |
+          chmod +x scripts/run-schemathesis.sh
+          ./scripts/run-schemathesis.sh
+
       - name: Dump logs on failure
         if: failure()
-        run: docker compose -f docker-compose.dev.yml logs --tail 100
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml logs --tail 150
+
+      - name: Upload logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml logs --no-color > staging-compose.log
+
+      - name: Archive staging evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-post-deploy-evidence-${{ github.run_id }}
+          path: |
+            staging-compose.log
+            docs/qa-evidence/playwright-report/
+            docs/qa-evidence/schemathesis-report.txt
+          if-no-files-found: ignore
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml down -v

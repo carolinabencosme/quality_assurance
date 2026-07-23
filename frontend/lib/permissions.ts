@@ -2,6 +2,16 @@ const ACCESS_COOKIE = 'inventory_access';
 const KEYCLOAK_CLIENT =
   process.env.NEXT_PUBLIC_KEYCLOAK_API_CLIENT_ID ?? 'inventory-api';
 
+export const BUSINESS_SCOPES = [
+  'product:view',
+  'product:manage',
+  'stock:view',
+  'stock:manage',
+  'report:view',
+  'user:manage',
+  'audit:view',
+] as const;
+
 /** Espejo de composites en keycloak/realm-export.json */
 const REALM_ROLE_PERMISSIONS: Record<string, string[]> = {
   'inventory-admin': [
@@ -42,21 +52,37 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 }
 
 function extractRoles(payload: Record<string, unknown>): string[] {
-  const roles: string[] = [];
+  const roles = new Set<string>();
 
   const realmAccess = payload.realm_access as { roles?: string[] } | undefined;
   if (realmAccess?.roles) {
     for (const realmRole of realmAccess.roles) {
       const perms = REALM_ROLE_PERMISSIONS[realmRole];
-      if (perms) roles.push(...perms);
+      if (perms) perms.forEach((permission) => roles.add(permission));
     }
   }
 
   const resourceAccess = payload.resource_access as Record<string, { roles?: string[] }> | undefined;
   const clientRoles = resourceAccess?.[KEYCLOAK_CLIENT]?.roles;
-  if (clientRoles) roles.push(...clientRoles);
+  if (clientRoles) clientRoles.forEach((role) => roles.add(role));
 
-  return roles;
+  const hasRoleBackedPermissions = Array.from(roles).some((role) =>
+    BUSINESS_SCOPES.includes(role as typeof BUSINESS_SCOPES[number]),
+  );
+  const scope = payload.scope;
+  const scopeCandidates: string[] = [];
+  if (typeof scope === 'string') {
+    scopeCandidates.push(...scope.split(/\s+/));
+  } else if (Array.isArray(scope)) {
+    scopeCandidates.push(...scope.filter((candidate): candidate is string => typeof candidate === 'string'));
+  }
+  for (const candidate of scopeCandidates) {
+    if (!BUSINESS_SCOPES.includes(candidate as typeof BUSINESS_SCOPES[number])) continue;
+    if (hasRoleBackedPermissions && !roles.has(candidate)) continue;
+    roles.add(candidate);
+  }
+
+  return Array.from(roles);
 }
 
 export function hasPermission(permission: string): boolean {
@@ -69,6 +95,14 @@ export function hasPermission(permission: string): boolean {
 
 export function canManageProducts(): boolean {
   return hasPermission('product:manage');
+}
+
+export function canManageUsers(): boolean {
+  return hasPermission('user:manage');
+}
+
+export function canViewAudit(): boolean {
+  return hasPermission('audit:view');
 }
 
 export function canManageStock(): boolean {

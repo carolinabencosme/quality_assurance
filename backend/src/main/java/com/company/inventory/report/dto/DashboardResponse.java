@@ -7,6 +7,7 @@ import java.util.List;
 public record DashboardResponse(
         DashboardKpiResponse kpis,
         List<ProductResponse> criticalProducts,
+        List<TopMovedProductSummary> topSoldProducts,
         List<RecentMovementSummary> recentMovements
 ) {
 }

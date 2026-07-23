@@ -8,8 +8,10 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -19,7 +21,7 @@ public class KeycloakJwtAuthoritiesConverter implements Converter<Jwt, Collectio
 
     @Override
     public Collection<GrantedAuthority> convert(@NonNull Jwt jwt) {
-        List<String> authorities = new ArrayList<>();
+        Set<String> authorities = new LinkedHashSet<>();
 
         Map<String, Object> realmAccess = jwt.getClaim("realm_access");
         if (realmAccess != null) {
@@ -36,20 +38,62 @@ public class KeycloakJwtAuthoritiesConverter implements Converter<Jwt, Collectio
             }
         }
 
+        addScopeAuthorities(jwt.getClaim("scope"), authorities);
+
         return authorities.stream()
-                .distinct()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toUnmodifiableList());
     }
 
     @SuppressWarnings("unchecked")
-    private void extractRoles(Object rolesObject, List<String> target) {
+    private void extractRoles(Object rolesObject, Collection<String> target) {
         if (rolesObject instanceof Collection<?> roles) {
             for (Object role : roles) {
                 if (role instanceof String roleName) {
                     target.add(roleName);
                 }
             }
+        }
+    }
+
+    private void addScopeAuthorities(Object scopeClaim, Set<String> authorities) {
+        Set<String> knownScopes = extractScopes(scopeClaim);
+        if (knownScopes.isEmpty()) {
+            return;
+        }
+
+        boolean hasRoleBasedPermissions = authorities.stream().anyMatch(Permission::isKnown);
+        for (String scope : knownScopes) {
+            if (!Permission.isKnown(scope)) {
+                continue;
+            }
+            if (hasRoleBasedPermissions && !authorities.contains(scope)) {
+                continue;
+            }
+            authorities.add(scope);
+            authorities.add("SCOPE_" + scope);
+        }
+    }
+
+    private Set<String> extractScopes(Object scopeClaim) {
+        Set<String> scopes = new LinkedHashSet<>();
+        if (scopeClaim instanceof String scopeString) {
+            for (String scope : scopeString.split("\\s+")) {
+                addScope(scope, scopes);
+            }
+        } else if (scopeClaim instanceof Collection<?> scopeCollection) {
+            for (Object scope : scopeCollection) {
+                if (scope instanceof String scopeName) {
+                    addScope(scopeName, scopes);
+                }
+            }
+        }
+        return scopes;
+    }
+
+    private void addScope(String scope, Set<String> scopes) {
+        if (scope != null && !scope.isBlank()) {
+            scopes.add(scope.trim());
         }
     }
 }

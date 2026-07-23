@@ -10,7 +10,7 @@ groups:
           summary: Inventory API no responde a scrape de Prometheus
           description: El job inventory-api lleva más de 2 minutos caído.
 
-      - alert: HighHttpErrorRate
+      - alert: HighErrorRate
         expr: |
           sum(rate(http_server_requests_seconds_count{job="inventory-api",status=~"5.."}[5m]))
           /
@@ -20,3 +20,68 @@ groups:
           severity: warning
         annotations:
           summary: Tasa elevada de errores HTTP 5xx en inventory-api
+
+      - alert: HighLatencyP95
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job="inventory-api"}[5m])) by (le))
+          > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: p95 latency above 1s in inventory-api
+
+      - alert: HighCpuUsage
+        expr: |
+          (process_cpu_usage{job="inventory-api"} > 0.85)
+          or (system_cpu_usage{job="inventory-api"} > 0.90)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU usage on inventory-api
+
+      - alert: HighAuthFailureRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count{job="inventory-api",status=~"401|403"}[5m])) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Auth failure rate is elevated
+
+      - alert: GrafanaDown
+        expr: up{job="grafana"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Grafana is down
+
+      - alert: LokiDown
+        expr: up{job="loki"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Loki is down
+
+      - alert: TempoDown
+        expr: up{job="tempo"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Tempo is down
+
+      - alert: HighJvmMemoryUsage
+        expr: |
+          sum(jvm_memory_used_bytes{job="inventory-api",area="heap"})
+          /
+          sum(jvm_memory_max_bytes{job="inventory-api",area="heap"} > 0)
+          > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: JVM heap usage is above 85 percent

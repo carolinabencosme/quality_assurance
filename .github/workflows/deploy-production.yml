@@ -1,0 +1,78 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: deploy-production-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            tests/api/package-lock.json
+            tests/e2e/package-lock.json
+
+      - name: Create production env file
+        shell: bash
+        run: |
+          cp .env.prod.example .env.prod
+          {
+            echo "POSTGRES_PASSWORD=${{ secrets.PROD_POSTGRES_PASSWORD }}"
+            echo "DATABASE_PASSWORD=${{ secrets.PROD_POSTGRES_PASSWORD }}"
+            echo "KEYCLOAK_ADMIN_PASSWORD=${{ secrets.PROD_KEYCLOAK_ADMIN_PASSWORD }}"
+            echo "KEYCLOAK_ADMIN_CLIENT_SECRET=${{ secrets.KEYCLOAK_ADMIN_CLIENT_SECRET }}"
+            echo "GRAFANA_ADMIN_PASSWORD=${{ secrets.PROD_GRAFANA_ADMIN_PASSWORD }}"
+          } >> .env.prod
+
+      - name: Start production stack
+        run: docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml --env-file .env.prod up -d --build
+
+      - name: Post-deploy smoke
+        run: bash scripts/post-deploy-smoke.sh
+
+      - name: API Newman
+        working-directory: tests/api
+        run: |
+          npm ci
+          npm test -- --env-var "baseUrl=http://localhost:8080" --env-var "keycloakUrl=http://localhost:8081" --env-var "sku=PROD-${{ github.run_number }}"
+
+      - name: API Schemathesis
+        run: |
+          chmod +x scripts/run-schemathesis.sh
+          SCHEMATHESIS_BASE_URL=http://localhost:8080 ./scripts/run-schemathesis.sh
+
+      - name: Playwright E2E
+        working-directory: tests/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          E2E_BASE_URL=http://localhost:3000 npm test
+
+      - name: Auth smoke
+        shell: pwsh
+        run: ./tests/security/auth-smoke.ps1
+
+      - name: Compose logs
+        if: failure()
+        run: docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml --env-file .env.prod logs --no-color
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml --env-file .env.prod down -v

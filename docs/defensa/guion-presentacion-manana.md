@@ -93,6 +93,14 @@ Debe salir `200` en los cuatro.
 
 **Frase de cierre bloque 1:** *"El JWT viaja en el header Authorization; Spring convierte los roles de Keycloak en authorities y `@PreAuthorize` decide si deja pasar o devuelve 403."*
 
+### 1.6 Scopes, policies y gestion real de usuarios
+
+- **Scopes OAuth2:** el token puede incluir `product:view`, `stock:manage`, `report:view`, `user:manage` y `audit:view`; el backend tambien expone aliases `SCOPE_*`.
+- **Policies Keycloak:** `inventory-api` tiene Authorization Services con recursos Products, Stock, Reports, Users y Audit. Las policies por rol quedan exportadas en `keycloak/realm-export.json`.
+- **Enforcement:** Spring Resource Server valida JWT y aplica `@PreAuthorize`; Keycloak documenta y emite el modelo de scopes/policies.
+- **Gestion real:** `/admin/users` llama `/api/v1/users`, protegido por `user:manage`, y el backend usa `inventory-admin-api` con client credentials contra Keycloak Admin API.
+- **Demo rapida:** login `admin` -> Usuarios -> cambiar rol o estado; login `viewer` -> no ve Usuarios ni Permisos.
+
 ---
 
 ## 2. Base de datos

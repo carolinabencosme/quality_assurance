@@ -1,0 +1,157 @@
+name: Full QA Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_security_scans:
+        description: Run ZAP and Dependency Check
+        type: boolean
+        default: true
+      run_k6:
+        description: Run k6 load test
+        type: boolean
+        default: true
+  push:
+    branches: [presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
+
+permissions:
+  contents: read
+
+jobs:
+  full-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Backend build, tests and JaCoCo
+        working-directory: backend
+        run: mvn -B verify
+
+      - name: Require real Keycloak integration test
+        run: pwsh scripts/verify-keycloak-it-report.ps1
+
+      - name: Frontend install and build
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Docker compose build
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml build
+
+      - name: Deploy test stack
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml up -d postgres keycloak backend frontend prometheus loki tempo grafana alertmanager alloy
+
+      - name: Wait for backend and frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          for url in http://localhost:8080/actuator/health http://localhost:3000/; do
+            for i in $(seq 1 90); do
+              if curl -fsS "$url" >/dev/null 2>&1; then
+                echo "$url OK"
+                break
+              fi
+              if [ "$i" = "90" ]; then
+                docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml logs --tail 150
+                exit 1
+              fi
+              sleep 3
+            done
+          done
+
+      - name: Playwright visual baselines
+        working-directory: tests/e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+          RUN_VISUAL_SNAPSHOTS: 'true'
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npx playwright test specs/visual-snapshots.spec.ts
+
+      - name: Newman API
+        working-directory: tests/api
+        run: |
+          npm ci
+          npm test -- --env-var "baseUrl=http://localhost:8080" --env-var "keycloakUrl=http://localhost:8081" --env-var "sku=QA-${{ github.run_id }}-${{ github.run_attempt }}"
+
+      - name: Playwright E2E and accessibility
+        working-directory: tests/e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+        run: |
+          npm test
+
+      - name: Schemathesis
+        env:
+          SCHEMATHESIS_SCHEMA_URL: http://host.docker.internal:8080/v3/api-docs
+        run: |
+          chmod +x scripts/run-schemathesis.sh
+          ./scripts/run-schemathesis.sh
+
+      - name: Authorization smoke
+        shell: pwsh
+        run: ./tests/security/auth-smoke.ps1
+
+      - name: Dependency Check
+        if: github.event_name != 'workflow_dispatch' || inputs.run_security_scans
+        working-directory: backend
+        run: mvn -B org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=9
+
+      - name: ZAP baseline
+        if: github.event_name != 'workflow_dispatch' || inputs.run_security_scans
+        env:
+          ZAP_TARGET: http://host.docker.internal:3000
+        run: |
+          chmod +x scripts/run-zap-baseline.sh
+          ./scripts/run-zap-baseline.sh
+
+      - name: k6 load test
+        if: github.event_name != 'workflow_dispatch' || inputs.run_k6
+        env:
+          BASE_URL: http://host.docker.internal:8080
+          KEYCLOAK_URL: http://host.docker.internal:8081
+          K6_USERNAME: ${{ vars.K6_USERNAME || 'viewer' }}
+          K6_PASSWORD: ${{ secrets.K6_PASSWORD || 'viewer123' }}
+        run: |
+          chmod +x scripts/run-k6.sh
+          ./scripts/run-k6.sh
+
+      - name: Observability smoke
+        shell: pwsh
+        run: ./tests/observability/smoke.ps1
+
+      - name: Upload QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-qa-artifacts
+          path: |
+            backend/target/site/jacoco/
+            backend/target/dependency-check-report.*
+            docs/qa-evidence/playwright-report/
+            docs/qa-evidence/screenshots/
+            docs/qa-evidence/zap-report.html
+            docs/qa-evidence/schemathesis-report.txt
+            docs/qa-evidence/k6-load-summary.txt
+          if-no-files-found: ignore
+
+      - name: Docker logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml logs --tail 200
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml -f docker-compose.observability.yml down -v

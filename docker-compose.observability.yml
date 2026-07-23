@@ -1,7 +1,7 @@
 # Overlay Fase 5 (QA-7): OpenTelemetry + Grafana stack
 # Uso: docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up -d --build
 
-name: inventory-qas-dev
+name: ${COMPOSE_PROJECT_NAME:-inventory-qas-dev}
 
 services:
   alloy:
@@ -51,6 +51,12 @@ services:
     volumes:
       - ./observability/loki/loki.yaml:/etc/loki/loki.yaml:ro
       - loki_data:/loki
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3100/ready | grep -q ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
     networks:
       - inventory-net
 
@@ -64,6 +70,12 @@ services:
     volumes:
       - ./observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
       - tempo_data:/var/tempo
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3200/ready | grep -q ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
     networks:
       - inventory-net
 
@@ -83,9 +95,12 @@ services:
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana_data:/var/lib/grafana
     depends_on:
-      - prometheus
-      - loki
-      - tempo
+      prometheus:
+        condition: service_started
+      loki:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
     networks:
       - inventory-net
 
@@ -104,12 +119,14 @@ services:
 
   backend:
     environment:
-      SPRING_PROFILES_ACTIVE: dev,observability
-      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://alloy:4318/v1/traces
-      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://alloy:4318/v1/metrics
-      OTEL_TRACES_SAMPLER_PROBABILITY: "1.0"
-      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://alloy:4318/v1/traces
-      MANAGEMENT_OTLP_METRICS_EXPORT_URL: http://alloy:4318/v1/metrics
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev,observability}
+      # Garantiza el perfil aun cuando un .env local fija SPRING_PROFILES_ACTIVE=dev.
+      SPRING_PROFILES_INCLUDE: observability
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://alloy:4318/v1/traces}
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:-http://alloy:4318/v1/metrics}
+      OTEL_TRACES_SAMPLER_PROBABILITY: ${OTEL_TRACES_SAMPLER_PROBABILITY:-1.0}
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://alloy:4318/v1/traces}
+      MANAGEMENT_OTLP_METRICS_EXPORT_URL: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:-http://alloy:4318/v1/metrics}
     depends_on:
       alloy:
         condition: service_started

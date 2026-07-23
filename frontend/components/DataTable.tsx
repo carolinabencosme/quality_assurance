@@ -32,7 +32,7 @@ export default function DataTable<T>({
 }: DataTableProps<T>) {
   if (loading) {
     return (
-      <div className="data-table-wrap" aria-busy="true">
+      <div className="data-table-wrap" role="region" aria-label="Tabla de datos" aria-busy="true" tabIndex={0}>
         <table className="data-table">
           <thead>
             <tr>
@@ -74,7 +74,7 @@ export default function DataTable<T>({
 
   return (
     <>
-      <div className="data-table-wrap">
+      <div className="data-table-wrap" role="region" aria-label="Tabla de datos" tabIndex={0}>
         <table className="data-table">
           <thead>
             <tr>

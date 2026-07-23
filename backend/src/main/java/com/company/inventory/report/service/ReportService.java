@@ -10,9 +10,12 @@ import com.company.inventory.product.repository.ProductSpecifications;
 import com.company.inventory.report.dto.DashboardKpiResponse;
 import com.company.inventory.report.dto.DashboardResponse;
 import com.company.inventory.report.dto.RecentMovementSummary;
+import com.company.inventory.report.dto.TopMovedProductSummary;
 import com.company.inventory.stock.entity.StockMovement;
+import com.company.inventory.stock.entity.StockMovementType;
 import com.company.inventory.stock.repository.StockMovementRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -73,7 +76,13 @@ public class ReportService {
                 .map(this::toMovementSummary)
                 .toList();
 
-        return new DashboardResponse(kpis, criticalProducts, recentMovements);
+        List<TopMovedProductSummary> topSoldProducts = stockMovementRepository.findTopMovedProducts(
+                StockMovementType.OUT,
+                Instant.now().minus(30, ChronoUnit.DAYS),
+                PageRequest.of(0, 10)
+        );
+
+        return new DashboardResponse(kpis, criticalProducts, topSoldProducts, recentMovements);
     }
 
     public Page<ProductResponse> getCriticalProducts(Pageable pageable) {

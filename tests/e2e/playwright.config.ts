@@ -10,10 +10,18 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 1,
   workers: 1,
   reporter: [['list'], ['html', { open: 'never', outputFolder: '../../docs/qa-evidence/playwright-report' }]],
+  snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}{ext}',
+  expect: {
+    toHaveScreenshot: {
+      animations: 'disabled',
+      maxDiffPixelRatio: 0.02,
+    },
+  },
   use: {
     baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    viewport: { width: 1280, height: 720 },
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });

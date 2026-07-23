@@ -35,6 +35,7 @@ class ReportApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.kpis.totalActiveProducts").exists())
                 .andExpect(jsonPath("$.kpis.criticalProductsCount").exists())
-                .andExpect(jsonPath("$.criticalProducts").isArray());
+                .andExpect(jsonPath("$.criticalProducts").isArray())
+                .andExpect(jsonPath("$.topSoldProducts").isArray());
     }
 }

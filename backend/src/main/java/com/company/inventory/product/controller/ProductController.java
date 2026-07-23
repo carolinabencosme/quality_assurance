@@ -42,7 +42,7 @@ public class ProductController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_VIEW + "')")
+    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_VIEW + "') or hasAuthority('SCOPE_" + Permission.PRODUCT_VIEW + "')")
     @Operation(summary = "Listar productos", description = "Paginación, búsqueda por nombre/SKU, filtros y ordenamiento")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Página de productos"),
@@ -59,7 +59,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_VIEW + "')")
+    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_VIEW + "') or hasAuthority('SCOPE_" + Permission.PRODUCT_VIEW + "')")
     @Operation(summary = "Detalle de producto")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Producto encontrado"),
@@ -72,7 +72,7 @@ public class ProductController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "')")
+    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "') or hasAuthority('SCOPE_" + Permission.PRODUCT_MANAGE + "')")
     @Operation(summary = "Crear producto", description = "Valida SKU único, precio y stock inicial no negativos")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Producto creado"),
@@ -87,7 +87,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "')")
+    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "') or hasAuthority('SCOPE_" + Permission.PRODUCT_MANAGE + "')")
     @Operation(summary = "Actualizar producto", description = "No modifica cantidad; usar movimientos de stock")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Producto actualizado"),
@@ -102,7 +102,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "')")
+    @PreAuthorize("hasAuthority('" + Permission.PRODUCT_MANAGE + "') or hasAuthority('SCOPE_" + Permission.PRODUCT_MANAGE + "')")
     @Operation(summary = "Inactivar producto", description = "Soft delete: status INACTIVE")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Producto inactivado"),

@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 const PROTECTED = ['/dashboard', '/products', '/audit', '/reports', '/stock'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const token = request.cookies.get('inventory_access')?.value;
   const { pathname } = request.nextUrl;
 

@@ -15,9 +15,15 @@ import com.company.inventory.stock.mapper.StockLevelMapper;
 import com.company.inventory.stock.mapper.StockMovementMapper;
 import com.company.inventory.stock.repository.StockMovementRepository;
 import com.company.inventory.stock.repository.StockMovementSpecifications;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -31,11 +37,18 @@ public class StockService {
 
     private final StockMovementRepository stockMovementRepository;
     private final ProductRepository productRepository;
+    private final Counter movementsCounter;
 
     public StockService(StockMovementRepository stockMovementRepository,
-                        ProductRepository productRepository) {
+                        ProductRepository productRepository,
+                        @Autowired(required = false) MeterRegistry meterRegistry) {
         this.stockMovementRepository = stockMovementRepository;
         this.productRepository = productRepository;
+        this.movementsCounter = meterRegistry != null
+                ? Counter.builder("inventory.movements")
+                .description("Total stock movements")
+                .register(meterRegistry)
+                : null;
     }
 
     @Transactional(readOnly = true)
@@ -64,7 +77,7 @@ public class StockService {
                 request.quantity(),
                 request.newQuantity(),
                 request.observations(),
-                request.userId(),
+                resolveUserId(request.userId()),
                 CorrelationIdFilter.currentCorrelationId()
         ));
     }
@@ -124,6 +137,9 @@ public class StockService {
         movement.setCorrelationId(correlationId);
 
         StockMovement saved = stockMovementRepository.save(movement);
+        if (movementsCounter != null) {
+            movementsCounter.increment();
+        }
         log.info("event=stock_movement_registered productId={} type={} previousQty={} newQty={} delta={} correlationId={}",
                 product.getId(), type, previousQty, newQty, delta, correlationId);
         return saved;
@@ -138,5 +154,30 @@ public class StockService {
         if (product.getStatus() != ProductStatus.ACTIVE) {
             throw ApiException.badRequest("Cannot modify stock of inactive product");
         }
+    }
+
+    private String resolveUserId(String requestUserId) {
+        if (requestUserId != null && !requestUserId.isBlank()) {
+            return requestUserId;
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "system";
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof Jwt jwt) {
+            String preferredUsername = jwt.getClaimAsString("preferred_username");
+            if (preferredUsername != null && !preferredUsername.isBlank()) {
+                return preferredUsername;
+            }
+            String email = jwt.getClaimAsString("email");
+            if (email != null && !email.isBlank()) {
+                return email;
+            }
+            if (jwt.getSubject() != null && !jwt.getSubject().isBlank()) {
+                return jwt.getSubject();
+            }
+        }
+        return authentication.getName();
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,6 +56,29 @@ class GlobalExceptionHandlerTest {
         .andExpect(jsonPath("$.status").value(400))
         .andExpect(jsonPath("$.error").value("Bad Request"))
         .andExpect(jsonPath("$.message").value(notNullValue()))
+        .andExpect(jsonPath("$.correlationId").value(CORRELATION_ID));
+  }
+
+  @Test
+  void malformedJson_returnsStandardBadRequestInsteadOfInternalError() throws Exception {
+    mockMvc.perform(post("/api/v1/demo/errors/validation")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{")
+            .header(CorrelationIdFilter.HEADER, CORRELATION_ID))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.status").value(400))
+        .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+        .andExpect(jsonPath("$.message").value("Invalid request parameters or body"))
+        .andExpect(jsonPath("$.correlationId").value(CORRELATION_ID));
+  }
+
+  @Test
+  void unsupportedMethod_returnsMethodNotAllowedInsteadOfInternalError() throws Exception {
+    mockMvc.perform(put("/api/v1/demo/errors/not-found")
+            .header(CorrelationIdFilter.HEADER, CORRELATION_ID))
+        .andExpect(status().isMethodNotAllowed())
+        .andExpect(jsonPath("$.status").value(405))
+        .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"))
         .andExpect(jsonPath("$.correlationId").value(CORRELATION_ID));
   }
 

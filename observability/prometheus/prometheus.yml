@@ -23,3 +23,19 @@ scrape_configs:
         labels:
           service: inventory-api
           environment: dev
+
+  - job_name: grafana
+    static_configs:
+      - targets: ['grafana:3000']
+
+  - job_name: loki
+    static_configs:
+      - targets: ['loki:3100']
+
+  - job_name: tempo
+    static_configs:
+      - targets: ['tempo:3200']
+
+  - job_name: alertmanager
+    static_configs:
+      - targets: ['alertmanager:9093']

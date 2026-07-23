@@ -22,8 +22,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -130,6 +135,38 @@ class StockServiceTest {
 
         assertThat(product.getQuantity()).isEqualTo(15);
         verify(stockMovementRepository).save(any());
+    }
+
+    @Test
+    void registerMovement_withoutUserIdUsesJwtPreferredUsername() {
+        Product product = activeProduct(10);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(stockMovementRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        Jwt jwt = Jwt.withTokenValue("token")
+                .header("alg", "none")
+                .subject("subject-1")
+                .claim("preferred_username", "warehouse")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(300))
+                .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(
+                jwt,
+                List.of(new SimpleGrantedAuthority("stock:manage"))
+        ));
+
+        try {
+            StockMovementRequest request = new StockMovementRequest(
+                    1L, StockMovementType.IN, 5, null, "restock", null);
+
+            stockService.registerMovement(request);
+
+            ArgumentCaptor<StockMovement> captor = ArgumentCaptor.forClass(StockMovement.class);
+            verify(stockMovementRepository).save(captor.capture());
+            assertThat(captor.getValue().getUserId()).isEqualTo("warehouse");
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
     }
 
     @Test

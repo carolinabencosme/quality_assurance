@@ -37,7 +37,7 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up 
 **Respuesta:** Arquitectura **en capas** (no microservicios):
 
 - **Backend:** Controller → Service → Repository → Entity (patrón **MVC / layered** de Spring). El controller solo recibe HTTP y delega; la lógica vive en el service; JPA accede a Postgres vía repository.
-- **Frontend:** **App Router de Next.js 15** (React 19) — páginas en `app/`, componentes reutilizables en `components/`, lógica HTTP en `lib/`. No es MVVM; es **component-based + hooks** con separación presentación / cliente API.
+- **Frontend:** **App Router de Next.js 16** (React 19) — páginas en `app/`, componentes reutilizables en `components/`, lógica HTTP en `lib/`. No es MVVM; es **component-based + hooks** con separación presentación / cliente API.
 
 **Qué decir:** *"Tomamos el dominio Product como ejemplo: el usuario ve la tabla en Next.js, la petición llega al ProductController, el ProductService aplica reglas y filtros, y ProductRepository persiste en PostgreSQL."*
 
@@ -82,7 +82,7 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml up 
 | API            | Java 21, Spring Boot 3.4                                 | `backend/pom.xml`                                     |
 | Seguridad      | Spring Security OAuth2 Resource Server, Keycloak 26      | `SecurityConfig.java`, `keycloak/realm-export.json`   |
 | Persistencia   | PostgreSQL 16, JPA/Hibernate, Flyway, Envers             | `db/migration/V*.sql`, `application.yml`              |
-| Frontend       | Next.js 15, React, TypeScript, Axios                     | `frontend/package.json`                               |
+| Frontend       | Next.js 16, React, TypeScript, Axios                     | `frontend/package.json`                               |
 | Auth UI        | OIDC Authorization Code + PKCE                           | `frontend/lib/auth.ts`, `frontend/lib/oidc-config.ts` |
 | Contenedores   | Docker, Docker Compose                                   | `docker-compose.dev.yml`                              |
 | Tests          | JUnit 5, Mockito, Testcontainers, Playwright, Newman, k6 | `backend/src/test/`, `tests/`                         |
@@ -905,7 +905,7 @@ cd tests\e2e; npx playwright test specs/capture-evidence.spec.ts --workers=1; cd
 
 ### Apertura (30 segundos)
 
-> *"Cub es un monorepo de inventario: Spring Boot 3.4 + Next.js 15, autenticación OIDC con Keycloak, PostgreSQL con Flyway y Envers, observabilidad con Prometheus/Grafana/Loki/Tempo, y una pirámide de pruebas automatizadas. Lo levantamos con Docker Compose y lo demostramos en localhost:3000."*
+> *"Cub es un monorepo de inventario: Spring Boot 3.4 + Next.js 16, autenticación OIDC con Keycloak, PostgreSQL con Flyway y Envers, observabilidad con Prometheus/Grafana/Loki/Tempo, y una pirámide de pruebas automatizadas. Lo levantamos con Docker Compose y lo demostramos en localhost:3000."*
 
 ### Novedades que suelen preguntar
 

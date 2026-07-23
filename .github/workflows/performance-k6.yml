@@ -1,0 +1,55 @@
+name: Performance k6
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
+
+permissions:
+  contents: read
+
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start backend stack
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml up -d --build postgres keycloak backend
+
+      - name: Wait for backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 90); do
+            if curl -fsS http://localhost:8080/actuator/health >/dev/null 2>&1; then
+              echo "Backend OK"
+              exit 0
+            fi
+            sleep 3
+          done
+          docker compose -f docker-compose.dev.yml -f docker-compose.test.yml logs backend --tail 150
+          exit 1
+
+      - name: Run k6 load test
+        env:
+          BASE_URL: http://host.docker.internal:8080
+          KEYCLOAK_URL: http://host.docker.internal:8081
+          K6_USERNAME: ${{ vars.K6_USERNAME || 'viewer' }}
+          K6_PASSWORD: ${{ secrets.K6_PASSWORD || 'viewer123' }}
+        run: |
+          chmod +x scripts/run-k6.sh
+          ./scripts/run-k6.sh
+
+      - name: Upload k6 summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-load-summary
+          path: docs/qa-evidence/k6-load-summary.txt
+          if-no-files-found: ignore
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.dev.yml -f docker-compose.test.yml down -v

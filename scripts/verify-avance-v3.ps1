@@ -1,11 +1,11 @@
-# Verificación checklist Avance Proyecto V3 — ejecutar desde la raíz del monorepo
+# Verificacion checklist Avance Proyecto V3 - ejecutar desde la raiz del monorepo
 # Uso: .\scripts\verify-avance-v3.ps1
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
-Write-Host "=== Avance V3 — verificación automatizada ===" -ForegroundColor Cyan
+Write-Host "=== Avance V3 - verificacion automatizada ===" -ForegroundColor Cyan
 
 $script:results = @()
 
@@ -16,7 +16,7 @@ function Test-Step($Name, $ScriptBlock) {
         Write-Host "[OK] $Name" -ForegroundColor Green
     } catch {
         $script:results += [PSCustomObject]@{ Criterio = $Name; Estado = "FALLO: $($_.Exception.Message)" }
-        Write-Host "[FAIL] $Name — $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "[FAIL] $Name - $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 
@@ -61,7 +61,7 @@ Push-Location frontend
 try {
     if (-not (Test-Path node_modules)) { npm ci 2>$null; if ($LASTEXITCODE -ne 0) { npm install } }
     npm run build 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw "build falló" }
+    if ($LASTEXITCODE -ne 0) { throw "build fallo" }
     $script:results += [PSCustomObject]@{ Criterio = "npm run build"; Estado = "OK" }
     Write-Host "[OK] frontend build" -ForegroundColor Green
 } catch {

@@ -1,0 +1,97 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Product endpoint traffic",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=~\"/api/v1/products.*\"}[5m])) by (method, status)", "legendFormat": "{{method}} {{status}}" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "title": "Stock movement endpoint traffic",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=~\"/api/v1/stock.*\"}[5m])) by (method, status)", "legendFormat": "{{method}} {{status}}" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 3,
+      "title": "Dashboard requests",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=\"/api/v1/reports/dashboard\"}[5m]))", "legendFormat": "dashboard" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 4,
+      "title": "Critical products report requests",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=\"/api/v1/reports/critical-products\"}[5m]))", "legendFormat": "critical-products" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 16 },
+      "id": 5,
+      "title": "Active products",
+      "type": "stat",
+      "targets": [
+        { "expr": "inventory_products_active{job=\"inventory-api\"}", "legendFormat": "active" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 16 },
+      "id": 6,
+      "title": "Critical products",
+      "type": "stat",
+      "targets": [
+        { "expr": "inventory_products_critical{job=\"inventory-api\"}", "legendFormat": "critical" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 16 },
+      "id": 7,
+      "title": "Inventory value",
+      "type": "stat",
+      "targets": [
+        { "expr": "inventory_inventory_value{job=\"inventory-api\"}", "legendFormat": "value" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 16 },
+      "id": 8,
+      "title": "Stock movements",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "rate(inventory_movements_total{job=\"inventory-api\"}[5m])", "legendFormat": "movements/s" }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["inventory-qas", "business"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Inventory Business",
+  "uid": "inventory-business",
+  "version": 1
+}

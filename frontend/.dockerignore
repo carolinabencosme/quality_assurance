@@ -1,3 +1,7 @@
 node_modules/
+.next/
+.next-dev/
+playwright-report/
+test-results/
 dist/
 .vite/

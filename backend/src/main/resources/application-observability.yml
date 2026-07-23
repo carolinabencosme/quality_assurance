@@ -32,4 +32,4 @@ logging:
     format:
       console: logstash
   pattern:
-    level: "%5p [${spring.application.name:},trace=%X{traceId:-},corr=%X{correlationId:-}]"
+    level: "%5p [app=${spring.application.name:},user=%X{user:-},endpoint=%X{endpoint:-},trace=%X{traceId:-},span=%X{spanId:-},corr=%X{correlationId:-}]"

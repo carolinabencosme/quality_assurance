@@ -5,8 +5,10 @@
 # --- Secretos y entorno local ---
 .env
 .env.local
+.env.prod
 .env.*.local
 !.env.example
+!.env.prod.example
 *.pem
 *.key
 *.p12
@@ -80,8 +82,15 @@ coverage/
 .nyc_output/
 .zap/
 zap-report.html
+!docs/qa-evidence/zap-report.html
 k6-summary.*
 *.har
+
+# Commit compact QA evidence, not large regenerable raw report trees.
+docs/qa-evidence/jmeter/
+docs/qa-evidence/playwright-report/data/
+docs/qa-evidence/playwright-report/trace/
+docs/qa-evidence/zap.yaml
 
 # --- Docker / datos locales ---
 .docker/

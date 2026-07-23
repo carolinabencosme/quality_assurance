@@ -1,0 +1,112 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes" } },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "JVM memory used",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(jvm_memory_used_bytes{job=\"inventory-api\"}) by (area)", "legendFormat": "{{area}}" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "title": "JVM threads",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "jvm_threads_live_threads{job=\"inventory-api\"}", "legendFormat": "live" },
+        { "expr": "jvm_threads_daemon_threads{job=\"inventory-api\"}", "legendFormat": "daemon" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit" } },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "id": 3,
+      "title": "Process CPU usage",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "process_cpu_usage{job=\"inventory-api\"}", "legendFormat": "process" },
+        { "expr": "system_cpu_usage{job=\"inventory-api\"}", "legendFormat": "system" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+      "id": 4,
+      "title": "Hikari pool active",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "hikaricp_connections_active{job=\"inventory-api\"}", "legendFormat": "active" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s" } },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+      "id": 5,
+      "title": "Process uptime",
+      "type": "stat",
+      "targets": [
+        { "expr": "process_uptime_seconds{job=\"inventory-api\"}", "legendFormat": "uptime" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
+      "id": 6,
+      "title": "Hikari pool idle",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "hikaricp_connections_idle{job=\"inventory-api\"}", "legendFormat": "idle" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
+      "id": 7,
+      "title": "Hikari pool pending",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "hikaricp_connections_pending{job=\"inventory-api\"}", "legendFormat": "pending" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
+      "id": 8,
+      "title": "Hikari pool max",
+      "type": "stat",
+      "targets": [
+        { "expr": "hikaricp_connections_max{job=\"inventory-api\"}", "legendFormat": "max" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+      "id": 9,
+      "title": "Hikari timeouts",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "increase(hikaricp_connections_timeout_total{job=\"inventory-api\"}[5m])", "legendFormat": "timeouts" }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["inventory-qas", "infra"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "Inventory Infra",
+  "uid": "inventory-infra",
+  "version": 1
+}
