@@ -1,9 +1,12 @@
 name: Dependency Check
 
+# Primera ejecucion con NVD_API_KEY puede tardar 60-90 min (descarga ~370k CVEs).
+# Luego el cache hace que los siguientes runs sean mucho mas rapidos.
+# No se dispara en cada push a main para no quemar minutos de Actions.
 on:
   workflow_dispatch:
-  push:
-    branches: [main, develop, presentacion, cierre-proyecto-final-v3, sellado-100-pdf-v3, 'cierre/**']
+  schedule:
+    - cron: '0 9 * * 1'
 
 permissions:
   contents: read
@@ -11,7 +14,7 @@ permissions:
 jobs:
   dependency-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 120
     defaults:
       run:
         working-directory: backend
@@ -23,14 +26,12 @@ jobs:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           if [ -z "${NVD_API_KEY:-}" ]; then
-            echo "::warning::NVD_API_KEY no configurado. Se omite Dependency-Check para no quemar 45-90 min descargando la NVD sin key."
+            echo "::warning::NVD_API_KEY no configurado. Se omite Dependency-Check."
             echo "1) Key gratis: https://nvd.nist.gov/developers/request-an-api-key"
-            echo "2) GitHub → Settings → Secrets and variables → Actions → New secret"
-            echo "   Name: NVD_API_KEY"
-            echo "3) Vuelve a lanzar este workflow."
+            echo "2) Settings → Secrets and variables → Actions → NVD_API_KEY"
             echo "SKIP_ODC=true" >> "$GITHUB_ENV"
           else
-            echo "NVD_API_KEY presente. Continuando con el scan."
+            echo "NVD_API_KEY presente (longitud=${#NVD_API_KEY}). Continuando con el scan."
             echo "SKIP_ODC=false" >> "$GITHUB_ENV"
           fi
 
@@ -46,8 +47,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.dependency-check-data
-          key: odc-db-${{ runner.os }}-12.1.3
+          key: odc-db-${{ runner.os }}-12.1.3-v2
           restore-keys: |
+            odc-db-${{ runner.os }}-12.1.3
             odc-db-${{ runner.os }}-
 
       - name: Run OWASP Dependency Check
@@ -58,10 +60,11 @@ jobs:
           set -euo pipefail
           DATA_DIR="${{ github.workspace }}/.dependency-check-data"
           mkdir -p "$DATA_DIR"
+          echo "Iniciando Dependency-Check. La primera vez puede tardar hasta ~90 min."
           mvn -B org.owasp:dependency-check-maven:check \
             "-DdataDirectory=${DATA_DIR}" \
             "-DfailBuildOnCVSS=9" \
-            "-DnvdApiDelay=2000" \
+            "-DnvdApiDelay=1500" \
             "-DnvdApiKey=${NVD_API_KEY}"
 
       - name: Upload Dependency Check reports
