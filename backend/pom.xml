@@ -31,6 +31,10 @@
         <jacoco.version>0.8.14</jacoco.version>
         <!-- Requisito académico: cobertura mínima de líneas (JaCoCo COVEREDRATIO) -->
         <jacoco.line.minimum.covered.ratio>0.60</jacoco.line.minimum.covered.ratio>
+        <!-- Overrides de seguridad (OWASP Dependency-Check CVSS >= 9) -->
+        <tomcat.version>10.1.56</tomcat.version>
+        <kotlin.version>2.1.20</kotlin.version>
+        <spring-framework.version>6.2.19</spring-framework.version>
     </properties>
 
     <dependencies>
@@ -171,8 +175,9 @@
                 <version>${dependency-check.version}</version>
                 <configuration>
                     <failBuildOnCVSS>9</failBuildOnCVSS>
-                    <!-- Sin NVD API key la descarga suele fallar con HTTP 524; aumentar delay ayuda. -->
                     <nvdApiDelay>6000</nvdApiDelay>
+                    <!-- OSS Index suele fallar por rate-limit en CI; NVD + CISA bastan para el gate. -->
+                    <ossIndexAnalyzerEnabled>false</ossIndexAnalyzerEnabled>
                     <suppressionFiles>
                         <suppressionFile>owasp-suppressions.xml</suppressionFile>
                     </suppressionFiles>
