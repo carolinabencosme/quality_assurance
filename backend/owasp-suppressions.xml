@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <!--
+      Suppressions academicas / falsos positivos documentados.
+      El proyecto NO usa Cassandra; CVE-2026-40974 aplica solo a auto-config Cassandra SSL.
+      Si un CVE ya no aparece tras el upgrade a Spring Boot 3.5.14, esta regla es inocua.
+    -->
+    <suppress>
+        <notes><![CDATA[
+            Falso positivo / no aplicable: inventory-api no usa Spring Data Cassandra ni conexiones SSL a Cassandra.
+            CVE-2026-40974 afecta solo spring-boot Cassandra SSL auto-configuration.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.boot/spring-boot-starter-.*@.*$</packageUrl>
+        <cve>CVE-2026-40974</cve>
+    </suppress>
+</suppressions>
