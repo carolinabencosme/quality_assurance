@@ -25,8 +25,11 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.time.Duration;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,11 +60,22 @@ class KeycloakContainerIntegrationTest {
             .withUsername("inventory_user")
             .withPassword("inventory_password");
 
+    /**
+     * En Windows + realm con Authorization Services el arranque supera el timeout
+     * por defecto de /health/started. Esperamos el realm HTTP y damos 5 minutos.
+     */
     @Container
     static KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.0.7")
             .withAdminUsername("admin")
             .withAdminPassword("admin")
-            .withRealmImportFile("keycloak/realm-export.json");
+            .withRealmImportFile("keycloak/realm-export.json")
+            .withEnv("KC_HEALTH_ENABLED", "true")
+            .withEnv("JAVA_OPTS_KC_HEAP", "-Xms64m -Xmx512m")
+            .withStartupTimeout(Duration.ofMinutes(5))
+            .waitingFor(Wait.forHttp("/realms/inventory-realm")
+                    .forPort(8080)
+                    .forStatusCode(200)
+                    .withStartupTimeout(Duration.ofMinutes(5)));
 
     @Autowired
     private MockMvc mockMvc;

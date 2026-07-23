@@ -171,6 +171,8 @@
                 <version>${dependency-check.version}</version>
                 <configuration>
                     <failBuildOnCVSS>9</failBuildOnCVSS>
+                    <!-- Sin NVD API key la descarga suele fallar con HTTP 524; aumentar delay ayuda. -->
+                    <nvdApiDelay>6000</nvdApiDelay>
                     <formats>
                         <format>HTML</format>
                         <format>JSON</format>

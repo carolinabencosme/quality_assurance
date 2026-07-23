@@ -17,17 +17,55 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
+
+      - name: Require NVD_API_KEY
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          if [ -z "${NVD_API_KEY:-}" ]; then
+            echo "::warning::NVD_API_KEY no configurado. Se omite Dependency-Check para no quemar 45-90 min descargando la NVD sin key."
+            echo "1) Key gratis: https://nvd.nist.gov/developers/request-an-api-key"
+            echo "2) GitHub → Settings → Secrets and variables → Actions → New secret"
+            echo "   Name: NVD_API_KEY"
+            echo "3) Vuelve a lanzar este workflow."
+            echo "SKIP_ODC=true" >> "$GITHUB_ENV"
+          else
+            echo "NVD_API_KEY presente. Continuando con el scan."
+            echo "SKIP_ODC=false" >> "$GITHUB_ENV"
+          fi
+
       - uses: actions/setup-java@v4
+        if: env.SKIP_ODC != 'true'
         with:
           distribution: temurin
           java-version: '21'
           cache: maven
 
+      - name: Cache OWASP Dependency-Check database
+        if: env.SKIP_ODC != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.dependency-check-data
+          key: odc-db-${{ runner.os }}-12.1.3
+          restore-keys: |
+            odc-db-${{ runner.os }}-
+
       - name: Run OWASP Dependency Check
-        run: mvn -B org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=9
+        if: env.SKIP_ODC != 'true'
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          set -euo pipefail
+          DATA_DIR="${{ github.workspace }}/.dependency-check-data"
+          mkdir -p "$DATA_DIR"
+          mvn -B org.owasp:dependency-check-maven:check \
+            "-DdataDirectory=${DATA_DIR}" \
+            "-DfailBuildOnCVSS=9" \
+            "-DnvdApiDelay=2000" \
+            "-DnvdApiKey=${NVD_API_KEY}"
 
       - name: Upload Dependency Check reports
-        if: always()
+        if: env.SKIP_ODC != 'true' && always()
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
