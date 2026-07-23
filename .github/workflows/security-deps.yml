@@ -65,7 +65,9 @@ jobs:
             "-DdataDirectory=${DATA_DIR}" \
             "-DfailBuildOnCVSS=9" \
             "-DnvdApiDelay=1500" \
-            "-DnvdApiKey=${NVD_API_KEY}"
+            "-DnvdApiKey=${NVD_API_KEY}" \
+            "-DossIndexAnalyzerEnabled=false" \
+            "-Danalyzer.ossindex.enabled=false"
 
       - name: Upload Dependency Check reports
         if: env.SKIP_ODC != 'true' && always()

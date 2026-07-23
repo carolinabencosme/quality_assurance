@@ -140,7 +140,9 @@ jobs:
             "-DdataDirectory=${DATA_DIR}" \
             "-DfailBuildOnCVSS=9" \
             "-DnvdApiDelay=2000" \
-            "-DnvdApiKey=${NVD_API_KEY}"
+            "-DnvdApiKey=${NVD_API_KEY}" \
+            "-DossIndexAnalyzerEnabled=false" \
+            "-Danalyzer.ossindex.enabled=false"
 
       - name: ZAP baseline
         if: github.event_name != 'workflow_dispatch' || inputs.run_security_scans
