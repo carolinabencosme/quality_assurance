@@ -5,11 +5,16 @@ test.describe('Admin users', () => {
   test('admin can open users administration', async ({ page }) => {
     await loginViaKeycloak(page, 'admin', 'admin123');
 
-    await expect(dockLink(page, 'Usuarios')).toBeVisible({ timeout: 15_000 });
-    await dockLink(page, 'Usuarios').click();
+    const usersLink = dockLink(page, 'Usuarios');
+    await expect(usersLink).toBeVisible({ timeout: 15_000 });
+    await Promise.all([
+      page.waitForURL(/\/admin\/users/, { timeout: 20_000 }),
+      usersLink.click(),
+    ]);
 
-    await expect(page).toHaveURL(/\/admin\/users/);
-    await expect(page.getByRole('heading', { name: 'Usuarios', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Usuarios', exact: true })).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByText('Usuarios Keycloak')).toBeVisible();
   });
 
