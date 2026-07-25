@@ -83,6 +83,14 @@ jobs:
           chmod +x scripts/run-schemathesis.sh
           SCHEMATHESIS_BASE_URL=http://localhost:8080 ./scripts/run-schemathesis.sh
 
+      - name: Restore catalog after API fuzz
+        run: |
+          set -euo pipefail
+          # Schemathesis puede soft-deletear productos del seed; reactivar para E2E UI.
+          docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml --env-file .env.prod \
+            exec -T postgres psql -U inventory_user -d inventory \
+            -c "UPDATE products SET status = 'ACTIVE' WHERE status <> 'ACTIVE';"
+
       - name: Wait for frontend and Keycloak login
         run: |
           set -euo pipefail
