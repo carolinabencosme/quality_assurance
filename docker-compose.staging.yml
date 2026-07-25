@@ -39,6 +39,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.staging
+      args:
+        API_PROXY_TARGET: ${API_PROXY_TARGET:-http://backend:8080}
+        KEYCLOAK_PROXY_TARGET: ${KEYCLOAK_PROXY_TARGET:-http://keycloak:8080}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
+        NEXT_PUBLIC_KEYCLOAK_URL: ${NEXT_PUBLIC_KEYCLOAK_URL:-http://localhost:8081}
+        NEXT_PUBLIC_KEYCLOAK_REALM: ${NEXT_PUBLIC_KEYCLOAK_REALM:-inventory-realm}
+        NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:-inventory-frontend}
+        NEXT_PUBLIC_KEYCLOAK_API_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_API_CLIENT_ID:-inventory-api}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
     environment:
       NODE_ENV: production
       API_PROXY_TARGET: http://backend:8080

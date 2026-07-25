@@ -96,6 +96,8 @@ services:
         NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:-inventory-frontend}
         NEXT_PUBLIC_KEYCLOAK_API_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_API_CLIENT_ID:-inventory-api}
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+        API_PROXY_TARGET: ${API_PROXY_TARGET:-http://backend:8080}
+        KEYCLOAK_PROXY_TARGET: ${KEYCLOAK_PROXY_TARGET:-http://keycloak:8080}
     restart: unless-stopped
     ports:
       - "3000:3000"

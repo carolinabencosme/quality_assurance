@@ -154,16 +154,30 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
+    let cancelled = false;
+
+    Promise.allSettled([
       apiGet<Dashboard>('/reports/dashboard'),
       apiGet<SystemMetrics>('/observability/system-metrics'),
-    ])
-      .then(([dashboard, metrics]) => {
-        setData(dashboard);
-        setSystemMetrics(metrics);
-      })
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setLoading(false));
+    ]).then(([dashboardResult, metricsResult]) => {
+      if (cancelled) return;
+
+      if (dashboardResult.status === 'fulfilled') {
+        setData(dashboardResult.value);
+      } else {
+        setError(dashboardResult.reason instanceof Error ? dashboardResult.reason.message : 'Error al cargar dashboard');
+      }
+
+      if (metricsResult.status === 'fulfilled') {
+        setSystemMetrics(metricsResult.value);
+      }
+    }).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (

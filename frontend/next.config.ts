@@ -1,5 +1,7 @@
 import type { NextConfig } from 'next';
 
+// En `next build` (prod/staging) estos valores quedan fijados en los rewrites.
+// En Docker deben ser http://backend:8080 y http://keycloak:8080 (ver Dockerfile.prod).
 const apiTarget = process.env.API_PROXY_TARGET ?? 'http://localhost:8080';
 const keycloakTarget = process.env.KEYCLOAK_PROXY_TARGET ?? 'http://localhost:8081';
 const isDevelopment = process.env.NODE_ENV === 'development';
