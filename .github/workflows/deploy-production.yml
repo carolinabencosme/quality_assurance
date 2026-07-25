@@ -31,18 +31,43 @@ jobs:
 
       - name: Create production env file
         shell: bash
+        env:
+          PROD_POSTGRES_PASSWORD: ${{ secrets.PROD_POSTGRES_PASSWORD }}
+          PROD_KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.PROD_KEYCLOAK_ADMIN_PASSWORD }}
+          KEYCLOAK_ADMIN_CLIENT_SECRET: ${{ secrets.KEYCLOAK_ADMIN_CLIENT_SECRET }}
+          PROD_GRAFANA_ADMIN_PASSWORD: ${{ secrets.PROD_GRAFANA_ADMIN_PASSWORD }}
         run: |
+          set -euo pipefail
           cp .env.prod.example .env.prod
+          # Fallbacks academicos si los secrets no estan configurados (CI demo local).
+          POSTGRES_PASSWORD="${PROD_POSTGRES_PASSWORD:-inventory_password}"
+          KEYCLOAK_ADMIN_PASSWORD="${PROD_KEYCLOAK_ADMIN_PASSWORD:-admin}"
+          ADMIN_CLIENT_SECRET="${KEYCLOAK_ADMIN_CLIENT_SECRET:-inventory-admin-secret-change-me}"
+          GRAFANA_ADMIN_PASSWORD="${PROD_GRAFANA_ADMIN_PASSWORD:-admin}"
           {
-            echo "POSTGRES_PASSWORD=${{ secrets.PROD_POSTGRES_PASSWORD }}"
-            echo "DATABASE_PASSWORD=${{ secrets.PROD_POSTGRES_PASSWORD }}"
-            echo "KEYCLOAK_ADMIN_PASSWORD=${{ secrets.PROD_KEYCLOAK_ADMIN_PASSWORD }}"
-            echo "KEYCLOAK_ADMIN_CLIENT_SECRET=${{ secrets.KEYCLOAK_ADMIN_CLIENT_SECRET }}"
-            echo "GRAFANA_ADMIN_PASSWORD=${{ secrets.PROD_GRAFANA_ADMIN_PASSWORD }}"
+            echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+            echo "DATABASE_PASSWORD=${POSTGRES_PASSWORD}"
+            echo "KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}"
+            echo "KEYCLOAK_ADMIN_CLIENT_SECRET=${ADMIN_CLIENT_SECRET}"
+            echo "GRAFANA_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}"
           } >> .env.prod
 
       - name: Start production stack
         run: docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml --env-file .env.prod up -d --build
+
+      - name: Wait for backend health
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/actuator/health >/dev/null; then
+              echo "Backend healthy"
+              exit 0
+            fi
+            echo "Waiting for backend... ($i/60)"
+            sleep 5
+          done
+          docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml --env-file .env.prod logs backend --tail 120
+          exit 1
 
       - name: Post-deploy smoke
         run: bash scripts/post-deploy-smoke.sh

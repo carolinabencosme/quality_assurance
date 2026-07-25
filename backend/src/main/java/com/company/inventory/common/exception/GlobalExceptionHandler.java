@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
@@ -64,6 +65,7 @@ public class GlobalExceptionHandler {
             ConstraintViolationException.class,
             PropertyReferenceException.class,
             InvalidDataAccessApiUsageException.class,
+            DataIntegrityViolationException.class,
             IllegalArgumentException.class
     })
     public ResponseEntity<ApiErrorResponse> handleMalformedRequest(Exception ex, HttpServletRequest request) {
