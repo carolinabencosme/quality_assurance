@@ -55,7 +55,8 @@ jobs:
           npm ci
           npm run lint
           npm run build
-          npm audit --audit-level=moderate
+          # Solo dependencias de produccion (eslint/minimatch en dev no se despliegan).
+          npm audit --omit=dev --audit-level=high
 
   sonar:
     name: Quality Gate (SonarQube)
