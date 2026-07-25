@@ -330,12 +330,13 @@
       }
     },
     {
-      "name": "14 Demo 404 (perfil dev) → 404",
+      "name": "14 Demo/ruta inexistente → 404",
       "event": [
         {
           "listen": "test",
           "script": {
             "exec": [
+              "// Dev: ErrorProbeController. Prod: NoResourceFoundException → 404 NOT_FOUND.",
               "pm.test('HTTP 404 not found', () => pm.response.to.have.status(404));",
               "const j = pm.response.json();",
               "pm.test('code NOT_FOUND', () => pm.expect(j.code).to.eql('NOT_FOUND'));"
