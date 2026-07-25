@@ -83,6 +83,21 @@ jobs:
           chmod +x scripts/run-schemathesis.sh
           SCHEMATHESIS_BASE_URL=http://localhost:8080 ./scripts/run-schemathesis.sh
 
+      - name: Wait for frontend and Keycloak login
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3000/ >/dev/null \
+              && curl -sf http://localhost:8081/realms/inventory-realm/.well-known/openid-configuration >/dev/null; then
+              echo "Frontend + Keycloak ready"
+              exit 0
+            fi
+            echo "Waiting for frontend/Keycloak... ($i/60)"
+            sleep 5
+          done
+          docker compose -f docker-compose.prod.yml -f docker-compose.observability.yml --env-file .env.prod logs frontend keycloak --tail 100
+          exit 1
+
       - name: Playwright E2E
         working-directory: tests/e2e
         run: |

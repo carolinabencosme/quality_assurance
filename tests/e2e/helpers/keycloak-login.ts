@@ -27,7 +27,15 @@ async function submitKeycloakCredentials(
   const userField = page.locator('#username, input[name="username"]').first();
   const passField = page.locator('#password, input[name="password"]').first();
 
-  await userField.waitFor({ state: 'visible', timeout: 15_000 });
+  await userField.waitFor({ state: 'visible', timeout: 15_000 }).catch(async (error) => {
+    const url = page.url();
+    const title = await page.title().catch(() => '(no title)');
+    const bodyPreview = (await page.locator('body').innerText().catch(() => '')).slice(0, 500);
+    throw new Error(
+      `Keycloak login form not visible at ${url} (title="${title}"). Body preview: ${bodyPreview}`,
+      { cause: error },
+    );
+  });
   await userField.fill(username);
   await passField.fill(password);
 

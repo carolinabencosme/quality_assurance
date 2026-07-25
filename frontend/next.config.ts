@@ -12,6 +12,9 @@ const connectSources = [
   externalOrigin(process.env.NEXT_PUBLIC_API_URL),
   externalOrigin(process.env.NEXT_PUBLIC_KEYCLOAK_URL ?? 'http://localhost:8081'),
 ].filter((value): value is string => Boolean(value));
+const keycloakOrigin =
+  externalOrigin(process.env.NEXT_PUBLIC_KEYCLOAK_URL ?? 'http://localhost:8081') ??
+  'http://localhost:8081';
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ''}`,
@@ -19,9 +22,10 @@ const contentSecurityPolicy = [
   "img-src 'self' data:",
   "font-src 'self' data:",
   `connect-src ${[...new Set(connectSources)].join(' ')}`,
+  // Login Keycloak hace POST al IdP (otro origen cuando NEXT_PUBLIC_KEYCLOAK_URL es absoluto).
+  `form-action 'self' ${keycloakOrigin}`,
   "object-src 'none'",
   "base-uri 'self'",
-  "form-action 'self'",
   "frame-ancestors 'none'",
 ].join('; ');
 

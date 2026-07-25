@@ -22,13 +22,13 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.0.7
     restart: unless-stopped
-    command: start --import-realm --http-enabled=true --hostname-strict=false
+    # Mismo modo permisivo que staging/dev para demo academica local/CI (HTTP + import realm).
+    command: start-dev --import-realm
     environment:
       KC_HTTP_PORT: 8080
       KC_HEALTH_ENABLED: "true"
       KC_HOSTNAME: ${KC_HOSTNAME:-http://localhost:8081}
       KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-SET_IN_ENV_KEYCLOAK_ADMIN_PASSWORD}
       KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-SET_IN_ENV_KEYCLOAK_ADMIN_CLIENT_SECRET}
@@ -42,7 +42,7 @@ services:
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8080'"]
       interval: 15s
       timeout: 5s
-      retries: 15
+      retries: 20
       start_period: 120s
     networks:
       - inventory-net
@@ -89,6 +89,13 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
+        NEXT_PUBLIC_KEYCLOAK_URL: ${NEXT_PUBLIC_KEYCLOAK_URL:-http://localhost:8081}
+        NEXT_PUBLIC_KEYCLOAK_REALM: ${NEXT_PUBLIC_KEYCLOAK_REALM:-inventory-realm}
+        NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID:-inventory-frontend}
+        NEXT_PUBLIC_KEYCLOAK_API_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_API_CLIENT_ID:-inventory-api}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
     restart: unless-stopped
     ports:
       - "3000:3000"
