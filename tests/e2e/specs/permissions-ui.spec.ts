@@ -25,7 +25,6 @@ test.describe('Permissions UI', () => {
     await loginViaKeycloak(page, 'viewer', 'viewer123');
 
     await page.goto('/admin/permissions');
-    await expect(page.getByText(/user:manage/)).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/No tienes permiso user:manage/)).toBeVisible();
+    await expect(page.getByText(/No tienes permiso user:manage/)).toBeVisible({ timeout: 15_000 });
   });
 });

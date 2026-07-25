@@ -24,8 +24,11 @@ test.describe('Stock movement', () => {
     await expect(page.getByRole('heading', { name: 'Movimientos de stock' })).toBeVisible();
 
     const productSelect = page.locator('#movement-product');
-    await expect(productSelect.locator('option')).not.toHaveCount(1, { timeout: 15_000 });
-    await productSelect.selectOption({ label: new RegExp(sku) });
+    const productOption = productSelect.locator('option', { hasText: sku });
+    await expect(productOption).toHaveCount(1, { timeout: 15_000 });
+    const productId = await productOption.getAttribute('value');
+    expect(productId).toBeTruthy();
+    await productSelect.selectOption(productId!);
     await page.locator('#movement-qty').fill('1');
     const note = `playwright-stock-${Date.now()}`;
     await page.locator('#movement-obs').fill(note);
