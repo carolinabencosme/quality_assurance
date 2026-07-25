@@ -25,7 +25,7 @@ test.describe('Stock movement', () => {
 
     const productSelect = page.locator('#movement-product');
     await expect(productSelect.locator('option')).not.toHaveCount(1, { timeout: 15_000 });
-    await productSelect.selectOption({ label: productName });
+    await productSelect.selectOption({ label: new RegExp(sku) });
     await page.locator('#movement-qty').fill('1');
     const note = `playwright-stock-${Date.now()}`;
     await page.locator('#movement-obs').fill(note);
