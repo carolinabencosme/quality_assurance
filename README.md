@@ -119,6 +119,7 @@ This is local production for academic demonstration, not a hardened cloud deploy
 - `docs/qa-evidence.md`
 - `docs/qa-evidence/FINAL-CHECKLIST.md`
 - `docs/branch-protection.md`
+- `docs/defensa/GUIA-PRESENTACION-FINAL-V3.md` (guia oral de defensa)
 - `docs/defensa/guion-sellado-v3.md`
 - `CONTRIBUTING.md`
 
