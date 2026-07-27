@@ -27,6 +27,7 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml -f 
 | Prometheus | http://localhost:9090 |
 | Alertmanager | http://localhost:9093 |
 | SonarQube | http://localhost:9001 (`admin` / `admin`) |
+| Jenkins | http://localhost:8082 (`admin` / `admin`) — job `cub-inventory-qas` |
 
 Usuarios Cub: `admin/admin123`, `viewer/viewer123`, `warehouse/warehouse123`, `clerk/clerk123`.
 

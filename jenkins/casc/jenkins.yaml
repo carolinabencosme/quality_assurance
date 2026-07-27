@@ -1,7 +1,22 @@
 jenkins:
   systemMessage: |
-    Inventory QAS — Jenkins (Fase 6 / QA-8).
-    Crear un Pipeline job apuntando al Jenkinsfile del repositorio.
+    Cub Inventory QAS — Jenkins local (Proyecto Final V3).
+    Job principal: cub-inventory-qas (pipeline visual del PDF + smoke del stack).
+    Pipeline CI completo del repo: Jenkinsfile (Maven/Node/Docker agents).
+  numExecutors: 2
+  mode: NORMAL
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: true
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: "admin"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: true
 
 unclassified:
   location:

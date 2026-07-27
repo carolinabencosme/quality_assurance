@@ -46,7 +46,10 @@ services:
       - inventory-net
 
   jenkins:
-    image: jenkins/jenkins:2.492.2-lts-jdk21
+    build:
+      context: ./jenkins
+      dockerfile: Dockerfile
+    image: cub-jenkins:local
     container_name: inventory-jenkins-staging
     restart: unless-stopped
     user: root
@@ -54,10 +57,19 @@ services:
       - "8082:8080"
       - "50000:50000"
     environment:
-      JAVA_OPTS: -Djenkins.install.runSetupWizard=false
+      CASC_JENKINS_CONFIG: /var/jenkins_casc
+      JAVA_OPTS: >-
+        -Djenkins.install.runSetupWizard=false
+        -Dcasc.jenkins.config=/var/jenkins_casc
+        -Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+      # Repo montado para Jenkinsfile.demo + evidencias (job seed en init.groovy)
+      - ./:/workspace/cub:ro
+      - ./jenkins/casc:/var/jenkins_casc:ro
     networks:
       - inventory-net
 
