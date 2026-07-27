@@ -1,13 +1,32 @@
 global:
   resolve_timeout: 5m
+  smtp_smarthost: "localhost:25"
+  smtp_from: "alertmanager@inventory-qas.local"
 
 route:
   receiver: default
-  group_by: ['alertname', 'service']
+  group_by: ["alertname", "severity", "job"]
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 4h
+  routes:
+    - matchers:
+        - severity = critical
+      receiver: default
+      continue: false
+    - matchers:
+        - severity = warning
+      receiver: default
+
+inhibit_rules:
+  - source_matchers:
+      - severity = critical
+    target_matchers:
+      - severity = warning
+    equal: ["alertname", "job"]
 
 receivers:
   - name: default
-    # Dev: revisar alertas en UI http://localhost:9093
+    # Entorno academico local: revisar alertas en la UI.
+    # URL: http://localhost:9093
+    # En produccion real se configuraria email/Slack/webhook via variables de entorno.

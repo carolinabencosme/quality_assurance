@@ -1,79 +1,160 @@
 {
   "annotations": { "list": [] },
+  "description": "Salud y rendimiento HTTP del inventory-api: throughput, latencia, errores, heap y logs. Cumple metricas PDF (latencia, throughput, error rate).",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    { "title": "Home Cub", "type": "link", "url": "/d/cub-home", "icon": "home", "targetBlank": false },
+    { "title": "Infra", "type": "link", "url": "/d/inventory-infra", "icon": "dashboard", "targetBlank": false },
+    { "title": "Security", "type": "link", "url": "/d/inventory-security", "icon": "dashboard", "targetBlank": false }
+  ],
   "panels": [
+    {
+      "type": "text",
+      "title": "Que mirar aqui",
+      "id": 100,
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "**API Overview** — Demuestra que el backend esta vivo, responde con buen throughput/latencia y deja logs. Genera carga desde Cub (`/dashboard`, productos) y observa las series. Logs abajo alimentan Loki; el `traceId` se puede abrir en Tempo (Explore)."
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 3 },
+      "id": 3,
+      "title": "API UP",
+      "description": "Target Prometheus job=inventory-api. 1 = scrape OK.",
+      "type": "stat",
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [{ "expr": "up{job=\"inventory-api\"}", "legendFormat": "up" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps", "decimals": 2 } },
+      "gridPos": { "h": 4, "w": 5, "x": 4, "y": 3 },
+      "id": 10,
+      "title": "Throughput ahora",
+      "type": "stat",
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\"}[1m]))", "legendFormat": "rps" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.5 }, { "color": "red", "value": 1 }] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 5, "x": 9, "y": 3 },
+      "id": 11,
+      "title": "p95 latency",
+      "description": "Alerta HighLatencyP95 si > 1s durante 5m.",
+      "type": "stat",
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"inventory-api\"}[5m])) by (le))", "legendFormat": "p95" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.02 }, { "color": "red", "value": 0.05 }] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 5, "x": 14, "y": 3 },
+      "id": 12,
+      "title": "Error rate 5xx",
+      "description": "Proporcion de 5xx. Alerta HighErrorRate si > 5%.",
+      "type": "stat",
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"5..\"}[5m])) / clamp_min(sum(rate(http_server_requests_seconds_count{job=\"inventory-api\"}[5m])), 1e-9)", "legendFormat": "5xx" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes", "decimals": 1 } },
+      "gridPos": { "h": 4, "w": 5, "x": 19, "y": 3 },
+      "id": 4,
+      "title": "JVM heap used",
+      "type": "stat",
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [{ "expr": "sum(jvm_memory_used_bytes{job=\"inventory-api\",area=\"heap\"})", "legendFormat": "heap" }]
+    },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "unit": "reqps" } },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
       "id": 1,
       "title": "HTTP requests / s",
+      "description": "Throughput agregado del Resource Server.",
       "type": "timeseries",
       "targets": [
-        {
-          "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\"}[1m]))",
-          "legendFormat": "total"
-        }
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\"}[1m]))", "legendFormat": "total" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"2..\"}[1m]))", "legendFormat": "2xx" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"4..\"}[1m]))", "legendFormat": "4xx" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"5..\"}[1m]))", "legendFormat": "5xx" }
       ]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "unit": "s" } },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 7 },
       "id": 2,
-      "title": "HTTP latency p95",
+      "title": "HTTP latency p50 / p95 / p99",
       "type": "timeseries",
       "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"inventory-api\"}[5m])) by (le))",
-          "legendFormat": "p95"
-        }
+        { "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{job=\"inventory-api\"}[5m])) by (le))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"inventory-api\"}[5m])) by (le))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{job=\"inventory-api\"}[5m])) by (le))", "legendFormat": "p99" }
       ]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 8 },
-      "id": 3,
-      "title": "API UP",
-      "type": "stat",
-      "targets": [{ "expr": "up{job=\"inventory-api\"}", "legendFormat": "up" }]
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "id": 13,
+      "title": "Requests by status class",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\"}[5m])) by (status)", "legendFormat": "{{status}}" }
+      ]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 8 },
-      "id": 4,
-      "title": "JVM heap used",
-      "type": "stat",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "id": 14,
+      "title": "Top URIs (req/s)",
+      "type": "timeseries",
       "targets": [
-        {
-          "expr": "jvm_memory_used_bytes{job=\"inventory-api\",area=\"heap\"}",
-          "legendFormat": "heap"
-        }
+        { "expr": "topk(8, sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=~\"/api/v1/.*\"}[5m])) by (uri))", "legendFormat": "{{uri}}" }
       ]
     },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 14 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 23 },
       "id": 5,
-      "title": "Logs (contenedores inventory-*)",
+      "title": "Logs backend / inventory-*",
+      "description": "Stream Loki de contenedores del proyecto. Busca ERROR o Access denied para seguridad.",
       "type": "logs",
-      "targets": [
-        {
-          "expr": "{container=~\"inventory-.*\"}",
-          "refId": "A"
-        }
-      ]
+      "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true },
+      "targets": [{ "expr": "{container=~\"inventory-.*\"}", "refId": "A" }]
     }
   ],
   "schemaVersion": 39,
-  "tags": ["inventory-qas", "qa-7"],
+  "tags": ["inventory-qas", "api", "qa-7"],
   "templating": { "list": [] },
   "time": { "from": "now-1h", "to": "now" },
   "title": "Inventory API — Overview",
   "uid": "inventory-api-overview",
-  "version": 1
+  "version": 2
 }

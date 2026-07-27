@@ -1,16 +1,69 @@
 {
   "annotations": { "list": [] },
+  "description": "Seguridad observable: 401/403, 5xx en API, denegaciones, logs con user+endpoint y auditoria de login Keycloak.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    { "title": "Home Cub", "type": "link", "url": "/d/cub-home", "icon": "home" },
+    { "title": "API", "type": "link", "url": "/d/inventory-api-overview", "icon": "dashboard" }
+  ],
   "panels": [
     {
+      "type": "text",
+      "title": "Que mirar aqui",
+      "id": 100,
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "**Security** — Demuestra fallos de autenticacion/autorizacion y trazabilidad.\n\n1. Llama un endpoint **sin token** → sube **401**.\n2. Login como **viewer** y abre Users/Audit → **403** + logs Access denied.\n3. Login **admin** y navega → logs con `user=` y `endpoint=`.\n4. Alertas: `HighAuthFailureRate` en Alertmanager si hay muchas 401/403."
+      }
+    },
+    {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 10 }] }
+        }
+      },
+      "gridPos": { "h": 5, "w": 8, "x": 0, "y": 4 },
+      "id": 5,
+      "title": "Auth failures (401+403) ultima hora",
+      "type": "stat",
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        { "expr": "sum(increase(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"401|403\"}[1h]))", "legendFormat": "401/403" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 5, "w": 8, "x": 8, "y": 4 },
+      "id": 20,
+      "title": "401 rate (5m)",
+      "type": "stat",
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=\"401\"}[5m]))", "legendFormat": "401/s" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 5, "w": 8, "x": 16, "y": 4 },
+      "id": 21,
+      "title": "403 rate (5m)",
+      "type": "stat",
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=\"403\"}[5m]))", "legendFormat": "403/s" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
       "id": 1,
-      "title": "401 Unauthorized rate",
+      "title": "401 Unauthorized por URI",
+      "description": "Intentos sin autenticacion valida.",
       "type": "timeseries",
       "targets": [
         { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=\"401\"}[5m])) by (uri)", "legendFormat": "{{uri}}" }
@@ -18,9 +71,10 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
       "id": 2,
-      "title": "403 Forbidden rate",
+      "title": "403 Forbidden por URI",
+      "description": "Autenticado pero sin permiso (scopes/authorities).",
       "type": "timeseries",
       "targets": [
         { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=\"403\"}[5m])) by (uri)", "legendFormat": "{{uri}}" }
@@ -28,9 +82,9 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
       "id": 3,
-      "title": "Protected endpoint 5xx",
+      "title": "5xx en endpoints /api/v1",
       "type": "timeseries",
       "targets": [
         { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=~\"/api/v1/.*\",status=~\"5..\"}[5m])) by (uri)", "legendFormat": "{{uri}}" }
@@ -38,42 +92,37 @@
     },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 8 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
       "id": 4,
-      "title": "Access denied logs",
+      "title": "Access denied / Authorization logs",
       "type": "logs",
+      "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true },
       "targets": [
-        { "expr": "{container=~\"inventory-.*\"} |= \"Access denied\"", "refId": "A" }
-      ]
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 18 },
-      "id": 5,
-      "title": "API auth failures last hour",
-      "type": "stat",
-      "targets": [
-        { "expr": "sum(increase(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"401|403\"}[1h]))", "legendFormat": "401/403" }
+        { "expr": "{container=~\"inventory-.*\"} |~ \"(?i)access denied|authorization|forbidden\"", "refId": "A" }
       ]
     },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 18 },
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 25 },
       "id": 6,
-      "title": "API logs with user and endpoint",
+      "title": "Logs API con user y endpoint (MDC)",
+      "description": "Exigencia PDF: logs con usuario y endpoint. Campos MDC en logging estructurado.",
       "type": "logs",
+      "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true },
       "targets": [
-        { "expr": "{container=~\"inventory-.*backend.*|inventory-api.*\"} |= \"user=\" |= \"endpoint=\"", "refId": "A" }
+        { "expr": "{container=~\".*backend.*\"} |~ \"user=|\\\"user\\\"\" |~ \"endpoint=|\\\"endpoint\\\"\"", "refId": "A" }
       ]
     },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 18 },
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 25 },
       "id": 7,
-      "title": "Keycloak login logs",
+      "title": "Keycloak LOGIN / auth events",
+      "description": "Eventos de autenticacion del IdP.",
       "type": "logs",
+      "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true },
       "targets": [
-        { "expr": "{container=~\".*keycloak.*\"} |= \"LOGIN\"", "refId": "A" }
+        { "expr": "{container=~\".*keycloak.*\"} |~ \"(?i)LOGIN|LOGIN_ERROR|type=LOGIN\"", "refId": "A" }
       ]
     }
   ],
@@ -83,5 +132,5 @@
   "time": { "from": "now-1h", "to": "now" },
   "title": "Inventory Security",
   "uid": "inventory-security",
-  "version": 1
+  "version": 2
 }

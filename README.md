@@ -120,6 +120,8 @@ This is local production for academic demonstration, not a hardened cloud deploy
 - `docs/qa-evidence/FINAL-CHECKLIST.md`
 - `docs/branch-protection.md`
 - `docs/defensa/README.md` (indice rama defensa / estudio)
+- `docs/defensa/LINKS-DEMO-PROFESOR.md` (links para probar todo con el profesor)
+- `docs/EXTERNAL-TOOLS.md` (Grafana, Sonar, Prometheus, Alertmanager)
 - `docs/defensa/GUIA-ESTUDIO-Y-PRUEBAS-V3.md` (mapa codigo + pruebas + guion)
 - `docs/defensa/GUIA-PRESENTACION-FINAL-V3.md` (guia oral de defensa)
 - `docs/defensa/guion-sellado-v3.md`

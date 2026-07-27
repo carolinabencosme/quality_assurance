@@ -8,6 +8,9 @@ datasources:
     url: http://prometheus:9090
     isDefault: true
     editable: false
+    jsonData:
+      timeInterval: 15s
+      httpMethod: POST
 
   - name: Loki
     uid: loki
@@ -16,7 +19,18 @@ datasources:
     url: http://loki:3100
     editable: false
     jsonData:
-      maxLines: 500
+      maxLines: 1000
+      derivedFields:
+        - datasourceUid: tempo
+          matcherRegex: '"traceId":"(\w+)"'
+          name: TraceID
+          url: "$${__value.raw}"
+          urlDisplayLabel: "View trace"
+        - datasourceUid: tempo
+          matcherRegex: "trace[=:]\\s*([a-fA-F0-9]+)"
+          name: TraceID
+          url: "$${__value.raw}"
+          urlDisplayLabel: "View trace"
 
   - name: Tempo
     uid: tempo
@@ -28,7 +42,13 @@ datasources:
       tracesToLogs:
         datasourceUid: loki
         filterByTraceID: true
+        filterBySpanID: false
+        mapTagNamesEnabled: false
+      tracesToMetrics:
+        datasourceUid: prometheus
       serviceMap:
         datasourceUid: prometheus
       nodeGraph:
         enabled: true
+      lokiSearch:
+        datasourceUid: loki

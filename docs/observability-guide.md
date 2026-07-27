@@ -24,14 +24,27 @@ Dev credentials are documented in `.env.example` and are only for local demonstr
 
 ## Grafana Dashboards
 
-| Dashboard | File | Purpose |
-|---|---|---|
-| Inventory API Overview | `inventory-api.json` | HTTP, latency, API up, heap, logs |
-| Inventory Infra | `inventory-infra.json` | JVM memory, threads, CPU, Hikari, uptime |
-| Inventory Business | `inventory-business.json` | Product gauges, inventory value, stock movement rate and business traffic |
-| Inventory Security | `inventory-security.json` | 401/403, protected 5xx, user/endpoint logs and Keycloak login logs |
+Login Grafana: `admin` / `admin` (solo demo local). Home por defecto: **Cub — Home Observabilidad**.
 
-The app dashboard also reads `/api/v1/observability/system-metrics` for CPU, heap, threads, HTTP count/error/p95 and Hikari active/idle/max/pending.
+| Dashboard | File / UID | Purpose |
+|---|---|---|
+| Cub Home | `cub-home.json` / `cub-home` | Entrada, salud del stack, instrucciones de defensa |
+| Inventory API Overview | `inventory-api.json` / `inventory-api-overview` | Throughput, p50/p95/p99, error rate, top URIs, logs |
+| Inventory Infra | `inventory-infra.json` / `inventory-infra` | JVM, CPU, threads, Hikari idle/active/pending/max/timeouts |
+| Inventory Business | `inventory-business.json` / `inventory-business` | Gauges negocio + trafico products/stock/reports |
+| Inventory Security | `inventory-security.json` / `inventory-security` | 401/403, 5xx, Access denied, user/endpoint MDC, Keycloak LOGIN |
+
+Cada dashboard incluye un panel markdown **Que mirar aqui**. Loki tiene derived fields a Tempo (`traceId`).
+
+Calentar datos antes de la demo:
+
+```powershell
+.\scripts\warmup-demo-traffic.ps1
+```
+
+The Cub UI dashboard also reads `/api/v1/observability/system-metrics` for CPU, heap, threads, HTTP count/error/p95 and Hikari active/idle/max/pending.
+
+Links listos para el profesor: [`docs/defensa/LINKS-DEMO-PROFESOR.md`](./defensa/LINKS-DEMO-PROFESOR.md).
 
 ## Prometheus Queries
 

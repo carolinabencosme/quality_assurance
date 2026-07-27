@@ -1,16 +1,91 @@
 {
   "annotations": { "list": [] },
+  "description": "Metricas de negocio del inventario: productos, criticos, valor, movimientos y trafico de endpoints de dominio.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    { "title": "Home Cub", "type": "link", "url": "/d/cub-home", "icon": "home" },
+    { "title": "API", "type": "link", "url": "/d/inventory-api-overview", "icon": "dashboard" }
+  ],
   "panels": [
     {
+      "type": "text",
+      "title": "Que mirar aqui",
+      "id": 100,
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "**Business** — Dashboard de negocio exigido por el PDF. Los gauges `inventory_*` los publica Micrometer (`BusinessMetricsRegistrar`). Los graficos de trafico muestran uso real de productos/stock/reportes. Tras crear productos o movimientos, los stats deben actualizarse."
+      }
+    },
+    {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 3 },
+      "id": 5,
+      "title": "Productos activos",
+      "description": "Gauge inventory_products_active",
+      "type": "stat",
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        { "expr": "inventory_products_active{job=\"inventory-api\"}", "legendFormat": "active" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 5 }] }
+        }
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 3 },
+      "id": 6,
+      "title": "Productos criticos",
+      "description": "Stock bajo minimo. inventory_products_critical",
+      "type": "stat",
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        { "expr": "inventory_products_critical{job=\"inventory-api\"}", "legendFormat": "critical" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0 } },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 3 },
+      "id": 7,
+      "title": "Valor de inventario",
+      "description": "Gauge inventory_inventory_value",
+      "type": "stat",
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        { "expr": "inventory_inventory_value{job=\"inventory-api\"}", "legendFormat": "value" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "ops" } },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 3 },
+      "id": 8,
+      "title": "Movimientos / s",
+      "description": "rate(inventory_movements_total)",
+      "type": "stat",
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        { "expr": "rate(inventory_movements_total{job=\"inventory-api\"}[5m])", "legendFormat": "movements/s" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "id": 1,
-      "title": "Product endpoint traffic",
+      "title": "Trafico Products API",
+      "description": "Peticiones a /api/v1/products por metodo y status.",
       "type": "timeseries",
       "targets": [
         { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=~\"/api/v1/products.*\"}[5m])) by (method, status)", "legendFormat": "{{method}} {{status}}" }
@@ -18,9 +93,9 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "id": 2,
-      "title": "Stock movement endpoint traffic",
+      "title": "Trafico Stock API",
       "type": "timeseries",
       "targets": [
         { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=~\"/api/v1/stock.*\"}[5m])) by (method, status)", "legendFormat": "{{method}} {{status}}" }
@@ -28,9 +103,9 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
       "id": 3,
-      "title": "Dashboard requests",
+      "title": "Dashboard report requests",
       "type": "timeseries",
       "targets": [
         { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=\"/api/v1/reports/dashboard\"}[5m]))", "legendFormat": "dashboard" }
@@ -38,52 +113,23 @@
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
       "id": 4,
-      "title": "Critical products report requests",
+      "title": "Critical products report + system-metrics",
       "type": "timeseries",
       "targets": [
-        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=\"/api/v1/reports/critical-products\"}[5m]))", "legendFormat": "critical-products" }
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=\"/api/v1/reports/critical-products\"}[5m]))", "legendFormat": "critical-products" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",uri=\"/api/v1/observability/system-metrics\"}[5m]))", "legendFormat": "system-metrics" }
       ]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 16 },
-      "id": 5,
-      "title": "Active products",
-      "type": "stat",
-      "targets": [
-        { "expr": "inventory_products_active{job=\"inventory-api\"}", "legendFormat": "active" }
-      ]
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 16 },
-      "id": 6,
-      "title": "Critical products",
-      "type": "stat",
-      "targets": [
-        { "expr": "inventory_products_critical{job=\"inventory-api\"}", "legendFormat": "critical" }
-      ]
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 16 },
-      "id": 7,
-      "title": "Inventory value",
-      "type": "stat",
-      "targets": [
-        { "expr": "inventory_inventory_value{job=\"inventory-api\"}", "legendFormat": "value" }
-      ]
-    },
-    {
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 16 },
-      "id": 8,
-      "title": "Stock movements",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "id": 16,
+      "title": "Contador acumulado de movimientos de stock",
       "type": "timeseries",
       "targets": [
-        { "expr": "rate(inventory_movements_total{job=\"inventory-api\"}[5m])", "legendFormat": "movements/s" }
+        { "expr": "inventory_movements_total{job=\"inventory-api\"}", "legendFormat": "total movements" }
       ]
     }
   ],
@@ -93,5 +139,5 @@
   "time": { "from": "now-1h", "to": "now" },
   "title": "Inventory Business",
   "uid": "inventory-business",
-  "version": 1
+  "version": 2
 }

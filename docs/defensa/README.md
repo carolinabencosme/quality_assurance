@@ -7,12 +7,14 @@
 | Paso | Documento | Objetivo |
 |-----:|-----------|----------|
 | 1 | Este README | Orientarte |
-| 2 | [GUIA-ESTUDIO-Y-PRUEBAS-V3.md](./GUIA-ESTUDIO-Y-PRUEBAS-V3.md) | Mapa de codigo + como probar + que decir |
-| 3 | [GUIA-PRESENTACION-FINAL-V3.md](./GUIA-PRESENTACION-FINAL-V3.md) | Guion oral con tiempos |
-| 4 | [../architecture.md](../architecture.md) | Diagramas C4 (L1/L2/L3) |
-| 5 | [guion-sellado-v3.md](./guion-sellado-v3.md) | 5 demos cortas de sellado |
-| 6 | [../qa-evidence/FINAL-CHECKLIST.md](../qa-evidence/FINAL-CHECKLIST.md) | Que ya esta sellado |
-| 7 | [preguntas-defensa-completa.md](./preguntas-defensa-completa.md) | Preguntas tipicas |
+| 2 | [LINKS-DEMO-PROFESOR.md](./LINKS-DEMO-PROFESOR.md) | **Todos los links** para probar con el profesor |
+| 3 | [../EXTERNAL-TOOLS.md](../EXTERNAL-TOOLS.md) | Grafana, Sonar, Prometheus, Alertmanager |
+| 4 | [GUIA-ESTUDIO-Y-PRUEBAS-V3.md](./GUIA-ESTUDIO-Y-PRUEBAS-V3.md) | Mapa de codigo + como probar + que decir |
+| 5 | [GUIA-PRESENTACION-FINAL-V3.md](./GUIA-PRESENTACION-FINAL-V3.md) | Guion oral con tiempos |
+| 6 | [../architecture.md](../architecture.md) | Diagramas C4 (L1/L2/L3) |
+| 7 | [guion-sellado-v3.md](./guion-sellado-v3.md) | 5 demos cortas de sellado |
+| 8 | [../qa-evidence/FINAL-CHECKLIST.md](../qa-evidence/FINAL-CHECKLIST.md) | Que ya esta sellado |
+| 9 | [preguntas-defensa-completa.md](./preguntas-defensa-completa.md) | Preguntas tipicas |
 
 ## Arranque rapido del sistema
 

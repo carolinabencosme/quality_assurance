@@ -1,0 +1,171 @@
+{
+  "annotations": { "list": [] },
+  "description": "Punto de entrada Cub QAS: mapa de dashboards, salud del stack y como demostrar observabilidad al profesor.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": true, "title": "API Overview", "type": "link", "url": "/d/inventory-api-overview" },
+    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": true, "title": "Infra", "type": "link", "url": "/d/inventory-infra" },
+    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": true, "title": "Business", "type": "link", "url": "/d/inventory-business" },
+    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": true, "title": "Security", "type": "link", "url": "/d/inventory-security" }
+  ],
+  "panels": [
+    {
+      "type": "text",
+      "title": "Cub Inventory QAS — Observabilidad",
+      "id": 100,
+      "gridPos": { "h": 5, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "## Bienvenido\nStack **Prometheus + Loki + Tempo + Alloy + Grafana + Alertmanager** (OpenTelemetry).\n\n| Dashboard | Que demuestra (PDF) |\n|---|---|\n| **API Overview** | Throughput, latencia p95, API UP, heap, logs correlacionados |\n| **Infra** | CPU, JVM, threads, pool HikariCP |\n| **Business** | Productos activos, stock critico, valor inventario, trafico de negocio |\n| **Security** | 401/403, denegaciones, logs con `user` + `endpoint`, login Keycloak |\n\n**Como usar en defensa:** genera trafico en la app (login admin, dashboard, productos) y refresca estos paneles (ultimos 15–60 min)."
+      }
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 5 },
+      "id": 1,
+      "title": "API",
+      "type": "stat",
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "targets": [{ "expr": "up{job=\"inventory-api\"}", "legendFormat": "api" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 5 },
+      "id": 2,
+      "title": "Prometheus",
+      "type": "stat",
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "targets": [{ "expr": "up{job=\"prometheus\"}", "legendFormat": "prom" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 5 },
+      "id": 3,
+      "title": "Grafana",
+      "type": "stat",
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "targets": [{ "expr": "up{job=\"grafana\"}", "legendFormat": "grafana" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 5 },
+      "id": 4,
+      "title": "Loki",
+      "type": "stat",
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "targets": [{ "expr": "up{job=\"loki\"}", "legendFormat": "loki" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 5 },
+      "id": 5,
+      "title": "Tempo",
+      "type": "stat",
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "targets": [{ "expr": "up{job=\"tempo\"}", "legendFormat": "tempo" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+        }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 5 },
+      "id": 6,
+      "title": "Alertmanager",
+      "type": "stat",
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "targets": [{ "expr": "up{job=\"alertmanager\"}", "legendFormat": "am" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps", "decimals": 2 } },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 9 },
+      "id": 7,
+      "title": "Throughput API (req/s)",
+      "description": "Tasa de peticiones HTTP al inventory-api. Debe subir al navegar la app.",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\"}[1m]))", "legendFormat": "req/s" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s", "decimals": 3 } },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 9 },
+      "id": 8,
+      "title": "Latencia p95",
+      "description": "Percentil 95 de latencia HTTP. Alerta HighLatencyP95 si supera 1s sostenido.",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"inventory-api\"}[5m])) by (le))", "legendFormat": "p95" }
+      ]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 16 },
+      "id": 9,
+      "title": "Logs recientes del backend (con contexto)",
+      "description": "Logs del contenedor backend. Tras login deben aparecer user= y endpoint= en el filtro de Security.",
+      "type": "logs",
+      "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true },
+      "targets": [
+        { "expr": "{service_name=\"backend\"} or {container=~\".*backend.*\"}", "refId": "A" }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["inventory-qas", "home", "cub"],
+  "templating": { "list": [] },
+  "time": { "from": "now-30m", "to": "now" },
+  "title": "Cub — Home Observabilidad",
+  "uid": "cub-home",
+  "version": 1
+}
