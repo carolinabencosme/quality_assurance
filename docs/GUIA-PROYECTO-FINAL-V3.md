@@ -37,7 +37,7 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml -f 
 | Prometheus | http://localhost:9090/targets | — |
 | Alertmanager | http://localhost:9093 | debe mostrar `CubStackHeartbeat` |
 | SonarQube | http://localhost:9001 | `admin` / `admin` (primer login) |
-| Jenkins | http://localhost:8082 | staging opcional |
+| Jenkins (staging) | http://localhost:8082 | Incluido en `docker-compose.staging.yml`. Si da Connection Failed: `docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml -f docker-compose.staging.yml up -d jenkins` |
 
 Usuarios Cub (realm):
 
