@@ -2,15 +2,40 @@
 # Uso completo (app + observabilidad + CI tooling):
 #   docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml -f docker-compose.staging.yml up -d --build
 #
-# Puertos extra: SonarQube 9000, Jenkins 8082
+# Puertos extra: SonarQube 9001, Jenkins 8082
+# Sonar usa PostgreSQL dedicado (no H2 embebido) para demo profesional.
 
 services:
+  sonar-db:
+    image: postgres:16-alpine
+    container_name: inventory-sonar-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${SONAR_JDBC_USERNAME:-sonar}
+      POSTGRES_PASSWORD: ${SONAR_JDBC_PASSWORD:-sonar}
+      POSTGRES_DB: ${SONAR_JDBC_DATABASE:-sonar}
+    volumes:
+      - sonar_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SONAR_JDBC_USERNAME:-sonar} -d ${SONAR_JDBC_DATABASE:-sonar}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - inventory-net
+
   sonarqube:
     image: sonarqube:26.7.0.124771-community
     container_name: inventory-sonarqube-staging
     restart: unless-stopped
+    depends_on:
+      sonar-db:
+        condition: service_healthy
     environment:
       SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+      SONAR_JDBC_URL: jdbc:postgresql://sonar-db:5432/${SONAR_JDBC_DATABASE:-sonar}
+      SONAR_JDBC_USERNAME: ${SONAR_JDBC_USERNAME:-sonar}
+      SONAR_JDBC_PASSWORD: ${SONAR_JDBC_PASSWORD:-sonar}
     ports:
       # 9000 a menudo ocupado en Windows (emuladores). Default academico: 9001.
       - "${SONAR_PORT:-9001}:9000"
@@ -57,6 +82,7 @@ services:
       - "host.docker.internal:host-gateway"
 
 volumes:
+  sonar_db_data:
   sonarqube_data:
   sonarqube_extensions:
   jenkins_home:

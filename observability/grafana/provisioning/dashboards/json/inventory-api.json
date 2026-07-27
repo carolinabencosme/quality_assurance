@@ -147,7 +147,9 @@
       "description": "Stream Loki de contenedores del proyecto. Busca ERROR o Access denied para seguridad.",
       "type": "logs",
       "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true },
-      "targets": [{ "expr": "{container=~\"inventory-.*\"}", "refId": "A" }]
+      "targets": [
+        { "expr": "{service_name=\"backend\"}", "refId": "A", "queryType": "range" }
+      ]
     }
   ],
   "schemaVersion": 39,

@@ -58,4 +58,5 @@ Write-Host '=== Warmup done - open Grafana dashboards ===' -ForegroundColor Gree
 Write-Host 'Home:      http://localhost:3030/d/cub-home'
 Write-Host 'Business:  http://localhost:3030/d/inventory-business'
 Write-Host 'Security:  http://localhost:3030/d/inventory-security'
-Write-Host 'Links doc: docs/defensa/LINKS-DEMO-PROFESOR.md'
+Write-Host 'Links doc: docs/GUIA-PROYECTO-FINAL-V3.md'
+Write-Host 'Grafana:   http://localhost:3030/d/cub-home'

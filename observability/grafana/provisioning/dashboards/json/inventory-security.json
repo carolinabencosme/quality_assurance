@@ -98,7 +98,7 @@
       "type": "logs",
       "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true },
       "targets": [
-        { "expr": "{container=~\"inventory-.*\"} |~ \"(?i)access denied|authorization|forbidden\"", "refId": "A" }
+        { "expr": "{service_name=\"backend\"} |~ \"(?i)access denied|authorization|forbidden\"", "refId": "A", "queryType": "range" }
       ]
     },
     {
@@ -110,7 +110,7 @@
       "type": "logs",
       "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true },
       "targets": [
-        { "expr": "{container=~\".*backend.*\"} |~ \"user=|\\\"user\\\"\" |~ \"endpoint=|\\\"endpoint\\\"\"", "refId": "A" }
+        { "expr": "{service_name=\"backend\"} |~ \"user=|\\\"user\\\"\"", "refId": "A", "queryType": "range" }
       ]
     },
     {
@@ -122,7 +122,7 @@
       "type": "logs",
       "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true },
       "targets": [
-        { "expr": "{container=~\".*keycloak.*\"} |~ \"(?i)LOGIN|LOGIN_ERROR|type=LOGIN\"", "refId": "A" }
+        { "expr": "{service_name=\"keycloak\"} |~ \"(?i)LOGIN|LOGIN_ERROR|type=LOGIN\"", "refId": "A", "queryType": "range" }
       ]
     }
   ],

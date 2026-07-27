@@ -1,6 +1,16 @@
 groups:
   - name: inventory-api
     rules:
+      # Heartbeat: demuestra que Prometheus envia alertas a Alertmanager (UI no vacia).
+      - alert: CubStackHeartbeat
+        expr: up{job="inventory-api"} == 1
+        for: 0m
+        labels:
+          severity: info
+        annotations:
+          summary: Cub API UP (heartbeat Alertmanager)
+          description: Alerta informativa. Si aparece en http://localhost:9093, Prometheus y Alertmanager estan conectados.
+
       - alert: InventoryApiDown
         expr: up{job="inventory-api"} == 0
         for: 2m
@@ -8,7 +18,7 @@ groups:
           severity: critical
         annotations:
           summary: Inventory API no responde a scrape de Prometheus
-          description: El job inventory-api lleva más de 2 minutos caído.
+          description: El job inventory-api lleva mas de 2 minutos caido.
 
       - alert: HighErrorRate
         expr: |

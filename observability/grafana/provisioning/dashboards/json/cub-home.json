@@ -1,55 +1,51 @@
 {
   "annotations": { "list": [] },
-  "description": "Punto de entrada Cub QAS: mapa de dashboards, salud del stack y como demostrar observabilidad al profesor.",
+  "description": "Home profesional Cub QAS: salud del stack, trafico, latencia, errores, negocio, seguridad y logs Loki reales del backend.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
   "links": [
-    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": true, "title": "API Overview", "type": "link", "url": "/d/inventory-api-overview" },
-    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": true, "title": "Infra", "type": "link", "url": "/d/inventory-infra" },
-    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": true, "title": "Business", "type": "link", "url": "/d/inventory-business" },
-    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": true, "title": "Security", "type": "link", "url": "/d/inventory-security" }
+    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": false, "title": "API Overview", "type": "link", "url": "/d/inventory-api-overview" },
+    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": false, "title": "Infra", "type": "link", "url": "/d/inventory-infra" },
+    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": false, "title": "Business", "type": "link", "url": "/d/inventory-business" },
+    { "asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": false, "title": "Security", "type": "link", "url": "/d/inventory-security" }
   ],
   "panels": [
     {
       "type": "text",
       "title": "Cub Inventory QAS — Observabilidad",
       "id": 100,
-      "gridPos": { "h": 5, "w": 24, "x": 0, "y": 0 },
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
       "options": {
         "mode": "markdown",
-        "content": "## Bienvenido\nStack **Prometheus + Loki + Tempo + Alloy + Grafana + Alertmanager** (OpenTelemetry).\n\n| Dashboard | Que demuestra (PDF) |\n|---|---|\n| **API Overview** | Throughput, latencia p95, API UP, heap, logs correlacionados |\n| **Infra** | CPU, JVM, threads, pool HikariCP |\n| **Business** | Productos activos, stock critico, valor inventario, trafico de negocio |\n| **Security** | 401/403, denegaciones, logs con `user` + `endpoint`, login Keycloak |\n\n**Como usar en defensa:** genera trafico en la app (login admin, dashboard, productos) y refresca estos paneles (ultimos 15–60 min)."
+        "content": "## Demo para el profesor\nStack **Prometheus + Loki + Tempo + Alloy + Grafana + Alertmanager** (OpenTelemetry).\n\n1. Navega Cub (`admin/admin123`) → dashboard/productos.\n2. Mira **req/s**, **p95**, gauges de negocio y **logs** abajo (`service_name=backend`).\n3. En Security: fuerza 401 (sin token) y 403 (viewer en `/users`).\n4. Alertmanager: alerta informativa **CubStackHeartbeat** = Prometheus → Alertmanager OK.\n\n| Dashboard | Que demuestra |\n|---|---|\n| API / Infra / Business / Security | Metricas PDF + logs con user/endpoint |"
       }
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
-          ],
-          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+          "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 5 },
+      "gridPos": { "h": 3, "w": 3, "x": 0, "y": 4 },
       "id": 1,
       "title": "API",
       "type": "stat",
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none", "textMode": "auto" },
       "targets": [{ "expr": "up{job=\"inventory-api\"}", "legendFormat": "api" }]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
-          ],
-          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+          "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 5 },
+      "gridPos": { "h": 3, "w": 3, "x": 3, "y": 4 },
       "id": 2,
       "title": "Prometheus",
       "type": "stat",
@@ -60,13 +56,11 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
-          ],
-          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+          "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 5 },
+      "gridPos": { "h": 3, "w": 3, "x": 6, "y": 4 },
       "id": 3,
       "title": "Grafana",
       "type": "stat",
@@ -77,13 +71,11 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
-          ],
-          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+          "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 5 },
+      "gridPos": { "h": 3, "w": 3, "x": 9, "y": 4 },
       "id": 4,
       "title": "Loki",
       "type": "stat",
@@ -94,13 +86,11 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
-          ],
-          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+          "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 5 },
+      "gridPos": { "h": 3, "w": 3, "x": 12, "y": 4 },
       "id": 5,
       "title": "Tempo",
       "type": "stat",
@@ -111,13 +101,11 @@
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
-          ],
-          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+          "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 5 },
+      "gridPos": { "h": 3, "w": 3, "x": 15, "y": 4 },
       "id": 6,
       "title": "Alertmanager",
       "type": "stat",
@@ -127,45 +115,196 @@
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "unit": "reqps", "decimals": 2 } },
-      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 9 },
+      "gridPos": { "h": 3, "w": 3, "x": 18, "y": 4 },
+      "id": 30,
+      "title": "RPS ahora",
+      "type": "stat",
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\"}[1m]))", "legendFormat": "rps" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.5 }, { "color": "red", "value": 1 }] }
+        }
+      },
+      "gridPos": { "h": 3, "w": 3, "x": 21, "y": 4 },
+      "id": 31,
+      "title": "p95",
+      "type": "stat",
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"inventory-api\"}[5m])) by (le))", "legendFormat": "p95" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 7 },
       "id": 7,
       "title": "Throughput API (req/s)",
-      "description": "Tasa de peticiones HTTP al inventory-api. Debe subir al navegar la app.",
+      "description": "Tasa de peticiones HTTP. Sube al navegar Cub o correr warmup-demo-traffic.ps1",
       "type": "timeseries",
       "targets": [
-        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\"}[1m]))", "legendFormat": "req/s" }
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\"}[1m]))", "legendFormat": "total" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"2..\"}[1m]))", "legendFormat": "2xx" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"4..\"}[1m]))", "legendFormat": "4xx" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"5..\"}[1m]))", "legendFormat": "5xx" }
       ]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": { "defaults": { "unit": "s", "decimals": 3 } },
-      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 9 },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 7 },
       "id": 8,
-      "title": "Latencia p95",
-      "description": "Percentil 95 de latencia HTTP. Alerta HighLatencyP95 si supera 1s sostenido.",
+      "title": "Latencia p50 / p95 / p99",
       "type": "timeseries",
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"inventory-api\"}[5m])) by (le))", "legendFormat": "p95" }
+        { "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{job=\"inventory-api\"}[5m])) by (le))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"inventory-api\"}[5m])) by (le))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{job=\"inventory-api\"}[5m])) by (le))", "legendFormat": "p99" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "decimals": 2 } },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 7 },
+      "id": 32,
+      "title": "CPU proceso + error rate 5xx",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "process_cpu_usage{job=\"inventory-api\"}", "legendFormat": "cpu process" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"5..\"}[5m])) / clamp_min(sum(rate(http_server_requests_seconds_count{job=\"inventory-api\"}[5m])), 1e-9)", "legendFormat": "5xx ratio" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 14 },
+      "id": 33,
+      "title": "Productos activos",
+      "type": "stat",
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [{ "expr": "inventory_products_active{job=\"inventory-api\"}", "legendFormat": "active" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 5 }] }
+        }
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 14 },
+      "id": 34,
+      "title": "Productos criticos",
+      "type": "stat",
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [{ "expr": "inventory_products_critical{job=\"inventory-api\"}", "legendFormat": "critical" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 0 } },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 14 },
+      "id": 35,
+      "title": "Valor inventario",
+      "type": "stat",
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [{ "expr": "inventory_inventory_value{job=\"inventory-api\"}", "legendFormat": "value" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 14 },
+      "id": 36,
+      "title": "Auth failures 1h (401+403)",
+      "description": "Sube al llamar API sin token o con viewer sin permiso.",
+      "type": "stat",
+      "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 1 }, { "color": "red", "value": 20 }] }
+        }
+      },
+      "targets": [{ "expr": "sum(increase(http_server_requests_seconds_count{job=\"inventory-api\",status=~\"401|403\"}[1h]))", "legendFormat": "401/403" }]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 19 },
+      "id": 37,
+      "title": "JVM heap used",
+      "type": "timeseries",
+      "fieldConfig": { "defaults": { "unit": "bytes" } },
+      "targets": [
+        { "expr": "sum(jvm_memory_used_bytes{job=\"inventory-api\",area=\"heap\"})", "legendFormat": "heap used" },
+        { "expr": "sum(jvm_memory_max_bytes{job=\"inventory-api\",area=\"heap\"})", "legendFormat": "heap max" }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 19 },
+      "id": 38,
+      "title": "HikariCP pool (DB)",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "hikaricp_connections_active{job=\"inventory-api\"}", "legendFormat": "active" },
+        { "expr": "hikaricp_connections_idle{job=\"inventory-api\"}", "legendFormat": "idle" },
+        { "expr": "hikaricp_connections_pending{job=\"inventory-api\"}", "legendFormat": "pending" },
+        { "expr": "hikaricp_connections_max{job=\"inventory-api\"}", "legendFormat": "max" }
       ]
     },
     {
       "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 16 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 26 },
       "id": 9,
-      "title": "Logs recientes del backend (con contexto)",
-      "description": "Logs del contenedor backend. Tras login deben aparecer user= y endpoint= en el filtro de Security.",
+      "title": "Logs backend (Loki service_name=backend)",
+      "description": "Query fija compatible con Alloy. Si esta vacio: corre scripts/warmup-demo-traffic.ps1 y amplía el rango de tiempo.",
       "type": "logs",
-      "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "prettifyLogMessage": false,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
       "targets": [
-        { "expr": "{service_name=\"backend\"} or {container=~\".*backend.*\"}", "refId": "A" }
+        {
+          "expr": "{service_name=\"backend\"}",
+          "refId": "A",
+          "queryType": "range"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 36 },
+      "id": 40,
+      "title": "Logs Keycloak (LOGIN)",
+      "type": "logs",
+      "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true, "sortOrder": "Descending" },
+      "targets": [
+        { "expr": "{service_name=\"keycloak\"} |= \"LOGIN\"", "refId": "A", "queryType": "range" }
+      ]
+    },
+    {
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 36 },
+      "id": 41,
+      "title": "Logs errores / Access denied",
+      "type": "logs",
+      "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true, "sortOrder": "Descending" },
+      "targets": [
+        { "expr": "{compose_project=~\".+\"} |~ \"(?i)ERROR|Access denied|Forbidden\"", "refId": "A", "queryType": "range" }
       ]
     }
   ],
   "schemaVersion": 39,
   "tags": ["inventory-qas", "home", "cub"],
   "templating": { "list": [] },
-  "time": { "from": "now-30m", "to": "now" },
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "10s",
   "title": "Cub — Home Observabilidad",
   "uid": "cub-home",
-  "version": 1
+  "version": 3
 }
