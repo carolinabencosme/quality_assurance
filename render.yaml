@@ -22,9 +22,7 @@ services:
     region: oregon
     dockerfilePath: ./keycloak/Dockerfile.cloud
     dockerContext: ./keycloak
-    # CRITICAL: no usar /realms/inventory-realm/... aqui.
-    # Si el healthcheck exige el realm antes del import, Render reinicia en loop
-    # y el realm nunca termina de cargarse → Not Found en Vercel login.
+    # Healthcheck liviano: el puerto correcto es $PORT (entrypoint). Evitar /realms/... en el primer boot.
     healthCheckPath: /
     envVars:
       - key: KC_HOSTNAME
@@ -48,6 +46,21 @@ services:
       - key: JAVA_OPTS_APPEND
         # No usar UseSerialGC: choca con el GC de Keycloak/Render
         value: "-Xms64m -Xmx384m -XX:MaxMetaspaceSize=128m"
+      # Postgres persistente: arranques siguientes mucho mas rapidos que H2 efimero
+      - key: KC_DB
+        value: postgres
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cub-inventory-db
+          property: connectionString
+      - key: KC_DB_USERNAME
+        fromDatabase:
+          name: cub-inventory-db
+          property: user
+      - key: KC_DB_PASSWORD
+        fromDatabase:
+          name: cub-inventory-db
+          property: password
 
   - type: web
     name: cub-api

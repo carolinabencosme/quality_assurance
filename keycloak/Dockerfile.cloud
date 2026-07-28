@@ -1,25 +1,25 @@
-# Keycloak 26 for Render/Railway — realm import + admin bootstrap correctos
+# Keycloak 26 for Render — bind $PORT + optional Postgres + realm import
 FROM quay.io/keycloak/keycloak:26.0.7
 
+USER root
 COPY realm-export.json /opt/keycloak/data/import/realm-export.json
 COPY themes /opt/keycloak/themes
+COPY docker-entrypoint-cloud.sh /opt/keycloak/docker-entrypoint-cloud.sh
+RUN chmod +x /opt/keycloak/docker-entrypoint-cloud.sh
 
-# KC 26 usa KC_BOOTSTRAP_ADMIN_* (las KEYCLOAK_ADMIN_* ya no crean el admin).
+# Volver al usuario de la imagen Keycloak
+USER 1000
+
 ENV KC_HTTP_ENABLED=true \
     KC_HEALTH_ENABLED=true \
     KC_HOSTNAME_STRICT=false \
     KC_PROXY_HEADERS=xforwarded \
-    KC_HTTP_PORT=8080 \
     KC_BOOTSTRAP_ADMIN_USERNAME=admin \
     KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
     KEYCLOAK_ADMIN=admin \
     KEYCLOAK_ADMIN_PASSWORD=admin \
-    # Sin -XX:+UseSerialGC: Render/Keycloak ya eligen GC → "Multiple garbage collectors selected"
     JAVA_OPTS_APPEND="-Xms64m -Xmx384m -XX:MaxMetaspaceSize=128m"
 
 EXPOSE 8080
 
-ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
-# start-dev + import-realm: adecuado para demo academica en free tier.
-# Healthcheck de Render NO debe apuntar al realm (puede no existir aun durante el import).
-CMD ["start-dev", "--import-realm", "--http-port=8080", "--hostname-strict=false"]
+ENTRYPOINT ["/opt/keycloak/docker-entrypoint-cloud.sh"]
