@@ -1,17 +1,31 @@
-# Keycloak 26 for Render — bind $PORT + optional Postgres + realm import
+# Keycloak 26 for Render — early $PORT bind + optimized start + Postgres + realm import
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5 AS tools
+RUN microdnf -y install python3 \
+    && microdnf clean all \
+    && mkdir -p /out/usr/bin /out/usr/lib64 /out/usr/lib \
+    && cp -a /usr/bin/python3 /usr/bin/python3.* /out/usr/bin/ \
+    && cp -a /usr/lib64/libpython3*.so* /out/usr/lib64/ \
+    && cp -a /usr/lib64/python3.* /out/usr/lib64/ \
+    && if [ -d /usr/lib/python3.* ]; then cp -a /usr/lib/python3.* /out/usr/lib/; fi \
+    && python3 -c "print('tools-python-ok')"
+
 FROM quay.io/keycloak/keycloak:26.0.7
 
 USER root
+COPY --from=tools /out/usr/ /usr/
+
 COPY realm-export.json /opt/keycloak/data/import/realm-export.json
 COPY themes /opt/keycloak/themes
 COPY docker-entrypoint-cloud.sh /opt/keycloak/docker-entrypoint-cloud.sh
-RUN chmod +x /opt/keycloak/docker-entrypoint-cloud.sh
+COPY cloud-port-gate.py /opt/keycloak/cloud-port-gate.py
+RUN chmod +x /opt/keycloak/docker-entrypoint-cloud.sh /opt/keycloak/cloud-port-gate.py \
+    && python3 -c "print('keycloak-image-python-ok')"
 
-# Volver al usuario de la imagen Keycloak
-USER 1000
-
-ENV KC_HTTP_ENABLED=true \
+# Build ahead-of-time for Postgres so runtime no hace "Updating the configuration..."
+# (eso atrasaba el bind de puerto y Render marcaba Timed Out).
+ENV KC_DB=postgres \
     KC_HEALTH_ENABLED=true \
+    KC_HTTP_ENABLED=true \
     KC_HOSTNAME_STRICT=false \
     KC_PROXY_HEADERS=xforwarded \
     KC_BOOTSTRAP_ADMIN_USERNAME=admin \
@@ -20,6 +34,10 @@ ENV KC_HTTP_ENABLED=true \
     KEYCLOAK_ADMIN_PASSWORD=admin \
     JAVA_OPTS_APPEND="-Xms64m -Xmx384m -XX:MaxMetaspaceSize=128m"
 
-EXPOSE 8080
+RUN /opt/keycloak/bin/kc.sh build --db=postgres
+
+USER 1000
+
+EXPOSE 8080 10000
 
 ENTRYPOINT ["/opt/keycloak/docker-entrypoint-cloud.sh"]

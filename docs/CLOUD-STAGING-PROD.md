@@ -73,9 +73,15 @@ Fix actual: `backend/cloud-port-gate.py` + `docker-entrypoint-cloud.sh`:
 - Mientras Spring arranca, `GET /actuator/health` responde **200** (gate).
 - Cuando Spring está `UP` en `8080`, el gate hace **proxy** de todo el trafico a la API.
 
-## Por que fallaba el Not Found
+## Por que fallaba `cub-keycloak` (Port scan timeout / Timed Out)
 
-El healthcheck apuntaba a `/realms/inventory-realm/...` **antes** de que terminara el import. Render reiniciaba el contenedor en loop → realm nunca quedaba → login Vercel = Not Found.
+`start-dev` recompila providers en cada arranque (“Updating the configuration…”) **antes** de abrir HTTP. En free tier eso supera el port-scan de Render → **Timed Out**.
+
+Fix:
+
+- `keycloak/Dockerfile.cloud` hace `kc.sh build --db=postgres` en build time.
+- Runtime usa `kc.sh start --optimized` (mucho mas rapido).
+- `keycloak/cloud-port-gate.py` abre `$PORT` al instante y responde **200** en `/` (healthcheck del blueprint) hasta que Keycloak escuche en `8080`; luego hace proxy.
 
 ## Notas free tier
 
