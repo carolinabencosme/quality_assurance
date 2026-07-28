@@ -1,20 +1,23 @@
 /** Configuración OIDC — Authorization Code + PKCE (cliente público SPA). */
 
-import { BUSINESS_SCOPES } from './permissions';
-
 const keycloakBase = (process.env.NEXT_PUBLIC_KEYCLOAK_URL ?? '/keycloak').replace(/\/$/, '');
 const realm = process.env.NEXT_PUBLIC_KEYCLOAK_REALM ?? 'inventory-realm';
 const clientId = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? 'inventory-frontend';
 const appOrigin =
   process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
 
+/**
+ * Solo scopes OIDC estándar. Los permisos de negocio (product:view, etc.)
+ * vienen de roles realm/client en el JWT (KeycloakJwtAuthoritiesConverter),
+ * no del parámetro scope — pedirlos aquí provoca invalid_scope en Keycloak.
+ */
 export const OIDC = {
   keycloakBase,
   realm,
   clientId,
   appOrigin,
   callbackPath: '/auth/callback',
-  scopes: ['openid', 'profile', 'email', ...BUSINESS_SCOPES].join(' '),
+  scopes: 'openid profile email',
 } as const;
 
 export function oidcRedirectUri(): string {

@@ -365,8 +365,8 @@
               "const jwtPart = d.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
               "const paddedJwtPart = jwtPart.padEnd(Math.ceil(jwtPart.length / 4) * 4, '=');",
               "const jwt = JSON.parse(atob(paddedJwtPart));",
-              "const scopes = (jwt.scope || '').split(/\\s+/);",
-              "pm.test('JWT contiene scopes de negocio', () => pm.expect(scopes).to.include.members(['product:view', 'report:view', 'user:manage', 'audit:view']));"
+              "const clientRoles = (((jwt.resource_access || {})['inventory-api'] || {}).roles) || [];",
+              "pm.test('JWT admin trae permisos via resource_access', () => pm.expect(clientRoles).to.include.members(['product:view', 'report:view', 'user:manage', 'audit:view']));"
             ],
             "type": "text/javascript"
           }
@@ -377,7 +377,7 @@
         "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
         "body": {
           "mode": "raw",
-          "raw": "grant_type=password&client_id=inventory-frontend&username=admin&password=admin123&scope=openid%20profile%20email%20product%3Aview%20product%3Amanage%20stock%3Aview%20stock%3Amanage%20report%3Aview%20user%3Amanage%20audit%3Aview"
+          "raw": "grant_type=password&client_id=inventory-frontend&username=admin&password=admin123&scope=openid%20profile%20email"
         },
         "url": "{{keycloakUrl}}/realms/inventory-realm/protocol/openid-connect/token"
       }
@@ -587,7 +587,7 @@
             "exec": [
               "pm.test('HTTP 200 security me', () => pm.response.to.have.status(200));",
               "const j = pm.response.json();",
-              "pm.test('authorities contiene permisos y SCOPE aliases', () => pm.expect(j.authorities).to.include.members(['product:view', 'SCOPE_product:view', 'user:manage', 'SCOPE_user:manage']));"
+              "pm.test('authorities contiene permisos de roles admin', () => pm.expect(j.authorities).to.include.members(['product:view', 'user:manage', 'audit:view', 'report:view']));"
             ],
             "type": "text/javascript"
           }

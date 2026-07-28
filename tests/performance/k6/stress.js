@@ -28,7 +28,8 @@ export function setup() {
       client_id: 'inventory-frontend',
       username,
       password,
-      scope: 'openid profile email product:view stock:view report:view',
+      // Permisos vienen de roles JWT; scopes custom provocan invalid_scope en Keycloak.
+      scope: 'openid profile email',
     },
   );
 

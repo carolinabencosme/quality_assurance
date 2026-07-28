@@ -35,7 +35,7 @@
       "title": "API",
       "type": "stat",
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none", "textMode": "auto" },
-      "targets": [{ "expr": "up{job=\"inventory-api\"}", "legendFormat": "api" }]
+      "targets": [{ "expr": "up{job=\"inventory-api\"}", "legendFormat": "api", "instant": true, "refId": "A" }]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -50,7 +50,7 @@
       "title": "Prometheus",
       "type": "stat",
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-      "targets": [{ "expr": "up{job=\"prometheus\"}", "legendFormat": "prom" }]
+      "targets": [{ "expr": "up{job=\"prometheus\"}", "legendFormat": "prom", "instant": true, "refId": "A" }]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -65,7 +65,7 @@
       "title": "Grafana",
       "type": "stat",
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-      "targets": [{ "expr": "up{job=\"grafana\"}", "legendFormat": "grafana" }]
+      "targets": [{ "expr": "up{job=\"grafana\"}", "legendFormat": "grafana", "instant": true, "refId": "A" }]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -80,7 +80,7 @@
       "title": "Loki",
       "type": "stat",
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-      "targets": [{ "expr": "up{job=\"loki\"}", "legendFormat": "loki" }]
+      "targets": [{ "expr": "up{job=\"loki\"}", "legendFormat": "loki", "instant": true, "refId": "A" }]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -95,7 +95,7 @@
       "title": "Tempo",
       "type": "stat",
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-      "targets": [{ "expr": "up{job=\"tempo\"}", "legendFormat": "tempo" }]
+      "targets": [{ "expr": "up{job=\"tempo\"}", "legendFormat": "tempo", "instant": true, "refId": "A" }]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -110,7 +110,7 @@
       "title": "Alertmanager",
       "type": "stat",
       "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background", "graphMode": "none" },
-      "targets": [{ "expr": "up{job=\"alertmanager\"}", "legendFormat": "am" }]
+      "targets": [{ "expr": "up{job=\"alertmanager\"}", "legendFormat": "am", "instant": true, "refId": "A" }]
     },
     {
       "datasource": { "type": "prometheus", "uid": "prometheus" },

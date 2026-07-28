@@ -104,8 +104,16 @@ pipeline {
                 echo 'SonarQube staging (quality gate UI)'
                 sh '''
                   set -e
-                  curl -sf "http://${HOST}:9001/api/system/status" | tee /tmp/sonar.json
-                  grep -q UP /tmp/sonar.json
+                  # 9001 is often reserved on Windows (Hyper-V); staging may publish Sonar on 9002.
+                  SONAR_OK=0
+                  for P in 9002 9001; do
+                    if curl -sf "http://${HOST}:${P}/api/system/status" | tee /tmp/sonar.json | grep -q '"status":"UP"\|"status" : "UP"\|UP'; then
+                      echo "OK_sonar_port_${P}"
+                      SONAR_OK=1
+                      break
+                    fi
+                  done
+                  test "$SONAR_OK" -eq 1
                   test -f /workspace/cub/docs/qa-evidence/sonar-summary.md
                   echo OK_sonar
                 '''

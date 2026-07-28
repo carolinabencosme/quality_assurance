@@ -9,8 +9,9 @@ $Keycloak = if ($env:KEYCLOAK_BASE) { $env:KEYCLOAK_BASE } else { 'http://localh
 Write-Host '=== Seed demo data (productos + movimientos) ===' -ForegroundColor Cyan
 
 function Get-AdminToken {
-  $scope = 'openid profile email product:view product:manage stock:view stock:manage report:view user:manage audit:view'
-  $body = "grant_type=password&client_id=inventory-frontend&username=admin&password=admin123&scope=$([uri]::EscapeDataString($scope))"
+  # inventory-frontend client: no pedir scopes de permiso custom (Keycloak responde invalid_scope).
+  # Los permisos vienen en el JWT via roles/resource_access del usuario admin.
+  $body = 'grant_type=password&client_id=inventory-frontend&username=admin&password=admin123'
   $tok = Invoke-RestMethod -Method Post -Uri "$Keycloak/realms/inventory-realm/protocol/openid-connect/token" `
     -ContentType 'application/x-www-form-urlencoded' -Body $body -TimeoutSec 45
   if (-not $tok.access_token) { throw 'No access_token from Keycloak' }
