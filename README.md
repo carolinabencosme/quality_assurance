@@ -38,6 +38,8 @@ Detalle: [`docs/CLOUD-STAGING-PROD.md`](docs/CLOUD-STAGING-PROD.md).
 | Documento | Contenido |
 |-----------|-----------|
 | [`docs/GUIA-PROYECTO-FINAL-V3.md`](docs/GUIA-PROYECTO-FINAL-V3.md) | Guia de estudio / defensa (mapa PDF ↔ codigo) |
+| [`docs/GUION-PRESENTACION.md`](docs/GUION-PRESENTACION.md) | Guion hablado |
+| [`docs/SCRIPTS-DEMO.md`](docs/SCRIPTS-DEMO.md) | **Todos los scripts**: que correr y para que sirve cada uno |
 | [`docs/architecture.md`](docs/architecture.md) | Diagramas C4 L1/L2/L3 |
 | [`docs/qa-evidence/`](docs/qa-evidence/) | Evidencias de sellado |
 | [`docs/CLOUD-STAGING-PROD.md`](docs/CLOUD-STAGING-PROD.md) | Staging + Production en la nube |

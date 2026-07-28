@@ -74,7 +74,7 @@ docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml -f 
 | Grafana Home | http://localhost:3030/d/cub-home | `admin` / `admin` | Dashboards JSON provisionados | Observabilidad del PDF | ≥4 paneles + drill-down |
 | Prometheus | http://localhost:9090/targets | — | Targets UP del API | Scraping de metricas | Probar que el backend exporta metrics |
 | Alertmanager | http://localhost:9093 | `CubStackHeartbeat` activo | UI de alertas firing | Prom → Alertmanager cableado | Demostrar alertas no vacias |
-| SonarQube | http://localhost:9001 | `admin` / `admin` | Quality Gate del proyecto | Calidad de codigo del PDF | Cobertura + smells en vivo |
+| SonarQube | http://localhost:9001 | `admin` / `CubSonar2026!` (o el que hayas puesto al primer login) | Quality Gate del proyecto | Calidad de codigo del PDF | Cobertura + smells en vivo |
 | Jenkins | http://localhost:8082 | `admin` / `admin` · job `cub-inventory-qas` | Build History + stages | CI local con historial visible | Pipeline DevSecOps en la oral |
 
 Usuarios del realm:
@@ -369,6 +369,7 @@ https://cub-inventory-qas.vercel.app · https://cub-inventory-qas-prod.vercel.ap
 | [`architecture.md`](./architecture.md) | C4 L1/L2/L3 | Abrir Mermaid | Arquitectura clara | Explicar contexto y contenedores |
 | [`CLOUD-STAGING-PROD.md`](./CLOUD-STAGING-PROD.md) | Deploy Vercel/Render | Checklist operativo | Cloud sin PC | Levantar staging/prod publicos |
 | [`qa-evidence/`](./qa-evidence/) | Reportes y capturas | Abrir carpeta | Evidencia del PDF | Probar que se ejecuto QA |
+| [`SCRIPTS-DEMO.md`](./SCRIPTS-DEMO.md) | Catalogo de scripts listos para correr | Copiar comando y ejecutar | Ensayo sin adivinar | Probar cada area del PDF |
 | `README.md` | Arranque rapido | Compose + cloud links | Onboarding | Que otro pueda seguir |
 
 ---

@@ -1,5 +1,5 @@
 param(
-  [string]$SonarHostUrl = $(if ($env:SONAR_HOST_URL) { $env:SONAR_HOST_URL } else { 'http://localhost:9000' }),
+  [string]$SonarHostUrl = $(if ($env:SONAR_HOST_URL) { $env:SONAR_HOST_URL } else { 'http://localhost:9001' }),
   [string]$SonarToken = $env:SONAR_TOKEN,
   [string]$ProjectKey = 'inventory-qas',
   [string]$OutputPath = 'docs/qa-evidence/sonar-summary.md'
