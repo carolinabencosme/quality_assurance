@@ -99,3 +99,6 @@ services:
         value: inventory-admin-secret-change-me
       - key: INVENTORY_CORS_ORIGINS
         value: https://cub-inventory-qas.vercel.app,https://cub-inventory-qas-prod.vercel.app,https://*.vercel.app
+      # Swagger "Try it out" apunta a la URL publica (no localhost)
+      - key: OPENAPI_SERVER_URL
+        value: https://cub-api.onrender.com

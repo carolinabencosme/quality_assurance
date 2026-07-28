@@ -7,8 +7,10 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -17,9 +19,17 @@ public class OpenApiConfig {
 
     private static final String BEARER_SCHEME = "bearerAuth";
 
+    /**
+     * URL publica del server para Swagger "Try it out".
+     * Vacio (default) → SpringDoc infiere la URL desde el request (funciona en
+     * local y en la nube). En Render se define OPENAPI_SERVER_URL.
+     */
+    @Value("${OPENAPI_SERVER_URL:}")
+    private String openApiServerUrl;
+
     @Bean
     public OpenAPI inventoryOpenAPI() {
-        return new OpenAPI()
+        OpenAPI openAPI = new OpenAPI()
                 .info(new Info()
                         .title("Inventory QAS API")
                 .description("""
@@ -36,8 +46,6 @@ public class OpenApiConfig {
                         """)
                         .version("1.0.0")
                         .contact(new Contact().name("Inventory QAS Team")))
-                .servers(List.of(
-                        new Server().url("http://localhost:8080").description("Development")))
                 .components(new Components().addSecuritySchemes(BEARER_SCHEME,
                         new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
@@ -45,5 +53,12 @@ public class OpenApiConfig {
                                 .bearerFormat("JWT")
                                 .description("Token JWT emitido por Keycloak (Fase 2)")))
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_SCHEME));
+
+        if (StringUtils.hasText(openApiServerUrl)) {
+            openAPI.servers(List.of(new Server()
+                    .url(openApiServerUrl.replaceAll("/+$", ""))
+                    .description("Cloud")));
+        }
+        return openAPI;
     }
 }
