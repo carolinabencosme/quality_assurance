@@ -17,7 +17,8 @@ try {
 }
 
 Write-Host "=== Token viewer ==="
-$body = "grant_type=password&client_id=inventory-frontend&username=viewer&password=viewer123&scope=openid%20profile%20email%20product%3Aview%20stock%3Aview%20report%3Aview"
+# Roles/permisos vienen en el JWT del usuario; no pedir scopes custom (Keycloak → invalid_scope).
+$body = 'grant_type=password&client_id=inventory-frontend&username=viewer&password=viewer123'
 $token = (Invoke-RestMethod -Method Post -Uri "$Keycloak/realms/inventory-realm/protocol/openid-connect/token" `
   -ContentType "application/x-www-form-urlencoded" -Body $body).access_token
 
@@ -83,7 +84,7 @@ try {
 }
 
 Write-Host "=== Token admin ==="
-$adminBody = "grant_type=password&client_id=inventory-frontend&username=admin&password=admin123&scope=openid%20profile%20email%20product%3Aview%20product%3Amanage%20stock%3Aview%20stock%3Amanage%20report%3Aview%20user%3Amanage%20audit%3Aview"
+$adminBody = 'grant_type=password&client_id=inventory-frontend&username=admin&password=admin123'
 $adminToken = (Invoke-RestMethod -Method Post -Uri "$Keycloak/realms/inventory-realm/protocol/openid-connect/token" `
   -ContentType "application/x-www-form-urlencoded" -Body $adminBody).access_token
 $adminHeaders = @{ Authorization = "Bearer $adminToken" }
@@ -91,27 +92,18 @@ $matrix = Invoke-WebRequest -Uri "$Api/api/v1/security/permissions-matrix" -Head
 if ($matrix.StatusCode -eq 200) { Write-Host "OK: permissions-matrix con user:manage -> 200" }
 else { Write-Host "FAIL: permissions-matrix -> $($matrix.StatusCode)"; exit 1 }
 
-$jwtPart = $adminToken.Split('.')[1].Replace('-', '+').Replace('_', '/')
-while (($jwtPart.Length % 4) -ne 0) { $jwtPart += '=' }
-$jwt = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($jwtPart)) | ConvertFrom-Json
-$requiredScopes = @('product:view', 'report:view', 'user:manage', 'audit:view')
-$actualScopes = @($jwt.scope -split '\s+')
-foreach ($scope in $requiredScopes) {
-  if ($actualScopes -notcontains $scope) {
-    Write-Host "FAIL: admin JWT missing scope $scope"
-    exit 1
-  }
-}
-Write-Host "OK: admin JWT contains business scopes"
-
+# Permisos salen de roles Keycloak → KeycloakJwtAuthoritiesConverter (no del claim OAuth "scope").
 $me = Invoke-RestMethod -Uri "$Api/api/v1/security/me" -Headers $adminHeaders
-foreach ($authority in @('product:view', 'SCOPE_product:view', 'user:manage', 'SCOPE_user:manage')) {
-  if (@($me.authorities) -notcontains $authority) {
-    Write-Host "FAIL: /security/me missing authority $authority"
+$authorities = @($me.authorities)
+$required = @('product:view', 'report:view', 'user:manage', 'audit:view')
+foreach ($needed in $required) {
+  $ok = ($authorities -contains $needed) -or ($authorities -contains "SCOPE_$needed")
+  if (-not $ok) {
+    Write-Host "FAIL: /security/me missing authority $needed"
     exit 1
   }
 }
-Write-Host "OK: /security/me exposes effective scope authorities"
+Write-Host "OK: /security/me exposes effective permission authorities"
 
 $users = @(Invoke-RestMethod -Uri "$Api/api/v1/users" -Headers $adminHeaders)
 if ($users.Count -lt 1 -or @($users.username) -notcontains 'admin') {

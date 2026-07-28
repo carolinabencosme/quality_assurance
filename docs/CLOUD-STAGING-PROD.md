@@ -7,9 +7,9 @@ Objetivo: demos publicas **sin** Docker en la PC.
 | | Staging | Production |
 |--|---------|------------|
 | App | https://cub-inventory-qas.vercel.app | https://cub-inventory-qas-prod.vercel.app |
-| API | https://cub-api.onrender.com | igual |
+| API | https://cub-api-elre.onrender.com | igual |
 | Keycloak | https://cub-keycloak.onrender.com | igual |
-| Swagger | https://cub-api.onrender.com/swagger-ui.html | igual |
+| Swagger | https://cub-api-elre.onrender.com/swagger-ui.html | igual |
 
 Usuarios app: `admin/admin123`, `viewer/viewer123`, `warehouse/warehouse123`, `clerk/clerk123`.  
 Keycloak Admin: `admin` / `admin`.
@@ -38,13 +38,13 @@ Si al login en Vercel ves **Not Found** en Keycloak, el Blueprint **no** esta ap
 8. Verifica:
 
 - https://cub-keycloak.onrender.com/realms/inventory-realm/.well-known/openid-configuration → JSON  
-- https://cub-api.onrender.com/actuator/health → `UP`  
+- https://cub-api-elre.onrender.com/actuator/health → `UP`  
 - https://cub-inventory-qas.vercel.app → login `admin` / `admin123`
 
 9. Si cambiaste URLs de API/KC, redespliega frontends:
 
 ```powershell
-$env:CLOUD_API_URL = "https://cub-api.onrender.com"
+$env:CLOUD_API_URL = "https://cub-api-elre.onrender.com"
 $env:CLOUD_KC_URL = "https://cub-keycloak.onrender.com"
 .\scripts\deploy-vercel-cloud.ps1
 ```
@@ -60,15 +60,28 @@ $env:CLOUD_KC_URL = "https://cub-keycloak.onrender.com"
 | `scripts/import-keycloak-realm-cloud.ps1` | Fallback import Admin API |
 | `scripts/deploy-vercel-cloud.ps1` | Staging + prod Vercel |
 
-## Por que fallaba `cub-api` (Timed Out / port)
+## Por que fallaba `cub-api` (Timed Out / port / pending eterno)
 
-Spring tarda ~2–3 min en abrir el puerto. Render veia “No open ports”, luego “New primary port detected: 10000” y **reiniciaba** el deploy; el segundo boot hacia **Timed Out**.
+Spring tarda ~2–3 min en free tier. Dos fallos tipicos:
 
-Fix: `backend/docker-entrypoint-cloud.sh` abre `$PORT` al instante con **socat** y Spring escucha en `8080` interno. Healthcheck sigue en `/actuator/health`.
+1. **Puerto tarde:** Render veia “No open ports” y reiniciaba el deploy.  
+2. **Puerto pronto con socat crudo:** `$PORT` abría al instante, pero `/actuator/health` fallaba mientras `8080` aun no escuchaba → deploy “Live” a medias y el dashboard de Vercel se quedaba en **(pending)**.
 
-## Por que fallaba el Not Found
+Fix actual: `backend/cloud-port-gate.py` + `docker-entrypoint-cloud.sh`:
 
-El healthcheck apuntaba a `/realms/inventory-realm/...` **antes** de que terminara el import. Render reiniciaba el contenedor en loop → realm nunca quedaba → login Vercel = Not Found.
+- Abre `$PORT` al instante.
+- Mientras Spring arranca, `GET /actuator/health` responde **200** (gate).
+- Cuando Spring está `UP` en `8080`, el gate hace **proxy** de todo el trafico a la API.
+
+## Por que fallaba `cub-keycloak` (Port scan timeout / Timed Out)
+
+`start-dev` recompila providers en cada arranque (“Updating the configuration…”) **antes** de abrir HTTP. En free tier eso supera el port-scan de Render → **Timed Out**.
+
+Fix:
+
+- `keycloak/Dockerfile.cloud` hace `kc.sh build --db=postgres` en build time.
+- Runtime usa `kc.sh start --optimized` (mucho mas rapido).
+- `keycloak/cloud-port-gate.py` abre `$PORT` al instante y responde **200** en `/` (healthcheck del blueprint) hasta que Keycloak escuche en `8080`; luego hace proxy.
 
 ## Notas free tier
 
