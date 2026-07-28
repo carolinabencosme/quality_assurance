@@ -389,6 +389,10 @@
         "http://127.0.0.1:3000/*",
         "http://localhost:3002/*",
         "http://127.0.0.1:3002/*",
+        "https://cub-inventory-qas.vercel.app/auth/callback",
+        "https://cub-inventory-qas.vercel.app/*",
+        "https://cub-inventory-qas-prod.vercel.app/auth/callback",
+        "https://cub-inventory-qas-prod.vercel.app/*",
         "https://*.vercel.app/auth/callback",
         "https://*.vercel.app/*"
       ],
@@ -397,6 +401,8 @@
         "http://127.0.0.1:3000",
         "http://localhost:3002",
         "http://127.0.0.1:3002",
+        "https://cub-inventory-qas.vercel.app",
+        "https://cub-inventory-qas-prod.vercel.app",
         "https://*.vercel.app",
         "+"
       ],
