@@ -10,8 +10,13 @@ normalize_https() {
   esac
 }
 
-# Render inyecta PORT; Spring Boot lee SERVER_PORT (no PORT).
-export SERVER_PORT="${PORT:-${SERVER_PORT:-8080}}"
+# Render inyecta PORT (tipico 10000). Si Spring tarda ~2-3 min en bindear,
+# Render ve "No open ports", luego "New primary port detected" y REINICIA el
+# deploy — el segundo boot suele hacer Timed Out.
+# Solucion: abrir $PORT al instante con socat y dejar Spring en 8080 interno.
+PUBLIC_PORT="${PORT:-10000}"
+INTERNAL_PORT="${INTERNAL_PORT:-8080}"
+export SERVER_PORT="$INTERNAL_PORT"
 
 # Railway/Render deliver postgres:// or postgresql:// — Spring needs jdbc:postgresql://
 if [ -n "${DATABASE_URL:-}" ]; then
@@ -44,7 +49,19 @@ if [ -n "${KEYCLOAK_PUBLIC_URL:-}" ]; then
   export KEYCLOAK_ADMIN_URL="${KEYCLOAK_ADMIN_URL:-$base}"
 fi
 
-echo "Starting inventory-api on 0.0.0.0:${SERVER_PORT}"
+echo "Port proxy: 0.0.0.0:${PUBLIC_PORT} -> 127.0.0.1:${INTERNAL_PORT} (Spring)"
 echo "Issuer: ${KEYCLOAK_ISSUER_URI:-unset}"
 
-exec java ${JAVA_OPTS:--Xms128m -Xmx400m} -jar /app/app.jar
+# Bind publico YA (evita reinicio de Render por late port detection).
+socat TCP-LISTEN:"${PUBLIC_PORT}",fork,reuseaddr,bind=0.0.0.0 TCP:127.0.0.1:"${INTERNAL_PORT}" &
+SOCAT_PID=$!
+
+cleanup() {
+  kill "$SOCAT_PID" 2>/dev/null || true
+}
+trap cleanup EXIT INT TERM
+
+exec java ${JAVA_OPTS:--Xms128m -Xmx400m} \
+  -Dserver.address=0.0.0.0 \
+  -Dserver.port="${INTERNAL_PORT}" \
+  -jar /app/app.jar

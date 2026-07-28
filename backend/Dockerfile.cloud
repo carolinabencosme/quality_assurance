@@ -8,13 +8,14 @@ RUN mvn -q -B -DskipTests package
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-RUN apk add --no-cache wget \
+# socat: abre $PORT al instante en Render (evita "New primary port detected" + restart)
+RUN apk add --no-cache wget socat \
     && addgroup -S inventory && adduser -S inventory -G inventory
 COPY --from=build /app/target/inventory-api-*.jar /app/app.jar
 COPY docker-entrypoint-cloud.sh /app/docker-entrypoint-cloud.sh
 RUN chmod +x /app/docker-entrypoint-cloud.sh \
     && chown -R inventory:inventory /app
 USER inventory
-EXPOSE 8080
+EXPOSE 10000 8080
 ENV SPRING_PROFILES_ACTIVE=prod
 ENTRYPOINT ["/app/docker-entrypoint-cloud.sh"]

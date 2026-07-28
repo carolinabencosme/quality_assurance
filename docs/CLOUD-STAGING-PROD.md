@@ -60,6 +60,12 @@ $env:CLOUD_KC_URL = "https://cub-keycloak.onrender.com"
 | `scripts/import-keycloak-realm-cloud.ps1` | Fallback import Admin API |
 | `scripts/deploy-vercel-cloud.ps1` | Staging + prod Vercel |
 
+## Por que fallaba `cub-api` (Timed Out / port)
+
+Spring tarda ~2–3 min en abrir el puerto. Render veia “No open ports”, luego “New primary port detected: 10000” y **reiniciaba** el deploy; el segundo boot hacia **Timed Out**.
+
+Fix: `backend/docker-entrypoint-cloud.sh` abre `$PORT` al instante con **socat** y Spring escucha en `8080` interno. Healthcheck sigue en `/actuator/health`.
+
 ## Por que fallaba el Not Found
 
 El healthcheck apuntaba a `/realms/inventory-realm/...` **antes** de que terminara el import. Render reiniciaba el contenedor en loop → realm nunca quedaba → login Vercel = Not Found.

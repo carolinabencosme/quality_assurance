@@ -74,8 +74,11 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
       - key: JAVA_OPTS
-        value: "-Xms128m -Xmx400m"
-      # Render asigna PORT; el entrypoint lo mapea a SERVER_PORT
+        # Arranque mas liviano en free tier (menos GC thrash)
+        value: "-Xms64m -Xmx384m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+      # Entrypoint: socat abre PORT al instante; Spring escucha 8080 interno
+      - key: INTERNAL_PORT
+        value: "8080"
       - key: DATABASE_URL
         fromDatabase:
           name: cub-inventory-db
