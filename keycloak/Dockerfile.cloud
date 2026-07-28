@@ -14,7 +14,8 @@ ENV KC_HTTP_ENABLED=true \
     KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
     KEYCLOAK_ADMIN=admin \
     KEYCLOAK_ADMIN_PASSWORD=admin \
-    JAVA_OPTS_APPEND="-Xms64m -Xmx384m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC"
+    # Sin -XX:+UseSerialGC: Render/Keycloak ya eligen GC → "Multiple garbage collectors selected"
+    JAVA_OPTS_APPEND="-Xms64m -Xmx384m -XX:MaxMetaspaceSize=128m"
 
 EXPOSE 8080
 

@@ -46,7 +46,8 @@ services:
       - key: KEYCLOAK_ADMIN_PASSWORD
         value: admin
       - key: JAVA_OPTS_APPEND
-        value: "-Xms64m -Xmx384m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC"
+        # No usar UseSerialGC: choca con el GC de Keycloak/Render
+        value: "-Xms64m -Xmx384m -XX:MaxMetaspaceSize=128m"
 
   - type: web
     name: cub-api
