@@ -15,15 +15,23 @@ Usuarios demo: `admin/admin123`, `viewer/viewer123`, `warehouse/warehouse123`, `
 
 ### Activar / redesplegar el backend cloud (Render)
 
-1. Abre [Render Blueprint](https://dashboard.render.com/select-repo?type=blueprint) y conecta este repo (rama `presentacion`).
-2. Usa el archivo `render.yaml` (crea Postgres + `cub-keycloak` + `cub-api`).
-3. Cuando esten Live, redespliega frontends:
+1. [New Blueprint](https://dashboard.render.com/select-repo?type=blueprint) → repo → rama **`presentacion`** → Apply `render.yaml`.
+2. Espera `cub-keycloak` + `cub-api` + DB **Live**.
+3. Si el realm falta (`Not Found` en login):
+
+```powershell
+.\scripts\import-keycloak-realm-cloud.ps1
+```
+
+4. Redespliega frontends si hace falta:
 
 ```powershell
 $env:CLOUD_API_URL = "https://cub-api.onrender.com"
 $env:CLOUD_KC_URL = "https://cub-keycloak.onrender.com"
 .\scripts\deploy-vercel-cloud.ps1
 ```
+
+Detalle: [`docs/CLOUD-STAGING-PROD.md`](docs/CLOUD-STAGING-PROD.md).
 
 ## Documentacion
 

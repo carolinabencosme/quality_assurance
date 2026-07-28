@@ -37,7 +37,8 @@ Detalle operativo: [`CLOUD-STAGING-PROD.md`](./CLOUD-STAGING-PROD.md).
 | Swagger cloud | https://cub-api.onrender.com/swagger-ui.html | Bearer JWT |
 | Keycloak cloud | https://cub-keycloak.onrender.com | `admin` / `admin` |
 
-Backend cloud = Render Blueprint (`render.yaml`). Frontends = Vercel (`scripts/deploy-vercel-cloud.ps1`).
+Backend cloud = Render Blueprint (`render.yaml`). Si login da Not Found: aplica Blueprint (rama `presentacion`) y corre `.\scripts\import-keycloak-realm-cloud.ps1`. Frontends = Vercel (`scripts/deploy-vercel-cloud.ps1`).
+
 
 ### 2.2 Local (observabilidad / Jenkins / Sonar para la oral)
 

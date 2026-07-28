@@ -1,11 +1,12 @@
 # Render Blueprint — Cub cloud (API + Keycloak + Postgres)
-# One-click: Dashboard → New → Blueprint → este repo / rama presentacion
-# URLs esperadas (Render free):
-#   API:      https://cub-api.onrender.com
-#   Keycloak: https://cub-keycloak.onrender.com
-# Frontends (Vercel):
-#   Staging:    https://cub-inventory-qas.vercel.app
-#   Production: https://cub-inventory-qas-prod.vercel.app
+# Dashboard → New → Blueprint → repo quality_assurance → rama presentacion
+#
+# URLs (nombres de servicio fijos):
+#   https://cub-keycloak.onrender.com
+#   https://cub-api.onrender.com
+# Frontends:
+#   https://cub-inventory-qas.vercel.app
+#   https://cub-inventory-qas-prod.vercel.app
 
 databases:
   - name: cub-inventory-db
@@ -18,9 +19,13 @@ services:
     name: cub-keycloak
     runtime: docker
     plan: free
+    region: oregon
     dockerfilePath: ./keycloak/Dockerfile.cloud
     dockerContext: ./keycloak
-    healthCheckPath: /realms/inventory-realm/.well-known/openid-configuration
+    # CRITICAL: no usar /realms/inventory-realm/... aqui.
+    # Si el healthcheck exige el realm antes del import, Render reinicia en loop
+    # y el realm nunca termina de cargarse → Not Found en Vercel login.
+    healthCheckPath: /
     envVars:
       - key: KC_HOSTNAME
         value: https://cub-keycloak.onrender.com
@@ -28,15 +33,26 @@ services:
         value: "false"
       - key: KC_PROXY_HEADERS
         value: xforwarded
+      - key: KC_HTTP_ENABLED
+        value: "true"
+      - key: KC_HEALTH_ENABLED
+        value: "true"
+      - key: KC_BOOTSTRAP_ADMIN_USERNAME
+        value: admin
+      - key: KC_BOOTSTRAP_ADMIN_PASSWORD
+        value: admin
       - key: KEYCLOAK_ADMIN
         value: admin
       - key: KEYCLOAK_ADMIN_PASSWORD
         value: admin
+      - key: JAVA_OPTS_APPEND
+        value: "-Xms64m -Xmx384m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC"
 
   - type: web
     name: cub-api
     runtime: docker
     plan: free
+    region: oregon
     dockerfilePath: ./backend/Dockerfile.cloud
     dockerContext: ./backend
     healthCheckPath: /actuator/health

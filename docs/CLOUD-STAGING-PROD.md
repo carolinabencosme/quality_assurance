@@ -1,51 +1,47 @@
-# Staging y Production en la nube
+# Staging y Production en la nube (Vercel + Render)
 
-Objetivo: demos publicas **sin** tener Docker encendido en la PC.
-
-## Arquitectura
-
-```text
-Navegador
-  → Vercel (Next.js)     staging: cub-inventory-qas.vercel.app
-                         production: cub-inventory-qas-prod.vercel.app
-  → Render (API Spring)  cub-api.onrender.com
-  → Render (Keycloak)    cub-keycloak.onrender.com
-  → Render Postgres      cub-inventory-db
-```
-
-Observabilidad completa (Grafana/Jenkins/Sonar) sigue siendo el stack **local** Compose para la defensa tecnica; en la nube se demuestra funcionalidad + auth + API publica.
+Objetivo: demos publicas **sin** Docker en la PC.
 
 ## URLs
 
 | | Staging | Production |
 |--|---------|------------|
 | App | https://cub-inventory-qas.vercel.app | https://cub-inventory-qas-prod.vercel.app |
-| API health | https://cub-api.onrender.com/actuator/health | igual (API compartida academica) |
+| API | https://cub-api.onrender.com | igual |
 | Keycloak | https://cub-keycloak.onrender.com | igual |
 | Swagger | https://cub-api.onrender.com/swagger-ui.html | igual |
 
-Credenciales app: `admin/admin123` (tambien viewer/warehouse/clerk).  
-Keycloak admin console: `admin` / `admin` (valor inicial del Blueprint; rotar en demos reales).
+Usuarios app: `admin/admin123`, `viewer/viewer123`, `warehouse/warehouse123`, `clerk/clerk123`.  
+Keycloak Admin: `admin` / `admin`.
 
-## Archivos
+## Deploy Render (obligatorio — un clic)
 
-| Archivo | Rol |
-|---------|-----|
-| `render.yaml` | Blueprint Render (Postgres + Keycloak + API) |
-| `backend/Dockerfile.cloud` | Imagen API para PaaS |
-| `backend/docker-entrypoint-cloud.sh` | Convierte `postgres://` → JDBC + issuer Keycloak |
-| `keycloak/Dockerfile.cloud` | Imagen Keycloak + realm import |
-| `docker-compose.cloud.yml` | Alternativa Railway / compose cloud |
-| `frontend/vercel.json` | Proyecto Vercel |
-| `scripts/deploy-vercel-cloud.ps1` | Redespliega staging + prod frontends |
+Si al login en Vercel ves **Not Found** en Keycloak, el Blueprint **no** esta aplicado o el realm no se importo.
 
-## Pasos (primera vez)
+1. Abre: https://dashboard.render.com/select-repo?type=blueprint  
+2. Conecta `carolinabencosme/quality_assurance`.  
+3. Branch: **`presentacion`**.  
+4. Debe detectar `render.yaml`.  
+5. **Apply**.  
+6. Espera a que queden **Live**:
+   - `cub-inventory-db`
+   - `cub-keycloak`
+   - `cub-api`  
+   (nombres exactos; las URLs `*.onrender.com` dependen de esos nombres)
 
-1. Push de la rama `presentacion` a GitHub.
-2. [Render → New Blueprint](https://dashboard.render.com/select-repo?type=blueprint) → repo `quality_assurance` → rama `presentacion` → Apply `render.yaml`.
-3. Espera a que `cub-keycloak` y `cub-api` queden **Live** (build largo la primera vez).
-4. En Keycloak (Admin), confirma redirects del client `inventory-frontend` (ya vienen `https://*.vercel.app/*` en `realm-export.json`).
-5. Redespliega Vercel:
+7. Importa el realm (si el OpenID del realm falla):
+
+```powershell
+.\scripts\import-keycloak-realm-cloud.ps1
+```
+
+8. Verifica:
+
+- https://cub-keycloak.onrender.com/realms/inventory-realm/.well-known/openid-configuration → JSON  
+- https://cub-api.onrender.com/actuator/health → `UP`  
+- https://cub-inventory-qas.vercel.app → login `admin` / `admin123`
+
+9. Si cambiaste URLs de API/KC, redespliega frontends:
 
 ```powershell
 $env:CLOUD_API_URL = "https://cub-api.onrender.com"
@@ -53,20 +49,23 @@ $env:CLOUD_KC_URL = "https://cub-keycloak.onrender.com"
 .\scripts\deploy-vercel-cloud.ps1
 ```
 
-6. Abre staging y production; login con `admin/admin123`.
+## Archivos clave
 
-## Notas Render free
+| Archivo | Rol |
+|---------|-----|
+| `render.yaml` | Blueprint (healthcheck Keycloak en `/`, no en el realm) |
+| `keycloak/Dockerfile.cloud` | KC 26 + `KC_BOOTSTRAP_ADMIN_*` + `--import-realm` |
+| `keycloak/realm-export.json` | Realm + users + redirects `*.vercel.app` |
+| `backend/Dockerfile.cloud` | API cloud |
+| `scripts/import-keycloak-realm-cloud.ps1` | Fallback import Admin API |
+| `scripts/deploy-vercel-cloud.ps1` | Staging + prod Vercel |
 
-- Cold start ~30–90s tras dormir.
-- Keycloak en 512 MB es justo; si falla por memoria, subir el plan de `cub-keycloak` a Starter.
-- Postgres free expira a los 30 dias: exportar dump antes si hace falta.
+## Por que fallaba el Not Found
 
-## Alternativa Railway
+El healthcheck apuntaba a `/realms/inventory-realm/...` **antes** de que terminara el import. Render reiniciaba el contenedor en loop → realm nunca quedaba → login Vercel = Not Found.
 
-```powershell
-# Tras railway login
-railway init
-railway up -c docker-compose.cloud.yml
-```
+## Notas free tier
 
-Luego exporta las URLs publicas a `CLOUD_API_URL` / `CLOUD_KC_URL` y corre `deploy-vercel-cloud.ps1`.
+- Cold start 30–90s.  
+- Si `cub-keycloak` se cae por memoria, sube ese servicio a **Starter**.  
+- Postgres free expira ~30 dias.

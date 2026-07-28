@@ -1,18 +1,24 @@
-# Keycloak for Railway/Render (public HTTPS hostname via KC_HOSTNAME)
+# Keycloak 26 for Render/Railway — realm import + admin bootstrap correctos
 FROM quay.io/keycloak/keycloak:26.0.7
 
 COPY realm-export.json /opt/keycloak/data/import/realm-export.json
 COPY themes /opt/keycloak/themes
 
+# KC 26 usa KC_BOOTSTRAP_ADMIN_* (las KEYCLOAK_ADMIN_* ya no crean el admin).
 ENV KC_HTTP_ENABLED=true \
     KC_HEALTH_ENABLED=true \
     KC_HOSTNAME_STRICT=false \
     KC_PROXY_HEADERS=xforwarded \
+    KC_HTTP_PORT=8080 \
+    KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+    KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
     KEYCLOAK_ADMIN=admin \
-    KEYCLOAK_ADMIN_PASSWORD=admin
+    KEYCLOAK_ADMIN_PASSWORD=admin \
+    JAVA_OPTS_APPEND="-Xms64m -Xmx384m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC"
 
 EXPOSE 8080
 
-# start-dev is OK for academic cloud demo (faster import). Production hardening = start --optimized.
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
-CMD ["start-dev", "--import-realm", "--http-port=8080"]
+# start-dev + import-realm: adecuado para demo academica en free tier.
+# Healthcheck de Render NO debe apuntar al realm (puede no existir aun durante el import).
+CMD ["start-dev", "--import-realm", "--http-port=8080", "--hostname-strict=false"]
