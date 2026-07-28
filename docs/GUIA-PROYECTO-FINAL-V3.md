@@ -23,7 +23,23 @@ Cub es un monorepo que demuestra un inventario empresarial de punta a punta:
 
 ---
 
-## 2. Levantar el stack y links de demo
+## 2. Links de demo (nube primero; local opcional)
+
+### 2.1 Publico en la nube (sin Docker en la PC)
+
+Detalle operativo: [`CLOUD-STAGING-PROD.md`](./CLOUD-STAGING-PROD.md).
+
+| Que | URL | Credenciales |
+|-----|-----|--------------|
+| **Staging (Vercel)** | https://cub-inventory-qas.vercel.app | `admin` / `admin123` |
+| **Production (Vercel)** | https://cub-inventory-qas-prod.vercel.app | igual |
+| API cloud | https://cub-api.onrender.com/actuator/health | — |
+| Swagger cloud | https://cub-api.onrender.com/swagger-ui.html | Bearer JWT |
+| Keycloak cloud | https://cub-keycloak.onrender.com | `admin` / `admin` |
+
+Backend cloud = Render Blueprint (`render.yaml`). Frontends = Vercel (`scripts/deploy-vercel-cloud.ps1`).
+
+### 2.2 Local (observabilidad / Jenkins / Sonar para la oral)
 
 ```powershell
 docker compose -f docker-compose.dev.yml -f docker-compose.observability.yml -f docker-compose.staging.yml up -d --build
@@ -330,6 +346,28 @@ Login Jenkins: `admin` / `admin`.
 - Staging tooling: `docker-compose.staging.yml` (Sonar + Jenkins; frontend staging override).  
 - Prod local del curso: `docker-compose.prod.yml` (+ observability).  
 - Deploy post-tests: parametros `DEPLOY_STAGING` / `DEPLOY_PRODUCTION` en `Jenkinsfile` y workflows `deploy-*.yml`.
+
+### 8.4 Staging y Production publicos (Vercel + Render)
+
+Guia corta: [`CLOUD-STAGING-PROD.md`](./CLOUD-STAGING-PROD.md).
+
+| Pieza | Donde |
+|-------|-------|
+| Blueprint cloud | `render.yaml` (Postgres + Keycloak + API en Render) |
+| API image | `backend/Dockerfile.cloud` + `docker-entrypoint-cloud.sh` |
+| Keycloak image | `keycloak/Dockerfile.cloud` |
+| Frontends | Vercel projects `cub-inventory-qas` (staging) y `cub-inventory-qas-prod` (production) |
+| Redeploy UIs | `scripts/deploy-vercel-cloud.ps1` |
+| CORS / OIDC | `INVENTORY_CORS_ORIGINS`, `SecurityConfig`, `keycloak/realm-export.json` (`*.vercel.app`) |
+
+**URLs**
+
+- Staging: https://cub-inventory-qas.vercel.app  
+- Production: https://cub-inventory-qas-prod.vercel.app  
+- API: https://cub-api.onrender.com  
+- Keycloak: https://cub-keycloak.onrender.com  
+
+No hace falta Docker en la PC para la demo funcional publica. El stack Compose local se usa para Grafana/Jenkins/Sonar en la defensa.
 
 ---
 

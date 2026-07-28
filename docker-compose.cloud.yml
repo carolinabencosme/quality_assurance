@@ -1,0 +1,82 @@
+# Cloud backend stack (API + Keycloak + Postgres) — sin frontend (Vercel).
+# Uso con Railway: railway up -c docker-compose.cloud.yml
+# Staging y Production = dos proyectos Railway separados (cub-staging / cub-production).
+
+name: cub-cloud
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: inventory
+      POSTGRES_USER: inventory_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cub_cloud_change_me}
+    volumes:
+      - cub_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inventory_user -d inventory"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - cub-net
+
+  keycloak:
+    build:
+      context: ./keycloak
+      dockerfile: Dockerfile.cloud
+    environment:
+      KC_HOSTNAME: ${KC_HOSTNAME}
+      KC_HOSTNAME_STRICT: "false"
+      KC_PROXY_HEADERS: xforwarded
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8080'"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 120s
+    networks:
+      - cub-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.cloud
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: jdbc:postgresql://postgres:5432/inventory
+      DATABASE_USERNAME: inventory_user
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-cub_cloud_change_me}
+      KEYCLOAK_PUBLIC_URL: ${KC_HOSTNAME}
+      KEYCLOAK_ISSUER_URI: ${KC_HOSTNAME}/realms/inventory-realm
+      KEYCLOAK_JWKS_URI: http://keycloak:8080/realms/inventory-realm/protocol/openid-connect/certs
+      KEYCLOAK_ADMIN_URL: http://keycloak:8080
+      KEYCLOAK_REALM: inventory-realm
+      KEYCLOAK_ADMIN_CLIENT_ID: inventory-admin-api
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-inventory-admin-secret-change-me}
+      INVENTORY_CORS_ORIGINS: ${INVENTORY_CORS_ORIGINS:-https://cub-inventory-qas.vercel.app,https://cub-inventory-qas-prod.vercel.app,https://*.vercel.app}
+      JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx512m}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+    networks:
+      - cub-net
+
+volumes:
+  cub_pg_data:
+
+networks:
+  cub-net:

@@ -72,7 +72,8 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.stream(allowedOrigins.split(","))
+        // Patterns permiten https://*.vercel.app (staging publico) ademas de origins exactos.
+        config.setAllowedOriginPatterns(Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList());

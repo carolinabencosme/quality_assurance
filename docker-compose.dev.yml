@@ -80,6 +80,7 @@ services:
       KEYCLOAK_REALM: inventory-realm
       KEYCLOAK_ADMIN_CLIENT_ID: inventory-admin-api
       KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-inventory-admin-secret-change-me}
+      INVENTORY_CORS_ORIGINS: ${INVENTORY_CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,https://cub-inventory-qas.vercel.app,https://*.vercel.app}
       OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-inventory-api}
     extra_hosts:
       - "host.docker.internal:host-gateway"

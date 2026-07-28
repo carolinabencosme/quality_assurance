@@ -1,22 +1,30 @@
 import type { NextConfig } from 'next';
 
-// En `next build` (prod/staging) estos valores quedan fijados en los rewrites.
-// En Docker deben ser http://backend:8080 y http://keycloak:8080 (ver Dockerfile.prod).
+// En Docker (`DOCKER_BUILD=true`) usamos standalone. En Vercel el output default.
+const isDockerBuild = process.env.DOCKER_BUILD === 'true';
+const isVercel = Boolean(process.env.VERCEL);
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+// Rewrites solo aplican cuando el cliente usa paths relativos (/api, /keycloak).
+// En Vercel staging publico: NEXT_PUBLIC_API_URL y NEXT_PUBLIC_KEYCLOAK_URL absolutos (HTTPS).
 const apiTarget = process.env.API_PROXY_TARGET ?? 'http://localhost:8080';
 const keycloakTarget = process.env.KEYCLOAK_PROXY_TARGET ?? 'http://localhost:8081';
-const isDevelopment = process.env.NODE_ENV === 'development';
+
 const externalOrigin = (value?: string) => {
   if (!value?.startsWith('http://') && !value?.startsWith('https://')) return null;
   return new URL(value).origin;
 };
+
 const connectSources = [
   "'self'",
   externalOrigin(process.env.NEXT_PUBLIC_API_URL),
   externalOrigin(process.env.NEXT_PUBLIC_KEYCLOAK_URL ?? 'http://localhost:8081'),
 ].filter((value): value is string => Boolean(value));
+
 const keycloakOrigin =
   externalOrigin(process.env.NEXT_PUBLIC_KEYCLOAK_URL ?? 'http://localhost:8081') ??
   'http://localhost:8081';
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ''}`,
@@ -24,17 +32,20 @@ const contentSecurityPolicy = [
   "img-src 'self' data:",
   "font-src 'self' data:",
   `connect-src ${[...new Set(connectSources)].join(' ')}`,
-  // Login Keycloak hace POST al IdP (otro origen cuando NEXT_PUBLIC_KEYCLOAK_URL es absoluto).
   `form-action 'self' ${keycloakOrigin}`,
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'none'",
 ].join('; ');
 
+const useRelativeProxies =
+  !externalOrigin(process.env.NEXT_PUBLIC_API_URL) ||
+  !externalOrigin(process.env.NEXT_PUBLIC_KEYCLOAK_URL);
+
 const nextConfig: NextConfig = {
   // Evita conflicto EPERM en Windows cuando Docker/WSL dejó bloqueado frontend/.next/trace
-  distDir: process.env.NODE_ENV === 'development' ? '.next-dev' : '.next',
-  output: 'standalone',
+  distDir: isDevelopment ? '.next-dev' : '.next',
+  ...(isDockerBuild && !isVercel ? { output: 'standalone' as const } : {}),
   poweredByHeader: false,
   async headers() {
     return [
@@ -42,9 +53,14 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: [
           { key: 'Content-Security-Policy', value: contentSecurityPolicy },
-          { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
-          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-          { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
+          // En Vercel + Keycloak cross-origin, COOP/COEP estrictos rompen el flujo OIDC.
+          ...(isVercel
+            ? []
+            : [
+                { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
+                { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+                { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
+              ]),
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -54,6 +70,9 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
+    if (!useRelativeProxies) {
+      return [];
+    }
     return [
       {
         source: '/api/:path*',
@@ -63,7 +82,6 @@ const nextConfig: NextConfig = {
         source: '/keycloak/:path*',
         destination: `${keycloakTarget}/:path*`,
       },
-      // Keycloak login sirve CSS/JS en rutas absolutas /resources/... y formularios en /realms/...
       {
         source: '/resources/:path*',
         destination: `${keycloakTarget}/resources/:path*`,

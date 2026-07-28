@@ -1,0 +1,20 @@
+# Cloud image (Railway / Render) — same jar + JDBC URL normalizer
+FROM maven:3.9.9-eclipse-temurin-21-alpine AS build
+WORKDIR /app
+COPY pom.xml .
+RUN mvn -q -B dependency:go-offline
+COPY src ./src
+RUN mvn -q -B -DskipTests package
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+RUN apk add --no-cache wget \
+    && addgroup -S inventory && adduser -S inventory -G inventory
+COPY --from=build /app/target/inventory-api-*.jar /app/app.jar
+COPY docker-entrypoint-cloud.sh /app/docker-entrypoint-cloud.sh
+RUN chmod +x /app/docker-entrypoint-cloud.sh \
+    && chown -R inventory:inventory /app
+USER inventory
+EXPOSE 8080
+ENV SPRING_PROFILES_ACTIVE=prod
+ENTRYPOINT ["/app/docker-entrypoint-cloud.sh"]

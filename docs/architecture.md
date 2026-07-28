@@ -2,7 +2,8 @@
 
 ## Summary
 
-Cub uses a Spring Boot API, Next.js frontend, PostgreSQL persistence, Keycloak identity provider and a Grafana observability stack. The architecture is containerized with Docker Compose for dev, staging, observability and local production.
+Cub uses a Spring Boot API, Next.js frontend, PostgreSQL persistence, Keycloak identity provider and a Grafana observability stack. Local demos use Docker Compose (dev, staging, observability, prod). Public staging/production UIs are on Vercel; API + Keycloak + Postgres are defined in `render.yaml` for Render (see `docs/CLOUD-STAGING-PROD.md`).
+
 
 ## Stack
 

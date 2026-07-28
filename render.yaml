@@ -1,0 +1,67 @@
+# Render Blueprint — Cub cloud (API + Keycloak + Postgres)
+# One-click: Dashboard → New → Blueprint → este repo / rama presentacion
+# URLs esperadas (Render free):
+#   API:      https://cub-api.onrender.com
+#   Keycloak: https://cub-keycloak.onrender.com
+# Frontends (Vercel):
+#   Staging:    https://cub-inventory-qas.vercel.app
+#   Production: https://cub-inventory-qas-prod.vercel.app
+
+databases:
+  - name: cub-inventory-db
+    plan: free
+    databaseName: inventory
+    user: inventory
+
+services:
+  - type: web
+    name: cub-keycloak
+    runtime: docker
+    plan: free
+    dockerfilePath: ./keycloak/Dockerfile.cloud
+    dockerContext: ./keycloak
+    healthCheckPath: /realms/inventory-realm/.well-known/openid-configuration
+    envVars:
+      - key: KC_HOSTNAME
+        value: https://cub-keycloak.onrender.com
+      - key: KC_HOSTNAME_STRICT
+        value: "false"
+      - key: KC_PROXY_HEADERS
+        value: xforwarded
+      - key: KEYCLOAK_ADMIN
+        value: admin
+      - key: KEYCLOAK_ADMIN_PASSWORD
+        value: admin
+
+  - type: web
+    name: cub-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile.cloud
+    dockerContext: ./backend
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JAVA_OPTS
+        value: "-Xms128m -Xmx400m"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cub-inventory-db
+          property: connectionString
+      - key: KEYCLOAK_PUBLIC_URL
+        value: https://cub-keycloak.onrender.com
+      - key: KEYCLOAK_ISSUER_URI
+        value: https://cub-keycloak.onrender.com/realms/inventory-realm
+      - key: KEYCLOAK_JWKS_URI
+        value: https://cub-keycloak.onrender.com/realms/inventory-realm/protocol/openid-connect/certs
+      - key: KEYCLOAK_ADMIN_URL
+        value: https://cub-keycloak.onrender.com
+      - key: KEYCLOAK_REALM
+        value: inventory-realm
+      - key: KEYCLOAK_ADMIN_CLIENT_ID
+        value: inventory-admin-api
+      - key: KEYCLOAK_ADMIN_CLIENT_SECRET
+        value: inventory-admin-secret-change-me
+      - key: INVENTORY_CORS_ORIGINS
+        value: https://cub-inventory-qas.vercel.app,https://cub-inventory-qas-prod.vercel.app,https://*.vercel.app
