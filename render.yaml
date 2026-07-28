@@ -1,9 +1,9 @@
 # Render Blueprint — Cub cloud (API + Keycloak + Postgres)
 # Dashboard → New → Blueprint → repo quality_assurance → rama presentacion
 #
-# URLs (nombres de servicio fijos):
+# URLs (nombres de servicio fijos; Render puede añadir sufijo si el hostname estaba ocupado):
 #   https://cub-keycloak.onrender.com
-#   https://cub-api.onrender.com
+#   https://cub-api-elre.onrender.com  (servicio cub-api)
 # Frontends:
 #   https://cub-inventory-qas.vercel.app
 #   https://cub-inventory-qas-prod.vercel.app
@@ -101,4 +101,4 @@ services:
         value: https://cub-inventory-qas.vercel.app,https://cub-inventory-qas-prod.vercel.app,https://*.vercel.app
       # Swagger "Try it out" apunta a la URL publica (no localhost)
       - key: OPENAPI_SERVER_URL
-        value: https://cub-api.onrender.com
+        value: https://cub-api-elre.onrender.com

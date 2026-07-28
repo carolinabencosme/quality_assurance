@@ -18,6 +18,8 @@ const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '/api/v1').replace(/\/$/, ''
 export const axiosClient = axios.create({
   baseURL: apiBase,
   headers: { Accept: 'application/json' },
+  // Evita skeleton infinito si la API cloud (Render free) no responde.
+  timeout: 45_000,
 });
 
 function redirectToLogin() {

@@ -6,8 +6,8 @@ Cub es el Proyecto Final V3: inventario + Full Stack Testing + observabilidad + 
 
 | Ambiente | App (Vercel) | API | Keycloak |
 |----------|--------------|-----|----------|
-| **Staging** | https://cub-inventory-qas.vercel.app | https://cub-api.onrender.com | https://cub-keycloak.onrender.com |
-| **Production** | https://cub-inventory-qas-prod.vercel.app | https://cub-api.onrender.com | https://cub-keycloak.onrender.com |
+| **Staging** | https://cub-inventory-qas.vercel.app | https://cub-api-elre.onrender.com | https://cub-keycloak.onrender.com |
+| **Production** | https://cub-inventory-qas-prod.vercel.app | https://cub-api-elre.onrender.com | https://cub-keycloak.onrender.com |
 
 Usuarios demo: `admin/admin123`, `viewer/viewer123`, `warehouse/warehouse123`, `clerk/clerk123`.
 
@@ -26,7 +26,7 @@ Usuarios demo: `admin/admin123`, `viewer/viewer123`, `warehouse/warehouse123`, `
 4. Redespliega frontends si hace falta:
 
 ```powershell
-$env:CLOUD_API_URL = "https://cub-api.onrender.com"
+$env:CLOUD_API_URL = "https://cub-api-elre.onrender.com"
 $env:CLOUD_KC_URL = "https://cub-keycloak.onrender.com"
 .\scripts\deploy-vercel-cloud.ps1
 ```

@@ -3,6 +3,10 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://postgres:5432/inventory}
     username: ${DATABASE_USERNAME:inventory_user}
     password: ${DATABASE_PASSWORD:inventory_password}
+    hikari:
+      connection-timeout: 20000
+      initialization-fail-timeout: 1
+      maximum-pool-size: 5
   jpa:
     hibernate:
       ddl-auto: validate
@@ -13,6 +17,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
+          # jwk-set-uri evita fetch blocking al issuer en el arranque (Keycloak cold start).
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/inventory-realm}
           jwk-set-uri: ${KEYCLOAK_JWKS_URI:http://keycloak:8080/realms/inventory-realm/protocol/openid-connect/certs}
 
@@ -20,6 +25,11 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
 
 logging:
   level:

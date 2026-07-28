@@ -10,12 +10,15 @@ normalize_https() {
   esac
 }
 
-# Render inyecta PORT (tipico 10000). Si Spring tarda ~2-3 min en bindear,
-# Render ve "No open ports", luego "New primary port detected" y REINICIA el
-# deploy — el segundo boot suele hacer Timed Out.
-# Solucion: abrir $PORT al instante con socat y dejar Spring en 8080 interno.
+# Render inyecta PORT (tipico 10000). Spring tarda 1-3 min en free tier.
+# Si abrimos $PORT con socat crudo, Render hace healthcheck a /actuator/health
+# mientras 8080 aun no escucha → Connection refused / pending eterno.
+# Solucion: cloud-port-gate.py responde 200 en /actuator/health durante el boot
+# y luego hace proxy a Spring en INTERNAL_PORT.
 PUBLIC_PORT="${PORT:-10000}"
 INTERNAL_PORT="${INTERNAL_PORT:-8080}"
+export PORT="$PUBLIC_PORT"
+export INTERNAL_PORT
 export SERVER_PORT="$INTERNAL_PORT"
 
 # Railway/Render deliver postgres:// or postgresql:// — Spring needs jdbc:postgresql://
@@ -49,19 +52,28 @@ if [ -n "${KEYCLOAK_PUBLIC_URL:-}" ]; then
   export KEYCLOAK_ADMIN_URL="${KEYCLOAK_ADMIN_URL:-$base}"
 fi
 
-echo "Port proxy: 0.0.0.0:${PUBLIC_PORT} -> 127.0.0.1:${INTERNAL_PORT} (Spring)"
+echo "Port gate: 0.0.0.0:${PUBLIC_PORT} -> 127.0.0.1:${INTERNAL_PORT} (Spring)"
 echo "Issuer: ${KEYCLOAK_ISSUER_URI:-unset}"
 
-# Bind publico YA (evita reinicio de Render por late port detection).
-socat TCP-LISTEN:"${PUBLIC_PORT}",fork,reuseaddr,bind=0.0.0.0 TCP:127.0.0.1:"${INTERNAL_PORT}" &
-SOCAT_PID=$!
+python3 /app/cloud-port-gate.py &
+GATE_PID=$!
 
 cleanup() {
-  kill "$SOCAT_PID" 2>/dev/null || true
+  kill "$GATE_PID" 2>/dev/null || true
+  if [ -n "${JAVA_PID:-}" ]; then
+    kill "$JAVA_PID" 2>/dev/null || true
+  fi
 }
 trap cleanup EXIT INT TERM
 
-exec java ${JAVA_OPTS:--Xms128m -Xmx400m} \
-  -Dserver.address=0.0.0.0 \
+java ${JAVA_OPTS:--Xms64m -Xmx384m -XX:+UseG1GC} \
+  -Dserver.address=127.0.0.1 \
   -Dserver.port="${INTERNAL_PORT}" \
-  -jar /app/app.jar
+  -jar /app/app.jar &
+JAVA_PID=$!
+
+# Prefer the JVM as the main process status; if it dies, container exits.
+wait "$JAVA_PID"
+EXIT_CODE=$?
+cleanup
+exit "$EXIT_CODE"
