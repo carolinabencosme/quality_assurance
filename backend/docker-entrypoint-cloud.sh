@@ -10,6 +10,9 @@ normalize_https() {
   esac
 }
 
+# Render inyecta PORT; Spring Boot lee SERVER_PORT (no PORT).
+export SERVER_PORT="${PORT:-${SERVER_PORT:-8080}}"
+
 # Railway/Render deliver postgres:// or postgresql:// — Spring needs jdbc:postgresql://
 if [ -n "${DATABASE_URL:-}" ]; then
   case "$DATABASE_URL" in
@@ -41,4 +44,7 @@ if [ -n "${KEYCLOAK_PUBLIC_URL:-}" ]; then
   export KEYCLOAK_ADMIN_URL="${KEYCLOAK_ADMIN_URL:-$base}"
 fi
 
-exec java ${JAVA_OPTS:--Xms256m -Xmx512m} -jar /app/app.jar
+echo "Starting inventory-api on 0.0.0.0:${SERVER_PORT}"
+echo "Issuer: ${KEYCLOAK_ISSUER_URI:-unset}"
+
+exec java ${JAVA_OPTS:--Xms128m -Xmx400m} -jar /app/app.jar
